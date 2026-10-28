@@ -5,21 +5,14 @@ import { useTranslation } from 'react-i18next'
 import { DefinicoesAdesivo } from '../componentes/Adesivo'
 import { Avisos } from '../componentes/Avisos'
 import { CartaoAgora } from '../componentes/CartaoAgora'
-import { useDosesDoDia } from '../dados/remedios'
-import { useTarefas } from '../dados/tarefas'
+import { useCandidatoAgora } from '../dados/agora'
 import { useAgora } from '../dados/timer'
-import { diaLocal } from '../logica/datas'
-import { blocoDoHorario, candidatosDeRemedios, candidatosDeTarefas, escolherAgora, fimDoBloco, formatarDuracao, minutosAte } from '../logica/hoje'
+import { blocoDoHorario, fimDoBloco, formatarDuracao, minutosAte } from '../logica/hoje'
 
 export function Mini({ janelaPorCima = false }: { janelaPorCima?: boolean }) {
   const { t, i18n } = useTranslation()
   const agora = useAgora(15_000)
-  const tarefas = useTarefas() ?? []
-  const doses = useDosesDoDia(diaLocal(agora))
-  const candidato = escolherAgora(
-    [...(doses ? candidatosDeRemedios(doses.doses, doses.registros, agora) : []), ...candidatosDeTarefas(tarefas, diaLocal(agora))],
-    agora,
-  )
+  const { candidato } = useCandidatoAgora(agora)
   const bloco = blocoDoHorario(agora)
   const hora = agora.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })
 

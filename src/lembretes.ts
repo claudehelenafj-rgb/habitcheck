@@ -3,7 +3,9 @@
 // com a ação escrita e conta o aviso (para repetir com gentileza e para a revisão semanal).
 
 import { useEffect, useRef } from 'react'
+import { jaAvisouTransicao, registrarTransicao, useConsultas } from './dados/consultas'
 import { registrarAviso, useConfigAvisos, useDosesDoDia } from './dados/remedios'
+import { planoReverso } from './logica/consultas'
 import { useAgora } from './dados/timer'
 import { diaLocal } from './logica/datas'
 import { deveAvisar, textoDoLembrete, type DosePrevista } from './logica/remedios'
@@ -35,13 +37,50 @@ async function mostrarAvisoSistema(titulo: string, corpo: string, tag: string) {
   }
 }
 
+export type TextosLembretes = {
+  remedio: string
+  transicao: string
+  arrumar: (titulo: string) => string
+  sair: (titulo: string) => string
+}
+
+/** Avisos de transição das consultas: "começar a se arrumar" e "sair de casa" (uma vez cada, até 30 min depois). */
+function useAvisosTransicao(agora: Date, textos: TextosLembretes) {
+  const consultas = useConsultas()
+  const emAndamento = useRef(new Set<string>())
+  useEffect(() => {
+    if (!consultas) return
+    for (const c of consultas) {
+      const plano = c.status === 'marcada' ? planoReverso(c) : null
+      if (!plano) continue
+      const momentos: Array<[string, Date, string]> = [
+        [`${c.id}|${c.data}${c.hora}|arrumar`, plano.comecarArrumar, textos.arrumar(c.titulo)],
+        [`${c.id}|${c.data}${c.hora}|sair`, plano.sairDeCasa, textos.sair(c.titulo)],
+      ]
+      for (const [id, quando, texto] of momentos) {
+        const passou = agora.getTime() - quando.getTime()
+        if (passou < 0 || passou > 30 * 60_000 || emAndamento.current.has(id)) continue
+        emAndamento.current.add(id)
+        ;(async () => {
+          if (await jaAvisouTransicao(id)) return
+          await registrarTransicao(id)
+          const hora = quando.toTimeString().slice(0, 5)
+          await mostrarAvisoSistema(textos.transicao, `${hora} · ${texto}`, id)
+        })().finally(() => emAndamento.current.delete(id))
+      }
+    }
+  }, [consultas, agora, textos])
+}
+
 /** Usar uma vez, na moldura do app. */
-export function useLembretes(tituloAviso: string) {
+export function useLembretes(textos: TextosLembretes) {
+  const tituloAviso = textos.remedio
   const agora = useAgora(20_000)
   const hoje = diaLocal(agora)
   const dados = useDosesDoDia(hoje)
   const { silencio } = useConfigAvisos()
   const emAndamento = useRef(new Set<string>())
+  useAvisosTransicao(agora, textos)
 
   useEffect(() => {
     if (!dados) return

@@ -4,6 +4,7 @@
 
 import Dexie, { type EntityTable } from 'dexie'
 import type { IdArea } from '../design/areas'
+import type { Consulta } from '../logica/consultas'
 import type { RegistroDose, Remedio } from '../logica/remedios'
 
 /** Item despejado na captura rápida, esperando virar tarefa, evento, hábito ou lixo. */
@@ -53,6 +54,7 @@ export class BancoCaderninho extends Dexie {
   objetivos!: EntityTable<Objetivo, 'id'>
   remedios!: EntityTable<Remedio, 'id'>
   doses!: EntityTable<RegistroDose, 'id'>
+  consultas!: EntityTable<Consulta, 'id'>
 
   constructor(nome = 'caderninho') {
     super(nome)
@@ -66,6 +68,10 @@ export class BancoCaderninho extends Dexie {
     this.version(2).stores({
       remedios: 'id, ativo',
       doses: 'id, remedioId, dia',
+    })
+    // etapa 7: consultas ("preciso marcar", marcadas e feitas)
+    this.version(3).stores({
+      consultas: 'id, status, data',
     })
   }
 }

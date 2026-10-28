@@ -24,7 +24,8 @@ export async function pararTimer() {
 /** Quanto falta, em segundos (0 quando acabou). */
 export function segundosRestantes(timer: Timer, agora: Date): number {
   const fim = new Date(timer.inicio).getTime() + timer.duracaoMin * 60_000
-  return Math.max(0, Math.round((fim - agora.getTime()) / 1000))
+  // o relógio da tela pode estar alguns segundos atrás do início do timer: nunca passa do total
+  return Math.min(timer.duracaoMin * 60, Math.max(0, Math.round((fim - agora.getTime()) / 1000)))
 }
 
 /** Hora atual, atualizada a cada `intervalo` milissegundos. */

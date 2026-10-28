@@ -178,7 +178,10 @@ function ListaAtalhos({ telas, fechar }: { telas: Tela[]; fechar: () => void }) 
 
 function escrevendo(alvo: EventTarget | null): boolean {
   const el = alvo as HTMLElement | null
-  return !!el && (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName))
+  if (!el) return false
+  if (el.isContentEditable || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') return true
+  // caixinhas, botões de opção e botões não são "escrever": os atalhos continuam valendo
+  return el instanceof HTMLInputElement && !['checkbox', 'radio', 'button', 'submit', 'reset', 'range', 'color', 'file'].includes(el.type)
 }
 
 function useAtalhos(telas: Tela[], abrirLista: () => void) {
@@ -251,7 +254,16 @@ function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
   const telas = useMemo(() => [...TELAS_PRINCIPAIS, ...areas, TELA_AJUSTES], [areas])
   const abrirAtalhos = useCallback(() => setAtalhosAbertos(true), [])
   useAtalhos(telas, abrirAtalhos)
-  useLembretes(t('remedios.lembrete'))
+  const textosLembretes = useMemo(
+    () => ({
+      remedio: t('remedios.lembrete'),
+      transicao: t('consultas.avisoTransicao'),
+      arrumar: (titulo: string) => t('consultas.arrumarPara', { titulo }),
+      sair: (titulo: string) => t('consultas.sairPara', { titulo }),
+    }),
+    [t],
+  )
+  useLembretes(textosLembretes)
 
   // Ao trocar de tela, o foco vai para o título da nova tela (bom para leitor de tela e teclado).
   const primeiraVez = useRef(true)

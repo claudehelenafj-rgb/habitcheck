@@ -11,6 +11,7 @@ import { apagarTudo, BackupInvalido, exportarTudo, importarTudo, lerBackup, nome
 import { IDIOMAS } from '../i18n'
 import { estaInstalado, instalar, usePodeInstalar } from '../instalacao'
 import { usePreferencias } from '../preferencias'
+import { baixarArquivo } from '../baixar'
 import { salvarConfigAvisos, useConfigAvisos } from '../dados/remedios'
 import { atualizarPerfil, usePerfil } from '../dados/perfil'
 import { AREAS_PRINCIPAIS } from '../design/areas'
@@ -46,10 +47,7 @@ function SeusDados() {
     try {
       const backup = await exportarTudo(banco)
       const arquivo = nomeArquivoBackup()
-      const url = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' }))
-      const link = Object.assign(document.createElement('a'), { href: url, download: arquivo })
-      link.click()
-      setTimeout(() => URL.revokeObjectURL(url), 10_000)
+      baixarArquivo(arquivo, JSON.stringify(backup, null, 2), 'application/json')
       setMensagem({ tipo: 'ok', texto: t('ajustes.exportado', { arquivo }) })
     } catch (e) {
       erro(e)

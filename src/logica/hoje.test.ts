@@ -148,3 +148,21 @@ describe('remédios no cartão Agora', () => {
     expect(candidatosDeRemedios(doses, [tomada], em(9))).toHaveLength(0)
   })
 })
+
+describe('consultas no cartão Agora', () => {
+  it('arrumar, depois sair, depois a consulta, e some quando acaba', async () => {
+    const { candidatosDeConsultas } = await import('./hoje')
+    const c = {
+      id: 'c1', titulo: 'Dentista', status: 'marcada' as const, data: '2026-10-28', hora: '14:30', duracaoMin: 60,
+      deslocamentoMin: 30, preparoMin: 30, folgaPct: 30, preparo: [], criadaEm: '',
+    }
+    const textos = { arrumar: (t: string) => `Começar a se arrumar para ${t}`, sair: (t: string) => `Sair de casa para ${t}` }
+    const escolher = (h: number, m: number) => escolherAgora(candidatosDeConsultas([c], em(h, m), textos), em(h, m))?.titulo
+    expect(escolher(13, 0)).toBeUndefined()
+    expect(escolher(13, 15)).toBe('Começar a se arrumar para Dentista')
+    expect(escolher(13, 55)).toBe('Sair de casa para Dentista')
+    expect(escolher(14, 40)).toBe('Dentista')
+    expect(escolher(15, 31)).toBeUndefined()
+    expect(candidatosDeConsultas([{ ...c, status: 'marcar' }], em(13, 15), textos)).toHaveLength(0)
+  })
+})

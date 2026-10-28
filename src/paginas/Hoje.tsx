@@ -14,9 +14,13 @@ import { EditorTarefa } from '../componentes/EditorTarefa'
 import { AnelProgresso } from '../componentes/Enfeites'
 import type { ContextoMoldura } from '../componentes/Moldura'
 import type { Tarefa } from '../dados/banco'
+import type { Consulta } from '../logica/consultas'
+import { momento } from '../logica/remedios'
 import { atualizarPerfil } from '../dados/perfil'
 import { useDosesDoDia } from '../dados/remedios'
 import { useTarefas } from '../dados/tarefas'
+import { useCandidatoAgora } from '../dados/agora'
+import { useConsultas } from '../dados/consultas'
 import { useAgora } from '../dados/timer'
 import { AREAS } from '../design/areas'
 import { abrirJanelinha } from '../janelinha'
@@ -25,9 +29,6 @@ import {
   BLOCOS,
   blocoDoHorario,
   blocoJaPassou,
-  candidatosDeRemedios,
-  candidatosDeTarefas,
-  escolherAgora,
   fimDoBloco,
   formatarDuracao,
   minutosAte,
@@ -75,7 +76,7 @@ function FolhaDoDia({ agora, nome }: { agora: Date; nome?: string }) {
   )
 }
 
-function LinhaDoDia({ tarefas, agora }: { tarefas: Tarefa[]; agora: Date }) {
+function LinhaDoDia({ tarefas, agora, consultas }: { tarefas: Tarefa[]; agora: Date; consultas: Consulta[] }) {
   const { t } = useTranslation()
   const atual = blocoDoHorario(agora)
   const semBloco = tarefas.filter((x) => !x.bloco)
@@ -87,6 +88,7 @@ function LinhaDoDia({ tarefas, agora }: { tarefas: Tarefa[]; agora: Date }) {
       <ol className="grid gap-3 md:grid-cols-3">
         {BLOCOS.map((bloco) => {
           const doBloco = tarefas.filter((x) => x.bloco === bloco)
+          const consultasDoBloco = consultas.filter((c) => c.hora && blocoDoHorario(momento(c.data!, c.hora)) === bloco)
           const passou = blocoJaPassou(bloco, atual)
           const eAgora = bloco === atual
           return (
@@ -104,13 +106,19 @@ function LinhaDoDia({ tarefas, agora }: { tarefas: Tarefa[]; agora: Date }) {
                   <span className="ml-auto rounded-full border-2 border-linha/50 px-2 text-xs">{eAgora ? t('hoje.agoraBloco') : t('hoje.passou')}</span>
                 )}
               </p>
+              {consultasDoBloco.map((c) => (
+                <p key={c.id} className="flex items-center gap-2 rounded-full border-2 border-linha bg-azul-nevoa py-1 pr-3 pl-1 text-sm font-semibold">
+                  <Adesivo nome="prancheta" tamanho={22} />
+                  <span className="tabular-nums">{c.hora}</span> {c.titulo}
+                </p>
+              ))}
               {doBloco.length ? (
                 <ul className="flex flex-col gap-1.5">
                   {doBloco.map((x) => (
                     <ItemLinha key={x.id} tarefa={x} />
                   ))}
                 </ul>
-              ) : (
+              ) : consultasDoBloco.length ? null : (
                 <p className="text-sm text-tinta-suave">{t('hoje.livre')}</p>
               )}
             </li>
@@ -190,6 +198,8 @@ export function Hoje() {
   const agora = useAgora(15_000)
   const tarefas = useTarefas()
   const doses = useDosesDoDia(diaLocal(agora))
+  const consultas = useConsultas()
+  const { candidato } = useCandidatoAgora(agora)
   const hoje = diaLocal(agora)
   const dia = diaDoPlano(perfil.inicioPlano, hoje)
 
@@ -197,10 +207,9 @@ export function Hoje() {
   const diaAlcancado = visitaAnterior ? diaDoPlano(perfil.inicioPlano, visitaAnterior) : dia
   const podeContinuar = acolher && visitaAnterior && diaAlcancado < DURACAO_PLANO
 
-  if (!tarefas || !doses) return null
+  if (!tarefas || !doses || !consultas) return null
   const doDia = tarefasDoDia(tarefas, hoje)
   const grupos = agruparTarefas(tarefas, hoje)
-  const candidato = escolherAgora([...candidatosDeRemedios(doses.doses, doses.registros, agora), ...candidatosDeTarefas(tarefas, hoje)], agora)
   const remediosHoje = { feitos: doses.registros.filter((r) => r.status === 'tomei').length, total: doses.doses.length }
   const tarefasA = doDia.filter((x) => x.prioridade === 'A')
   const bonus = [...grupos.b, ...grupos.c]
@@ -294,7 +303,7 @@ export function Hoje() {
         </div>
       </div>
 
-      <LinhaDoDia tarefas={doDia} agora={agora} />
+      <LinhaDoDia tarefas={doDia} agora={agora} consultas={consultas.filter((c) => c.status === 'marcada' && c.data === hoje)} />
 
       {!perfil.planoEscondido && <CartaoPlano dia={dia} />}
 

@@ -112,8 +112,26 @@ export function CartaoAgora({ candidato, compacto = false, semNada }: Props) {
     )
   }
 
+  if (candidato.tipo === 'transicao' || candidato.tipo === 'compromisso') {
+    return (
+      <section aria-labelledby="titulo-agora" className={`cartao flex flex-col gap-3 bg-azul-nevoa ${compacto ? 'p-4' : 'p-6'}`}>
+        <p className="rotulo flex items-center gap-2">
+          <span id="titulo-agora">{t('hoje.agora')}</span>
+          <span aria-hidden="true">·</span>
+          <Adesivo nome="prancheta" tamanho={20} />
+          {t('nav.consultas')}
+        </p>
+        <p className={`font-titulo leading-tight font-semibold break-words ${compacto ? 'text-2xl' : 'text-3xl sm:text-4xl'}`}>{candidato.titulo}</p>
+        {candidato.detalhe && <p className="text-lg font-semibold tabular-nums">{candidato.detalhe}</p>}
+        <a href="#/consultas" className="self-start font-bold underline decoration-2 underline-offset-4">
+          {t('consultas.titulo')} →
+        </a>
+      </section>
+    )
+  }
+
   if (candidato.tipo !== 'tarefa') {
-    // remédios, transições, compromissos e hábitos chegam nas próximas etapas
+    // hábitos chegam na etapa da academia
     return (
       <section className="cartao bg-papel p-6">
         <p className="rotulo">{t('hoje.agora')}</p>
