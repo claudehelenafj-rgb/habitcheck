@@ -16,6 +16,12 @@ Autismo" (lido). Plano aprovado em 28/10/2026.
   No mês, bolinhas de tamanho e tom diferentes pela maior intensidade do dia (nunca vermelho, nunca só a cor),
   tabela equivalente, e o que mais se repete ("não sei" não entra nos porquês), sempre com o aviso de que
   repetir junto não quer dizer causa. Os padrões com sono e remédio ficam para a B7.
+- Hobbies (B4): frequência por semana ou por mês; "em dia" até o intervalo combinado (2 por semana = 3,5 dias);
+  o adesivo desbota um pouco depois disso e mais depois do dobro, sempre com o texto ("de lado há 9 dias").
+  Hobby novo conta desde que foi criado; pausa de propósito (1 semana, 2 semanas, 1 mês) não desbota e não deixa
+  dívida: a contagem recomeça quando acaba. O porquê do hobby parado guarda histórico (para a B7) e só aparece se
+  foi anotado depois da última vez. Adesivos novos: música, pincel, novelo e videogame. A seção de hobbies na
+  revisão semanal entra com a etapa 14.
 - Ordem: **I1** tema Índigo (guia de estilo para aprovar, depois aplicar) e **B1–B8** Bem-estar,
   antes da etapa 9.
   - B1 base da aba (ativar nos Ajustes, cores, adesivos, ferramentas que se ligam uma ou duas por vez);

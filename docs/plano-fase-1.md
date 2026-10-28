@@ -95,7 +95,8 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | B1 | **Bem-estar**: base da aba, ativada nos Ajustes (atalho B) | Pronta |
 | B2 | **Bem-estar**: check-in de emoções e plano por faixa | Pronta |
 | B3 | **Bem-estar**: sintomas com o porquê e visão do mês | Pronta |
-| B4–B8 | **Bem-estar**: hobbies, sugestões, sono, resumo, privacidade | |
+| B4 | **Bem-estar**: hobbies (desbote, porquê, pausar, arquivar, agenda, mês) | Pronta |
+| B5–B8 | **Bem-estar**: sugestões, sono, resumo, privacidade | |
 | 9 | Faculdade, modo foco, saída do hiperfoco | |
 | 10 | Academia | |
 | 11 | Quarto | |

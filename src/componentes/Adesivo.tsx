@@ -379,6 +379,47 @@ const desenhos = {
       <circle cx="51" cy="12" r="5" fill={COR.mostarda} />
     </g>
   ),
+  // Hobbies
+  musica: (
+    <g transform="rotate(-6 32 32)">
+      <Camadas
+        d={redondo(20, 46, 8, 9) + redondo(44, 41, 8, 9) + 'M25 16L29 15L29 44L25 45Z' + 'M49 10L53 9L53 39L49 40Z' + 'M25 15L53 8L53 16L25 23Z'}
+        fora={COR.ameixa}
+        dentro={COR.lilas}
+      />
+      <ellipse cx="18" cy="44" rx="2.6" ry="1.8" fill="#fff" opacity="0.7" />
+    </g>
+  ),
+  pincel: (
+    <g transform="rotate(35 32 32)">
+      <Camadas d="M28 31L36 31L37 59L27 59Z" fora={COR.laranja} dentro={COR.pessego} borda={5} />
+      <Camadas d="M27 23L37 23L36 31L28 31Z" fora={COR.piscina} dentro={COR.azul} borda={5} />
+      <Camadas d="M27 23L37 23L36 14L32 4L28 14Z" fora={COR.rosa} dentro={COR.morango} borda={5} />
+    </g>
+  ),
+  novelo: (
+    <g>
+      <path d="M44 48q8 8 15 4" fill="none" stroke={COR.rosa} strokeWidth={3} strokeLinecap="round" />
+      <Camadas d={redondo(31, 32, 20, 13)} fora={COR.rosa} dentro={COR.morango} />
+      <path
+        d="M14 26q16 4 30-12M13 36q20 2 35-16M18 46q18-4 30-22M26 51q14-8 22-20"
+        fill="none"
+        stroke={COR.rosa}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+      <path d="M8 14l14 14M14 8l12 16" stroke={COR.laranja} strokeWidth={2.5} strokeLinecap="round" />
+    </g>
+  ),
+  controle: (
+    <g>
+      <Camadas d="M10 25L22 21L42 21L54 25L59 43L51 50L42 42L22 42L13 50L5 43Z" fora={COR.indigo} dentro={COR.azulLavanda} />
+      <path d="M15 29h4v-4h4v4h4v4h-4v4h-4v-4h-4z" fill={COR.noite} />
+      <circle cx="44" cy="28" r="3" fill={COR.rosa} />
+      <circle cx="50" cy="33" r="3" fill={COR.mostarda} />
+      <circle cx="44" cy="38" r="3" fill={COR.agua} />
+    </g>
+  ),
 } satisfies Record<string, ReactNode>
 
 export type NomeAdesivo = keyof typeof desenhos

@@ -16,10 +16,11 @@ export type ConfigBemEstar = {
   listaSintomas?: string[]
   listaPorques?: string[]
   listaAjudou?: string[]
+  listaMotivosHobby?: string[]
 }
 
 /** Nome do campo de cada lista de etiquetas editável. */
-export type ListaEtiquetas = 'sinais' | 'listaSintomas' | 'listaPorques' | 'listaAjudou'
+export type ListaEtiquetas = 'sinais' | 'listaSintomas' | 'listaPorques' | 'listaAjudou' | 'listaMotivosHobby'
 
 const CHAVE = 'bemEstar'
 const VAZIA: ConfigBemEstar = { ferramentas: [] }
