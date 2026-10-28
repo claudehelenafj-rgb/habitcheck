@@ -9,6 +9,8 @@ import { diaLocal, type Dia } from '../logica/datas'
 import { TELA_AJUSTES, TELAS_AREAS, TELAS_BARRA_CELULAR, TELAS_PRINCIPAIS, type Tela } from '../rotas'
 import { Adesivo } from './Adesivo'
 import { AvisoAtualizacao } from './AvisoAtualizacao'
+import { Avisos } from './Avisos'
+import { ATALHO_CAPTURA, Captura } from './Captura'
 import { Micangas } from './Papelaria'
 
 function Kbd({ children }: { children: string }) {
@@ -155,6 +157,10 @@ function ListaAtalhos({ telas, fechar }: { telas: Tela[]; fechar: () => void }) 
           </li>
         ))}
         <li className="flex items-center gap-2">
+          <Kbd>{ATALHO_CAPTURA}</Kbd>
+          <span className="mr-auto">{t('captura.campo')}</span>
+        </li>
+        <li className="flex items-center gap-2">
           <Kbd>?</Kbd>
           <span className="mr-auto">{t('atalhos.lista')}</span>
         </li>
@@ -276,10 +282,10 @@ function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
           </p>
         )}
         <AvisoAtualizacao />
-        <main id="conteudo" ref={principal} className="mx-auto w-full max-w-5xl flex-1 px-4 pt-6 pb-32 sm:px-8 md:pb-12">
+        <main id="conteudo" ref={principal} className="mx-auto w-full max-w-5xl flex-1 px-4 pt-6 pb-32 sm:px-8">
           <Outlet context={{ perfil, visitaAnterior } satisfies ContextoMoldura} />
         </main>
-        <footer className="px-4 pb-28 text-center text-xs text-tinta-suave md:pb-6">
+        <footer className="px-4 pb-28 text-center text-xs text-tinta-suave md:pr-56 md:pb-8">
           {t('app.aviso')}{' '}
           <button type="button" onClick={() => setAtalhosAbertos(true)} className="ml-1 underline underline-offset-2">
             {t('atalhos.abrir')} (?)
@@ -290,6 +296,8 @@ function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
         <BarraCelular telas={telas} />
       </div>
       {atalhosAbertos && <ListaAtalhos telas={telas} fechar={() => setAtalhosAbertos(false)} />}
+      <Captura />
+      <Avisos />
     </div>
   )
 }

@@ -10,7 +10,7 @@ export type ItemCaixa = {
   id: string
   texto: string
   criadoEm: string // ISO
-  destino?: 'tarefa' | 'evento' | 'habito' | 'lixo'
+  destino?: 'tarefa' | 'evento' | 'habito' | 'feito' | 'lixo'
   resolvidoEm?: string
 }
 
@@ -28,7 +28,9 @@ export type Tarefa = {
   realMin?: number
   recompensa?: string
   objetivoId?: string
-  feitaEm?: string
+  feitaEm?: string // ISO
+  /** dia local em que foi feita (o ISO acima é em UTC e pode cair no dia seguinte à noite) */
+  feitaNoDia?: string
   criadaEm: string
 }
 

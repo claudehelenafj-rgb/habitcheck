@@ -51,6 +51,7 @@ const NOMES_ADESIVO: Record<NomeAdesivo, string> = {
   explosao: 'Explosão',
   interrogacao: 'Interrogação',
   exclamacao: 'Exclamação',
+  lista: 'Lista',
   cofrinho: 'Cofrinho',
   engrenagem: 'Engrenagem',
 }

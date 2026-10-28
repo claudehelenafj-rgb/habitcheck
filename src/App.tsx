@@ -6,6 +6,8 @@ import { Ajustes } from './paginas/Ajustes'
 import { BoasVindas } from './paginas/BoasVindas'
 import { EmBreve } from './paginas/EmBreve'
 import { Hoje } from './paginas/Hoje'
+import { Caixa } from './paginas/Caixa'
+import { Tarefas } from './paginas/Tarefas'
 import { GuiaDeEstilo } from './paginas/GuiaDeEstilo'
 import { useAplicarPreferencias } from './preferencias'
 import { TELA_AJUSTES, TODAS_AS_TELAS } from './rotas'
@@ -18,7 +20,9 @@ const roteador = createHashRouter([
     children: [
       { index: true, element: <Navigate to="/hoje" replace /> },
       { path: '/hoje', element: <Hoje /> },
-      ...TODAS_AS_TELAS.filter((tela) => tela.id !== 'ajustes' && tela.id !== 'hoje').map((tela) => ({
+      { path: '/tarefas', element: <Tarefas /> },
+      { path: '/caixa', element: <Caixa /> },
+      ...TODAS_AS_TELAS.filter((tela) => tela.etapa).map((tela) => ({
         path: tela.caminho,
         element: <EmBreve tela={tela} />,
       })),

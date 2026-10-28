@@ -7,6 +7,7 @@ export type IdTela =
   | 'hoje'
   | 'calendario'
   | 'caixa'
+  | 'tarefas'
   | 'objetivos'
   | 'rituais'
   | 'remedios'
@@ -30,9 +31,10 @@ export type Tela = {
 }
 
 export const TELAS_PRINCIPAIS: Tela[] = [
-  { id: 'hoje', caminho: '/hoje', adesivo: 'sol', atalho: 'h', etapa: 5 },
+  { id: 'hoje', caminho: '/hoje', adesivo: 'sol', atalho: 'h' },
   { id: 'calendario', caminho: '/calendario', adesivo: 'calendario', atalho: 'c', etapa: 8 },
-  { id: 'caixa', caminho: '/caixa', adesivo: 'envelope', atalho: 'x', etapa: 4 },
+  { id: 'tarefas', caminho: '/tarefas', adesivo: 'lista', atalho: 't' },
+  { id: 'caixa', caminho: '/caixa', adesivo: 'envelope', atalho: 'x' },
   { id: 'objetivos', caminho: '/objetivos', adesivo: 'estrela', atalho: 'o', etapa: 15 },
   { id: 'rituais', caminho: '/rituais', adesivo: 'lua', atalho: 'r', etapa: 14 },
 ]
@@ -52,4 +54,4 @@ export const TELA_AJUSTES: Tela = { id: 'ajustes', caminho: '/ajustes', adesivo:
 export const TODAS_AS_TELAS = [...TELAS_PRINCIPAIS, ...TELAS_AREAS, TELA_AJUSTES]
 
 /** Telas da barra de baixo no celular; o resto fica em "Mais". */
-export const TELAS_BARRA_CELULAR: IdTela[] = ['hoje', 'calendario', 'caixa', 'objetivos']
+export const TELAS_BARRA_CELULAR: IdTela[] = ['hoje', 'tarefas', 'caixa', 'calendario']

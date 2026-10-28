@@ -242,6 +242,14 @@ const desenhos = {
       <Camadas d="M27 47L37 46L38 57L27 58Z" fora={COR.lavanda} dentro={COR.rosa} borda={5} />
     </g>
   ),
+  lista: (
+    <g transform="rotate(-5 32 32)">
+      <Camadas d="M13 9L51 8L52 56L12 57Z" fora={COR.pessego} dentro={COR.creme} />
+      <path d="M20 19l3 3 6-6M20 32l3 3 6-6" fill="none" stroke={COR.piscina} strokeWidth={3} strokeLinecap="square" />
+      <path d="M33 19h12M33 32h12M33 45h12" stroke={COR.chocolate} strokeWidth={3} />
+      <path d="M20 42h7v7h-7z" fill="none" stroke={COR.chocolate} strokeWidth={2.5} />
+    </g>
+  ),
   cofrinho: (
     <g>
       <path d="M27 6L37 6L38 12L26 12Z" fill={COR.laranja} />
