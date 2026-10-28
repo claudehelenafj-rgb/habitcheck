@@ -47,24 +47,27 @@ function FolhaDoDia({ agora, nome }: { agora: Date; nome?: string }) {
   return (
     <header className="relative pt-3">
       <div aria-hidden="true" className="estampa estampa-atual absolute inset-x-0 top-0 h-12 rounded-t-[1.75rem] bg-destaque-claro" />
-      <div className="folha-destacavel relative flex flex-wrap items-center gap-x-6 gap-y-3 rounded-b-[1.75rem] border-x-2 border-b-2 border-linha bg-papel px-5 pb-5 shadow-[3px_3px_0_var(--linha)] sm:px-7">
-        <div className="flex items-center gap-3">
-          <span className="font-titulo text-6xl leading-none font-semibold tabular-nums">{agora.getDate()}</span>
-          <span className="flex flex-col">
-            <span className="rotulo">{semana}</span>
-            <span className="font-destaque text-2xl italic">{mes}</span>
-          </span>
+      <div className="folha-destacavel relative flex flex-col gap-3 rounded-b-[1.75rem] border-x-2 border-b-2 border-linha bg-papel px-5 pb-5 shadow-[3px_3px_0_var(--linha)] sm:px-7">
+        {/* linha de cima: data e relógio; linha de baixo: saudação sozinha (nome longo nunca encosta em nada) */}
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+          <div className="flex items-center gap-3">
+            <span className="font-titulo text-6xl leading-none font-semibold tabular-nums">{agora.getDate()}</span>
+            <span className="flex flex-col">
+              <span className="rotulo">{semana}</span>
+              <span className="font-destaque text-2xl italic">{mes}</span>
+            </span>
+          </div>
+          <div className="flex flex-col items-start sm:items-end">
+            <span className="font-titulo text-4xl font-semibold tabular-nums">{hora}</span>
+            <span className="flex items-center gap-1.5 text-sm font-semibold">
+              <Adesivo nome={ADESIVO_BLOCO[bloco]} tamanho={20} />
+              {t('hoje.blocoAcaba', { bloco: t(`hoje.blocos.${bloco}`), tempo: formatarDuracao(minutosAte(agora, fimDoBloco(agora))) })}
+            </span>
+          </div>
         </div>
-        <h1 tabIndex={-1} className="min-w-0 flex-1 text-3xl font-semibold outline-none sm:text-4xl">
+        <h1 tabIndex={-1} className="text-3xl font-semibold break-words outline-none sm:text-4xl">
           {nome ? t('saudacao.comNome', { saudacao, nome }) : t('saudacao.semNome', { saudacao })}
         </h1>
-        <div className="flex flex-col items-start sm:items-end">
-          <span className="font-titulo text-4xl font-semibold tabular-nums">{hora}</span>
-          <span className="flex items-center gap-1.5 text-sm font-semibold">
-            <Adesivo nome={ADESIVO_BLOCO[bloco]} tamanho={20} />
-            {t('hoje.blocoAcaba', { bloco: t(`hoje.blocos.${bloco}`), tempo: formatarDuracao(minutosAte(agora, fimDoBloco(agora))) })}
-          </span>
-        </div>
       </div>
     </header>
   )
