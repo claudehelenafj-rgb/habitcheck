@@ -74,6 +74,10 @@ Valores guardados em centavos (números inteiros, sem erro de arredondamento) e 
   - Safari: app instalado no Dock abre em modo compacto, numa janela pequena.
 - **Fase 3 (opcional):** widget nativo de verdade, com um pequeno app para Mac.
 
+## Adicional: Bem-estar e tema Índigo
+
+Registrado em [`adicional-bem-estar-indigo.md`](adicional-bem-estar-indigo.md). Plano detalhado depois de ler o guia de saúde mental.
+
 ## Etapas
 
 | Etapa | O que entra | Situação |
