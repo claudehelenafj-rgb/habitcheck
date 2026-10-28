@@ -59,6 +59,12 @@
   --forte-agua: var(--verde-agua);
   --forte-chocolate: var(--chocolate);
 
+  /* Mapa de calor (sequencial, um só tom, validado contra o papel) */
+  --mapa-1: #ee9cbe;
+  --mapa-2: #e86a92;
+  --mapa-3: #c44770;
+  --mapa-4: #872c4e;
+
   /* Botão principal */
   --botao-fundo: var(--chocolate);
   --botao-texto: var(--creme);
@@ -112,6 +118,12 @@
 
   --botao-fundo: var(--creme);
   --botao-texto: var(--chocolate);
+
+  /* no escuro, "mais" fica mais claro */
+  --mapa-1: #b6486d;
+  --mapa-2: #d4668e;
+  --mapa-3: #ec97b5;
+  --mapa-4: #f8cbdc;
 
   color-scheme: dark;
 }
