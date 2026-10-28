@@ -26,7 +26,9 @@ Base: guia "Estratégias de organização para pessoas com TDAH e Autismo" (PubM
 - Carinhas fofas (olhos, sorriso, bochechas) em alguns adesivos.
 - Miçangas de letrinhas para palavras curtas ("HOJE", o nome do app).
 - Folha de caderno com furos, margem vermelha, pauta azul, fita adesiva e estrelinhas de giz de cera.
-- Estampas trocáveis: bolinhas, xadrez, listras, coraçõezinhos, cerejas, estrelinhas, florzinhas, ondinhas e pauta de caderno.
+- Estampas trocáveis (11): bolinhas, xadrez, listras à mão, coraçõezinhos, cerejas, estrelinhas, flores retrô, ondinhas,
+  pauta de caderno, confete e oncinha. Geradas por `scripts/gerar-estampas.py`.
+- Modo escuro **cereja**: fundo cereja escuro, texto creme; cartões das áreas continuam nos tons claros, com texto chocolate.
 - Tudo desenhado do zero; nada copiado das referências.
 
 ## Novidades pedidas depois do plano

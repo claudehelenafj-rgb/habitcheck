@@ -31,13 +31,15 @@ const PALETA = [
 const NOMES_ESTAMPAS: Record<Estampa, string> = {
   bolinhas: 'Bolinhas',
   xadrez: 'Xadrez',
-  listras: 'Listras',
+  listras: 'Listras à mão',
   coracoes: 'Coraçõezinhos',
   cerejas: 'Cerejas',
   estrelas: 'Estrelinhas',
-  flores: 'Florzinhas',
+  flores: 'Flores retrô',
   ondas: 'Ondinhas',
   caderno: 'Pauta de caderno',
+  confete: 'Confete',
+  oncinha: 'Oncinha',
 }
 
 const NOMES_ADESIVO: Record<NomeAdesivo, string> = {
@@ -380,7 +382,7 @@ export function GuiaDeEstilo() {
         </Secao>
 
         <Secao id="estampas" rotulo="Embalagem trocável" titulo="Estampas">
-          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {ESTAMPAS.map((e) => (
               <li key={e}>
                 <button

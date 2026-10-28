@@ -95,50 +95,44 @@
 }
 
 /*
- * Modo escuro: fundo chocolate, texto creme, tons claros "apagados"
- * (22% do tom sobre chocolate) para não ofuscar.
+ * Modo escuro "cereja": fundo cereja escuro e texto creme.
+ * Os cartões das áreas continuam nos tons claros (um pouco apagados, 12% de cereja),
+ * como papéis coloridos sobre uma mesa escura; dentro deles o texto volta a ser chocolate
+ * (ver .cartao-claro em global.css). Assim cada área continua com sua cor.
  */
 :root[data-modo='escuro'] {
-  --fundo: var(--chocolate);
-  --papel: #4d3b1b;
+  --fundo: #521429;
+  --papel: #5e2437;
   --tinta: var(--creme);
-  --tinta-suave: #d6cec1;
-  --linha: #d6cec1;
+  --tinta-suave: #d9c9c7;
+  --linha: #d9c9c7;
 
-  --claro-lavanda: #6a5341;
-  --claro-azul-nevoa: #5a5239;
-  --claro-pessego: #6c522b;
-  --claro-manteiga: #6a5832;
-  --claro-menta: #645a33;
-  --claro-morango: #6b5035;
+  --claro-lavanda: #e5bddf;
+  --claro-azul-nevoa: #a3b9bc;
+  --claro-pessego: #eab987;
+  --claro-manteiga: #e3cfa2;
+  --claro-menta: #ccd7a7;
+  --claro-morango: #e8afae;
 
-  /* verde-piscina some sobre chocolate (2,6:1); usamos uma versão mais clara */
-  --forte-piscina: #269082;
+  /* verde-piscina some sobre cereja (2,9:1); usamos uma versão mais clara */
+  --forte-piscina: #35978a;
   --forte-chocolate: var(--creme);
 
   --botao-fundo: var(--creme);
-  --botao-texto: var(--chocolate);
+  --botao-texto: #521429;
 
   /* no escuro, "mais" fica mais claro */
-  --mapa-1: #b6486d;
-  --mapa-2: #d4668e;
-  --mapa-3: #ec97b5;
-  --mapa-4: #f8cbdc;
+  --mapa-1: #c85e82;
+  --mapa-2: #de80a1;
+  --mapa-3: #f0a6c0;
+  --mapa-4: #fbd5e2;
+
+  --destaque-claro: #6e2e44;
 
   color-scheme: dark;
 }
 :root[data-modo='escuro'][data-tema='creme'],
 :root[data-modo='escuro']:not([data-tema]) {
   --destaque: var(--creme);
-  --destaque-texto: var(--chocolate);
-  --destaque-claro: #6a5832;
-}
-:root[data-modo='escuro'][data-tema='cereja'] {
-  --destaque-claro: #6b5035;
-}
-:root[data-modo='escuro'][data-tema='piscina'] {
-  --destaque-claro: #5a5239;
-}
-:root[data-modo='escuro'][data-tema='pessego'] {
-  --destaque-claro: #6c522b;
+  --destaque-texto: #521429;
 }

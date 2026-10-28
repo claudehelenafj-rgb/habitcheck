@@ -21,6 +21,8 @@ export const ESTAMPAS = [
   'flores',
   'ondas',
   'caderno',
+  'confete',
+  'oncinha',
 ] as const
 export type Estampa = (typeof ESTAMPAS)[number]
 

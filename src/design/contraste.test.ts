@@ -40,9 +40,17 @@ describe.each([
 ])('%s', (_modo, vars) => {
   const cor = (nome: string) => resolver(vars, nome)
 
-  it('texto principal passa AA sobre fundo, papel e todos os tons claros', () => {
-    for (const fundo of ['fundo', 'papel', ...TONS_CLAROS]) {
+  it('texto principal passa AA sobre fundo e papel', () => {
+    for (const fundo of ['fundo', 'papel']) {
       expect(contraste(cor('tinta'), cor(fundo)), `tinta sobre ${fundo}`).toBeGreaterThanOrEqual(MINIMO_TEXTO)
+    }
+  })
+
+  // Nos dois modos, o texto dentro de um cartão em tom claro é chocolate.
+  it('texto chocolate passa AA sobre todos os tons claros', () => {
+    for (const fundo of TONS_CLAROS) {
+      expect(contraste(cor('chocolate'), cor(fundo)), `chocolate sobre ${fundo}`).toBeGreaterThanOrEqual(MINIMO_TEXTO)
+      expect(contraste(cor('chocolate'), cor(fundo)), `contorno sobre ${fundo}`).toBeGreaterThanOrEqual(MINIMO_ICONE)
     }
   })
 
@@ -62,7 +70,7 @@ describe.each([
   // Por isso todo ícone, check e barra forte é desenhado com contorno em "linha",
   // e é o contorno que precisa passar 3:1.
   it('contorno de ícones, checks e barras passa 3:1 sobre fundo e papel', () => {
-    for (const fundo of ['fundo', 'papel', ...TONS_CLAROS]) {
+    for (const fundo of ['fundo', 'papel']) {
       expect(contraste(cor('linha'), cor(fundo)), `linha sobre ${fundo}`).toBeGreaterThanOrEqual(MINIMO_ICONE)
     }
   })
