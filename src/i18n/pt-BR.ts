@@ -26,6 +26,7 @@ export const ptBR = {
     quarto: 'Quarto',
     alimentacao: 'Alimentação',
     dinheiro: 'Dinheiro',
+    bemestar: 'Bem-estar',
     ajustes: 'Ajustes',
     areas: 'Áreas',
     maisAreas: '+ Áreas',
@@ -65,6 +66,7 @@ export const ptBR = {
     quarto: 'Meu quarto vive bagunçado',
     alimentacao: 'Pulo refeições ou como mal',
     dinheiro: 'Esqueço contas e gasto por impulso',
+    bemestar: 'Quero cuidar de como me sinto',
   },
   plano: {
     titulo: 'Seu começo',
@@ -422,6 +424,26 @@ export const ptBR = {
     apagar: 'Apagar evento',
     apagado: 'Evento apagado.',
     virouEvento: 'Virou evento.',
+  },
+  bemEstar: {
+    intro: 'Um cantinho para perceber como você está e cuidar disso, no seu ritmo.',
+    cuidado:
+      'O Caderninho apoia o seu cuidado, mas não substitui tratamento. Ele nunca dá diagnóstico nem orienta dose ou troca de remédio.',
+    privacidade: 'Tudo daqui fica só neste aparelho.',
+    ligadasTitulo: 'Ligadas agora',
+    nenhumaLigada: 'Nenhuma ferramenta ligada ainda. Escolha uma ou duas logo abaixo.',
+    ferramentasTitulo: 'Suas ferramentas',
+    ferramentasDica: 'Ligue uma ou duas para começar. Dá para trocar quando quiser.',
+    muitas: 'Mais de duas ao mesmo tempo pode pesar. É só uma sugestão: quem decide é você.',
+    emBreve: 'Chega na etapa {{etapa}}',
+    ferramentas: {
+      checkin: { nome: 'Check-in de emoções', desc: 'Ansiedade, irritação e energia de 0 a 10, em poucos toques.' },
+      sintomas: { nome: 'Sintomas com o porquê', desc: 'O que você sentiu, por quê, e o que ajudou.' },
+      hobbies: { nome: 'Hobbies', desc: 'As coisas que te recarregam, e quais ficaram de lado.' },
+      sugestoes: { nome: 'Sugestões de atividade', desc: '2 ou 3 ideias para o momento, primeiro as que já ajudaram.' },
+      sono: { nome: 'Sono', desc: 'Horário de acordar, rotina para desacelerar e diário de sono.' },
+      resumo: { nome: 'Resumo para a consulta', desc: 'Seus registros num resumo para levar ao profissional.' },
+    },
   },
   emBreve: {
     titulo: 'Esta parte chega na etapa {{etapa}}',

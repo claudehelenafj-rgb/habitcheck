@@ -92,7 +92,8 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | 7 | Consultas e arquivo .ics | Pronta |
 | 8 | Calendário semana/mês e **importar calendário** | Pronta |
 | I1 | **Tema Índigo**, estampas novas, decoração doce/neutra | Pronta (zebrinha recusada) |
-| B1–B8 | **Bem-estar** (ver o adicional) | |
+| B1 | **Bem-estar**: base da aba, ativada nos Ajustes (atalho B) | Pronta |
+| B2–B8 | **Bem-estar**: check-in, sintomas, hobbies, sugestões, sono, resumo, privacidade | |
 | 9 | Faculdade, modo foco, saída do hiperfoco | |
 | 10 | Academia | |
 | 11 | Quarto | |

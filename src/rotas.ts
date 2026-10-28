@@ -17,6 +17,7 @@ export type IdTela =
   | 'quarto'
   | 'alimentacao'
   | 'dinheiro'
+  | 'bemestar'
   | 'ajustes'
 
 export type Tela = {
@@ -47,6 +48,7 @@ export const TELAS_AREAS: Tela[] = [
   { id: 'quarto', caminho: '/quarto', adesivo: 'vassoura', atalho: 'q', etapa: 11, area: 'quarto' },
   { id: 'alimentacao', caminho: '/alimentacao', adesivo: 'prato', atalho: 'l', etapa: 12, area: 'alimentacao' },
   { id: 'dinheiro', caminho: '/dinheiro', adesivo: 'cofrinho', atalho: 'd', etapa: 13, area: 'dinheiro' },
+  { id: 'bemestar', caminho: '/bem-estar', adesivo: 'cerebro', atalho: 'b', area: 'bemestar' },
 ]
 
 export const TELA_AJUSTES: Tela = { id: 'ajustes', caminho: '/ajustes', adesivo: 'engrenagem', atalho: ',' }

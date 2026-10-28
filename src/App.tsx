@@ -12,6 +12,7 @@ import { Mini } from './paginas/Mini'
 import { Remedios } from './paginas/Remedios'
 import { Consultas } from './paginas/Consultas'
 import { Calendario } from './paginas/Calendario'
+import { BemEstar } from './paginas/BemEstar'
 import { GuiaDeEstilo } from './paginas/GuiaDeEstilo'
 import { GuiaIndigo } from './paginas/GuiaIndigo'
 import { useAplicarPreferencias } from './preferencias'
@@ -30,6 +31,7 @@ const roteador = createHashRouter([
       { path: '/remedios', element: <Remedios /> },
       { path: '/consultas', element: <Consultas /> },
       { path: '/calendario', element: <Calendario /> },
+      { path: '/bem-estar', element: <BemEstar /> },
       ...TODAS_AS_TELAS.filter((tela) => tela.etapa).map((tela) => ({
         path: tela.caminho,
         element: <EmBreve tela={tela} />,

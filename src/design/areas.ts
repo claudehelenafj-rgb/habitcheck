@@ -8,6 +8,7 @@ export type IdArea =
   | 'quarto'
   | 'alimentacao'
   | 'dinheiro'
+  | 'bemestar'
   | 'base'
 
 export type Area = {
@@ -81,6 +82,16 @@ export const AREAS: Record<IdArea, Area> = {
     forte: 'bg-verde-piscina',
     forteCss: 'var(--forte-piscina)',
   },
+  // lilás-névoa + ameixa. O lilás é parecido com a lavanda da Faculdade; o que separa as duas
+  // é a cor forte (ameixa × rosa), o adesivo e o nome.
+  bemestar: {
+    id: 'bemestar',
+    nome: 'Bem-estar',
+    adesivo: 'cerebro',
+    claro: 'bg-lilas',
+    forte: 'bg-ameixa',
+    forteCss: 'var(--forte-ameixa)',
+  },
   base: {
     id: 'base',
     nome: 'Calendário e rituais',
@@ -92,3 +103,6 @@ export const AREAS: Record<IdArea, Area> = {
 }
 
 export const AREAS_PRINCIPAIS = (Object.values(AREAS) as Area[]).filter((a) => a.id !== 'base')
+
+/** Áreas oferecidas no primeiro uso. O Bem-estar é opcional e se liga depois, nos Ajustes. */
+export const AREAS_INICIO = AREAS_PRINCIPAIS.filter((a) => a.id !== 'bemestar')

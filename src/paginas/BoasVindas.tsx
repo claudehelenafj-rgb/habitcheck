@@ -7,7 +7,7 @@ import { Adesivo } from '../componentes/Adesivo'
 import { Botao } from '../componentes/Botao'
 import { Micangas } from '../componentes/Papelaria'
 import { salvarPerfil, usePerfil } from '../dados/perfil'
-import { AREAS_PRINCIPAIS, type IdArea } from '../design/areas'
+import { AREAS_INICIO, type IdArea } from '../design/areas'
 import { diaLocal } from '../logica/datas'
 import { alternarArea, FASES, LIMITE_AREAS_INICIO } from '../logica/planoInicio'
 import { CORES_FASE } from '../componentes/CartaoPlano'
@@ -133,7 +133,7 @@ export function BoasVindas() {
             </h1>
             <p className="max-w-prose text-lg">{t('boasVindas.texto2')}</p>
             <ul className="grid gap-3 sm:grid-cols-2">
-              {AREAS_PRINCIPAIS.map((area) => {
+              {AREAS_INICIO.map((area) => {
                 const ativa = areas.includes(area.id)
                 return (
                   <li key={area.id}>

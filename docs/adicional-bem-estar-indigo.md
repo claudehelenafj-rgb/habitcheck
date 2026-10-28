@@ -6,9 +6,10 @@ Autismo" (lido). Plano aprovado em 28/10/2026.
 ## Decisões depois do plano
 
 - **Sem botão "Por que isso funciona?"**, nem no Bem-estar (a pessoa preferiu tirar de vez).
+- **Sem botão "Em crise?"** (pedido na etapa B1).
 - Ordem: **I1** tema Índigo (guia de estilo para aprovar, depois aplicar) e **B1–B8** Bem-estar,
   antes da etapa 9.
-  - B1 base da aba (ativar, cores, adesivos, botão "Em crise?" com CVV 188, SAMU 192, CAPS/UBS);
+  - B1 base da aba (ativar nos Ajustes, cores, adesivos, ferramentas que se ligam uma ou duas por vez);
   - B2 check-in; B3 sintomas e visão do mês; B4 hobbies; B5 sugestões e "ajudou?"; B6 sono;
   - B7 remédio no plano, resumo para a consulta, padrões e "quando buscar ajuda";
   - B8 PIN, avisos neutros, exportar/apagar só o Bem-estar.

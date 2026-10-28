@@ -174,7 +174,8 @@ function AreasAtivas() {
           )
         })}
       </ul>
-      {noComeco && ativas.length > LIMITE_AREAS_INICIO && <p className="text-sm font-semibold">{t('ajustes.areasMuitas')}</p>}
+      {/* o Bem-estar não conta no limite do começo: é cuidado, não mais uma frente de organização */}
+      {noComeco && ativas.filter((a) => a !== 'bemestar').length > LIMITE_AREAS_INICIO && <p className="text-sm font-semibold">{t('ajustes.areasMuitas')}</p>}
     </div>
   )
 }

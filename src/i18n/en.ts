@@ -27,6 +27,7 @@ export const en: Recursos = {
     quarto: 'Bedroom',
     alimentacao: 'Food',
     dinheiro: 'Money',
+    bemestar: 'Wellbeing',
     ajustes: 'Settings',
     areas: 'Areas',
     maisAreas: '+ Areas',
@@ -66,6 +67,7 @@ export const en: Recursos = {
     quarto: 'My bedroom is always a mess',
     alimentacao: 'I skip meals or eat poorly',
     dinheiro: 'I forget bills and buy on impulse',
+    bemestar: 'I want to take care of how I feel',
   },
   plano: {
     titulo: 'Your start',
@@ -423,6 +425,26 @@ export const en: Recursos = {
     apagar: 'Delete event',
     apagado: 'Event deleted.',
     virouEvento: 'Turned into an event.',
+  },
+  bemEstar: {
+    intro: 'A little corner to notice how you are and take care of it, at your own pace.',
+    cuidado:
+      'Caderninho supports your care, but it does not replace treatment. It never diagnoses or advises on doses or changing medication.',
+    privacidade: 'Everything here stays on this device only.',
+    ligadasTitulo: 'On now',
+    nenhumaLigada: 'No tools on yet. Pick one or two just below.',
+    ferramentasTitulo: 'Your tools',
+    ferramentasDica: 'Turn on one or two to start. You can change them anytime.',
+    muitas: 'More than two at once can feel heavy. It is just a suggestion: you decide.',
+    emBreve: 'Coming in step {{etapa}}',
+    ferramentas: {
+      checkin: { nome: 'Feelings check-in', desc: 'Anxiety, irritation and energy from 0 to 10, in a few taps.' },
+      sintomas: { nome: 'Symptoms and why', desc: 'What you felt, why, and what helped.' },
+      hobbies: { nome: 'Hobbies', desc: 'The things that recharge you, and which ones got left aside.' },
+      sugestoes: { nome: 'Activity ideas', desc: '2 or 3 ideas for the moment, the ones that helped before first.' },
+      sono: { nome: 'Sleep', desc: 'Wake-up time, a wind-down routine and a sleep diary.' },
+      resumo: { nome: 'Summary for appointments', desc: 'Your notes in a summary to bring to your health professional.' },
+    },
   },
   emBreve: {
     titulo: 'This part arrives in step {{etapa}}',
