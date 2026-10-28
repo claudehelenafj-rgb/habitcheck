@@ -54,6 +54,15 @@ const NOMES_ADESIVO: Record<NomeAdesivo, string> = {
   lista: 'Lista',
   cofrinho: 'Cofrinho',
   engrenagem: 'Engrenagem',
+  cerebro: 'Cerebrinho meditando',
+  nuvem: 'Nuvem',
+  xicara: 'Xícara',
+  maoCoracao: 'Mão no coração',
+  folha: 'Folha',
+  raio: 'Raio',
+  planeta: 'Planeta',
+  onda: 'Onda',
+  montanha: 'Montanha',
 }
 
 const SEMANA: Dia[] = [
@@ -170,6 +179,9 @@ export function GuiaDeEstilo() {
             antes de eu construir as telas.{' '}
             <span className="font-destaque text-2xl italic">Use os ajustes abaixo para testar.</span>
           </p>
+          <Link to="/estilo/indigo" className="mt-3 inline-block font-bold underline decoration-2 underline-offset-4">
+            Ver o tema Índigo, as estampas novas e o Bem-estar →
+          </Link>
         </div>
       </header>
       <Letreiro frases={['Um passo de cada vez', 'Voltar já é vitória', 'Feito é melhor que perfeito', 'Que bom te ver hoje']} />

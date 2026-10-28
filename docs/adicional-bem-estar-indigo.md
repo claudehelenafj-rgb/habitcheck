@@ -1,13 +1,25 @@
 # Adicional: aba "Bem-estar" (saúde mental) e tema Índigo
 
-Pedido recebido depois da etapa 7. Base científica: `docs/guia-saude-mental.pdf`
-("Cuidando da saúde mental de pessoas com TDAH e Autismo"), **ainda não recebido**.
-O plano detalhado só será feito depois de ler o guia, e só começa depois de aprovado.
+Pedido recebido depois da etapa 7. Base científica: guia "Cuidando da saúde mental de pessoas com TDAH e
+Autismo" (lido). Plano aprovado em 28/10/2026.
+
+## Decisões depois do plano
+
+- **Sem botão "Por que isso funciona?"**, nem no Bem-estar (a pessoa preferiu tirar de vez).
+- Ordem: **I1** tema Índigo (guia de estilo para aprovar, depois aplicar) e **B1–B8** Bem-estar,
+  antes da etapa 9.
+  - B1 base da aba (ativar, cores, adesivos, botão "Em crise?" com CVV 188, SAMU 192, CAPS/UBS);
+  - B2 check-in; B3 sintomas e visão do mês; B4 hobbies; B5 sugestões e "ajudou?"; B6 sono;
+  - B7 remédio no plano, resumo para a consulta, padrões e "quando buscar ajuda";
+  - B8 PIN, avisos neutros, exportar/apagar só o Bem-estar.
+- Fica para depois (Fase 3, com o orçamento de energia): camuflagem, burnout, "conecte-se com quem entende".
+- Referências visuais novas (desenhadas do zero): cerebrinho meditando (adesivo do Bem-estar) e as estampas
+  patinhas, rabiscos, zebrinha e xadrez à mão.
+- Contraste: ameixa clareia no escuro (`#C49BD6`); mostarda só com contorno; botão do Índigo escuro é papel-gelo.
 
 ## Parte 1: aba "Bem-estar"
 
-Princípios: botão "Por que isso funciona?" com nível de evidência honesto (forte, moderada, inicial,
-experiencial) conforme o quadro-resumo do guia; o app apoia o cuidado e não substitui tratamento
+Princípios (pedido original; o botão "Por que isso funciona?" foi retirado depois): o app apoia o cuidado e não substitui tratamento
 (nunca diagnostica, nunca orienta dose ou troca de remédio); aba opcional, ativada pela pessoa, uma ou
 duas ferramentas por vez; linguagem acolhedora, registrar um dia ruim é informação, não fracasso.
 

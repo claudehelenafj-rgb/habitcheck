@@ -27,7 +27,7 @@ Base: guia "Estratégias de organização para pessoas com TDAH e Autismo" (PubM
 - Miçangas de letrinhas para palavras curtas ("HOJE", o nome do app).
 - Folha de caderno com furos, margem vermelha, pauta azul, fita adesiva e estrelinhas de giz de cera.
 - Estampas trocáveis (11): bolinhas, xadrez, listras à mão, coraçõezinhos, cerejas, estrelinhas, flores retrô, ondinhas,
-  pauta de caderno, confete e oncinha. Geradas por `scripts/gerar-estampas.py`.
+  pauta de caderno, confete e oncinha. Novas, para aprovar: patinhas, rabiscos, zebrinha e xadrez à mão. Geradas por `scripts/gerar-estampas.py`.
 - Modo escuro **cereja**: fundo cereja escuro, texto creme; cartões das áreas continuam nos tons claros, com texto chocolate.
 - Tudo desenhado do zero; nada copiado das referências.
 
@@ -76,7 +76,8 @@ Valores guardados em centavos (números inteiros, sem erro de arredondamento) e 
 
 ## Adicional: Bem-estar e tema Índigo
 
-Registrado em [`adicional-bem-estar-indigo.md`](adicional-bem-estar-indigo.md). Plano detalhado depois de ler o guia de saúde mental.
+Registrado em [`adicional-bem-estar-indigo.md`](adicional-bem-estar-indigo.md). Plano aprovado: I1 (Índigo) e B1–B8 (Bem-estar) vêm antes da etapa 9.
+Guia de estilo do Índigo em `#/estilo/indigo`.
 
 ## Etapas
 
@@ -90,6 +91,8 @@ Registrado em [`adicional-bem-estar-indigo.md`](adicional-bem-estar-indigo.md). 
 | 6 | Remédios e sistema de lembretes | Pronta |
 | 7 | Consultas e arquivo .ics | Pronta |
 | 8 | Calendário semana/mês e **importar calendário** | Pronta |
+| I1 | **Tema Índigo**, estampas novas, decoração doce/neutra | Guia de estilo pronto, esperando aprovação |
+| B1–B8 | **Bem-estar** (ver o adicional) | |
 | 9 | Faculdade, modo foco, saída do hiperfoco | |
 | 10 | Academia | |
 | 11 | Quarto | |

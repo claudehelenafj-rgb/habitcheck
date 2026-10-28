@@ -33,6 +33,8 @@
   --color-laranja: var(--forte-laranja);
   --color-verde-piscina: var(--forte-piscina);
   --color-verde-agua: var(--forte-agua);
+  --color-ameixa: var(--forte-ameixa);
+  --color-lilas: var(--claro-lilas);
 
   --color-botao: var(--botao-fundo);
   --color-botao-texto: var(--botao-texto);
@@ -102,11 +104,11 @@ h3 {
  * No modo escuro, cartões em tom claro são "papel colorido": dentro deles
  * os tokens de texto e linha voltam aos valores do modo claro.
  */
-:root[data-modo='escuro'] :is(.bg-lavanda, .bg-azul-nevoa, .bg-pessego, .bg-manteiga, .bg-menta, .bg-morango-claro) {
+[data-modo='escuro'] :is(.bg-lavanda, .bg-azul-nevoa, .bg-pessego, .bg-manteiga, .bg-menta, .bg-morango-claro, .bg-lilas) {
   --tinta: var(--chocolate);
-  --tinta-suave: #67573b;
+  --tinta-suave: var(--suave-claro);
   --linha: var(--chocolate);
-  --papel: #fffdf8;
+  --papel: var(--papel-claro);
   --forte-chocolate: var(--chocolate);
   --forte-piscina: var(--verde-piscina);
   --botao-fundo: var(--chocolate);
@@ -304,7 +306,7 @@ h3 {
 .folha-caderno {
   --pauta: 2rem;
   color: var(--chocolate);
-  background-color: #fffdf8;
+  background-color: var(--papel-claro);
   background-image:
     linear-gradient(90deg, transparent 3.1rem, rgb(234 94 134 / 0.75) 3.1rem 3.2rem, transparent 3.2rem),
     repeating-linear-gradient(
@@ -317,4 +319,10 @@ h3 {
 }
 .folha-caderno :focus-visible {
   outline-color: var(--chocolate);
+}
+
+/* Decoração neutra: adesivos sem carinha */
+.sem-rosto .rosto,
+:root[data-decoracao='neutra'] .rosto {
+  display: none;
 }

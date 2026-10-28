@@ -13,6 +13,8 @@ CHOC = '#422F0E'
 CREME = '#FBF6EE'
 LAVANDA, AZUL, PESSEGO, MANTEIGA, MENTA, MORANGO = '#F9D4F8', '#AECFD0', '#FFD094', '#F7E9B2', '#DDF2B8', '#FCC4C0'
 ROSA, TOMATE, LARANJA, PISCINA, AGUA = '#EA5E86', '#EF6545', '#F49625', '#037F71', '#57B1A8'
+# tema Índigo
+NOITE, INDIGO, AZUL_LAVANDA, MOSTARDA, AMEIXA = '#1E2350', '#3949A3', '#D9DDF5', '#E3A73B', '#8A5A9E'
 
 
 def uri(svg: str) -> str:
@@ -173,6 +175,110 @@ def oncinha():
     return svg(w, h, corpo)
 
 
+def patinhas():
+    """Patinhas em aquarela: almofada + 4 dedinhos, cores suaves e levemente transparentes."""
+    w = h = 170
+    rnd = random.Random(31)
+    cores = [AMEIXA, TOMATE, MOSTARDA, PISCINA]
+    pos = [(28, 30), (100, 22), (150, 70), (62, 88), (126, 130), (30, 146), (86, 160)]
+
+    def borrao(cx, cy, rx, ry):
+        pts = []
+        for k in range(9):
+            a = k / 9 * 2 * math.pi
+            f = rnd.uniform(0.88, 1.1)
+            pts.append((cx + rx * f * math.cos(a), cy + ry * f * math.sin(a)))
+        d = ''.join(f'Q{x1:.1f} {y1:.1f} {(x1 + x2) / 2:.1f} {(y1 + y2) / 2:.1f}' for (x1, y1), (x2, y2) in zip(pts, pts[1:] + pts[:1]))
+        ini = ((pts[-1][0] + pts[0][0]) / 2, (pts[-1][1] + pts[0][1]) / 2)
+        return f'M{ini[0]:.1f} {ini[1]:.1f}{d}Z'
+
+    corpo = ''
+    for i, (x, y) in enumerate(pos):
+        cor = cores[i % len(cores)]
+        giro = rnd.randint(-40, 40)
+        pata = borrao(0, 5, 8, 6.5) + ''.join(borrao(dx, dy, 3, 3.6) for dx, dy in [(-9, -5), (-3.5, -10), (3.5, -10), (9, -5)])
+        corpo += repetido(w, h, x, y, lambda a, b: (
+            f"<path d='{pata}' transform='translate({a} {b}) rotate({giro})' fill='{cor}' fill-opacity='0.55'/>"))
+    return svg(w, h, corpo)
+
+
+def rabiscos():
+    """Rabiscos de caneta: molinhas, zigue-zagues, laços e pontinhos em índigo."""
+    w = h = 180
+    rnd = random.Random(44)
+    formas = [
+        'M0 0c4-8 10-8 8 0s4 8 8 0 10-8 8 0',
+        'M0 0l5-7 5 7 5-7 5 7 5-7',
+        'M0 0c8-10 18-2 10 5s-14-6-2-10 14 6 12 12',
+        'M0 0q6-9 12 0t12 0',
+        'M0 0a5 5 0 1 1 5 5a8 8 0 1 1 -8 -8',
+        'M0 0c3 4 7 4 9 0s6-4 9 0 6 4 9 0',
+    ]
+    itens = [(14, 18), (84, 12), (146, 34), (40, 66), (112, 78), (168, 112), (20, 120), (80, 132), (136, 160), (52, 170)]
+    corpo = ''
+    for i, (x, y) in enumerate(itens):
+        d = formas[i % len(formas)]
+        cor = INDIGO if i % 3 else NOITE
+        giro = rnd.randint(-70, 70)
+        corpo += repetido(w, h, x, y, lambda a, b: (
+            f"<path d='{d}' transform='translate({a} {b}) rotate({giro})' fill='none' stroke='{cor}' "
+            f"stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.7'/>"))
+    for _ in range(14):
+        x, y = rnd.uniform(0, w), rnd.uniform(0, h)
+        corpo += repetido(w, h, x, y, lambda a, b: f"<circle cx='{a:.1f}' cy='{b:.1f}' r='1.6' fill='{INDIGO}' fill-opacity='0.7'/>")
+    return svg(w, h, corpo)
+
+
+def zebrinha():
+    """Zebrinha: listras tortas e afinadas nas pontas, em chocolate, com estrelinhas rosa."""
+    w = h = 160
+    rnd = random.Random(17)
+    corpo = f"<rect width='{w}' height='{h}' fill='{MANTEIGA}'/>"
+
+    def listra(x0, y0, comprimento, grossura, inclinacao):
+        n = 8
+        cima, baixo = [], []
+        for k in range(n + 1):
+            t = k / n
+            x = x0 + t * comprimento
+            y = y0 + t * comprimento * inclinacao + 4 * math.sin(t * math.pi * 2 + x0)
+            g = grossura * math.sin(t * math.pi) ** 0.7 * rnd.uniform(0.85, 1.1)
+            cima.append((x, y - g / 2))
+            baixo.append((x, y + g / 2))
+        pts = cima + list(reversed(baixo))
+        return 'M' + 'L'.join(f'{x:.1f} {y:.1f}' for x, y in pts) + 'Z'
+
+    for k in range(9):
+        y = k * h / 9 + rnd.uniform(-3, 3)
+        x = rnd.uniform(-30, 20)
+        d = listra(0, 0, rnd.uniform(80, 130), rnd.uniform(6, 10), rnd.uniform(-0.25, 0.25))
+        corpo += repetido(w, h, x, y, lambda a, b: f"<path d='{d}' transform='translate({a:.1f} {b:.1f})' fill='{CHOC}'/>", margem=140)
+    estrela = 'M0 -5l1.4 3.3 3.6.3-2.7 2.4.8 3.5-3.1-1.9-3.1 1.9.8-3.5-2.7-2.4 3.6-.3z'
+    for x, y in [(30, 22), (118, 50), (64, 104), (140, 128), (18, 140)]:
+        corpo += repetido(w, h, x, y, lambda a, b: (
+            f"<path d='{estrela}' transform='translate({a} {b}) scale(1.3)' fill='{ROSA}' stroke='{CREME}' stroke-width='1' stroke-linejoin='round'/>"))
+    return svg(w, h, corpo)
+
+
+def xadrez_a_mao():
+    """Xadrez pintado à mão: quadrados com bordas tortinhas em índigo."""
+    lado, n = 24, 4
+    w = h = lado * n
+    rnd = random.Random(23)
+    corpo = ''
+    for i in range(n):
+        for j in range(n):
+            if (i + j) % 2:
+                continue
+            x, y = i * lado, j * lado
+            v = lambda: rnd.uniform(-1.6, 1.6)
+            d = (f'M{x + v():.1f} {y + v():.1f}L{x + lado / 2 + v():.1f} {y + v():.1f}L{x + lado + v():.1f} {y + v():.1f}'
+                 f'L{x + lado + v():.1f} {y + lado / 2 + v():.1f}L{x + lado + v():.1f} {y + lado + v():.1f}'
+                 f'L{x + lado / 2 + v():.1f} {y + lado + v():.1f}L{x + v():.1f} {y + lado + v():.1f}L{x + v():.1f} {y + lado / 2 + v():.1f}Z')
+            corpo += f"<path d='{d}' fill='{INDIGO}' fill-opacity='{rnd.uniform(0.62, 0.8):.2f}'/>"
+    return svg(w, h, corpo)
+
+
 ESTAMPAS = {
     'coracoes': (coracoes(), None),
     'cerejas': (cerejas(), None),
@@ -183,6 +289,10 @@ ESTAMPAS = {
     'listras': (listras_a_mao(), '24px 160px'),
     'confete': (confete(), '170px'),
     'oncinha': (oncinha(), '150px'),
+    'patinhas': (patinhas(), '150px'),
+    'rabiscos': (rabiscos(), '160px'),
+    'zebrinha': (zebrinha(), '150px'),
+    'xadrez-mao': (xadrez_a_mao(), '72px'),
 }
 
 CABECALHO = """/*
@@ -207,7 +317,7 @@ CABECALHO = """/*
   opacity: var(--estampa-opacidade, 0.9);
   pointer-events: none;
 }
-:root[data-modo='escuro'] .estampa::before {
+[data-modo='escuro'] .estampa::before {
   --estampa-opacidade: 0.45;
 }
 :root[data-calmo='sim'] .estampa::before {

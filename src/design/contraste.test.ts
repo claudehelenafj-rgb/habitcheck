@@ -23,6 +23,9 @@ function resolver(vars: Record<string, string>, nome: string): string {
 
 const claro = bloco(':root')
 const escuro = { ...claro, ...bloco(":root[data-modo='escuro']") }
+// Os blocos do Índigo definem todos os tokens; o claro serve só de reserva.
+const indigo = { ...claro, ...bloco("[data-tema='indigo']") }
+const indigoEscuro = { ...claro, ...bloco("[data-modo='escuro'][data-tema='indigo']") }
 
 const TONS_CLAROS = [
   'claro-lavanda',
@@ -37,7 +40,10 @@ const TONS_FORTES = ['forte-rosa', 'forte-tomate', 'forte-laranja', 'forte-pisci
 describe.each([
   ['modo claro', claro],
   ['modo escuro', escuro],
+  ['Índigo claro', indigo],
+  ['Índigo escuro', indigoEscuro],
 ])('%s', (_modo, vars) => {
+  const modoEscuro = _modo.endsWith('escuro')
   const cor = (nome: string) => resolver(vars, nome)
 
   it('texto principal passa AA sobre fundo e papel', () => {
@@ -76,7 +82,7 @@ describe.each([
   })
 
   it('tons fortes usados sem contorno passam 3:1 sobre o fundo', () => {
-    const semContorno = _modo === 'modo escuro' ? TONS_FORTES : ['forte-piscina', 'forte-chocolate']
+    const semContorno = modoEscuro ? TONS_FORTES : ['forte-piscina', 'forte-chocolate']
     for (const forte of semContorno) {
       expect(contraste(cor(forte), cor('fundo')), `${forte} sobre fundo`).toBeGreaterThanOrEqual(MINIMO_ICONE)
     }
@@ -104,5 +110,43 @@ describe('temas', () => {
     expect(contraste(resolver(vars, 'destaque-texto'), resolver(vars, 'destaque'))).toBeGreaterThanOrEqual(
       MINIMO_TEXTO,
     )
+  })
+})
+
+describe('Índigo', () => {
+  it('destaque e botão passam AA nos dois modos', () => {
+    for (const vars of [indigo, indigoEscuro]) {
+      const cor = (nome: string) => resolver(vars, nome)
+      expect(contraste(cor('destaque-texto'), cor('destaque'))).toBeGreaterThanOrEqual(MINIMO_TEXTO)
+      expect(contraste(cor('botao-texto'), cor('botao-fundo'))).toBeGreaterThanOrEqual(MINIMO_TEXTO)
+    }
+  })
+
+  // A mostarda é clara demais para ícone solto sobre o papel-gelo (1,9:1): só entra com contorno.
+  it('mostarda sozinha não passa sobre o fundo claro, e por isso leva contorno', () => {
+    const cor = (nome: string) => resolver(indigo, nome)
+    expect(contraste(cor('mostarda'), cor('fundo'))).toBeLessThan(MINIMO_ICONE)
+    expect(contraste(cor('linha'), cor('mostarda'))).toBeGreaterThanOrEqual(MINIMO_ICONE)
+  })
+
+  it('texto índigo-noite passa AA sobre o azul-lavanda', () => {
+    const cor = (nome: string) => resolver(indigo, nome)
+    expect(contraste(cor('tinta'), cor('azul-lavanda'))).toBeGreaterThanOrEqual(MINIMO_TEXTO)
+  })
+})
+
+describe('Bem-estar', () => {
+  // só os valores em hex: --forte-ameixa em hex é a versão do modo escuro
+  const bem = Object.fromEntries(
+    [...css.matchAll(/--(ameixa|lilas-nevoa|forte-ameixa):\s*(#[0-9a-f]{6})/g)].map(([, nome, hex]) => [nome, hex]),
+  )
+  it('ameixa passa 3:1 como ícone no claro, e a versão clara passa no escuro', () => {
+    expect(contraste(bem['ameixa'], resolver(claro, 'fundo'))).toBeGreaterThanOrEqual(MINIMO_ICONE)
+    expect(contraste(bem['forte-ameixa'], resolver(escuro, 'fundo'))).toBeGreaterThanOrEqual(MINIMO_ICONE)
+    expect(contraste(bem['forte-ameixa'], resolver(indigoEscuro, 'fundo'))).toBeGreaterThanOrEqual(MINIMO_ICONE)
+  })
+  it('texto chocolate e índigo-noite passam AA sobre o lilás-névoa', () => {
+    expect(contraste(resolver(claro, 'chocolate'), bem['lilas-nevoa'])).toBeGreaterThanOrEqual(MINIMO_TEXTO)
+    expect(contraste(resolver(indigo, 'chocolate'), bem['lilas-nevoa'])).toBeGreaterThanOrEqual(MINIMO_TEXTO)
   })
 })

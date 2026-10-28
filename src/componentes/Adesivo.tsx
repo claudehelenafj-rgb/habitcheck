@@ -18,6 +18,14 @@ const COR = {
   laranja: '#F49625',
   piscina: '#037F71',
   agua: '#57B1A8',
+  // tema Índigo e Bem-estar
+  gelo: '#F3F2EE',
+  noite: '#1E2350',
+  indigo: '#3949A3',
+  azulLavanda: '#D9DDF5',
+  mostarda: '#E3A73B',
+  ameixa: '#8A5A9E',
+  lilas: '#E6E0F5',
 } as const
 
 /** Pontos de um polígono "recortado à mão": raio alterna e varia um pouco. */
@@ -74,7 +82,7 @@ function Rosto({
   dormindo?: boolean
 }) {
   return (
-    <g transform={`translate(${x} ${y}) scale(${e})`}>
+    <g className="rosto" transform={`translate(${x} ${y}) scale(${e})`}>
       <ellipse cx="-7.5" cy="3" rx="2.6" ry="1.7" fill={bochecha} />
       <ellipse cx="7.5" cy="3" rx="2.6" ry="1.7" fill={bochecha} />
       {dormindo ? (
@@ -278,6 +286,86 @@ const desenhos = {
       />
       <path d={redondo(32, 32, 9, 9)} fill={COR.creme} />
       <Rosto x={32} y={32} e={0.55} bochecha={COR.morango} />
+    </g>
+  ),
+
+  // Bem-estar
+  cerebro: (
+    <g>
+      <Camadas d="M10 50L54 50L50 57L14 57Z" fora={COR.azul} dentro={COR.azulLavanda} borda={4} />
+      <Camadas
+        d="M14 34L11 26L15 18L23 13L32 14L41 12L49 17L53 25L51 34L54 41L47 47L37 46L32 48L27 46L17 47L10 41Z"
+        fora={COR.rosa}
+        dentro={COR.lavanda}
+      />
+      <path
+        d="M32 15v7M24 17q4 3 2 7M40 17q-4 3-2 7M15 29q4-1 6 2M49 29q-4-1-6 2"
+        fill="none"
+        stroke={COR.rosa}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+      />
+      <Rosto x={32} y={33} e={0.8} dormindo />
+      <path d="M8 22l1.5-3 1.5 3-3 0zM56 14l1.2-2.4 1.2 2.4zM57 30l1-2 1 2z" fill={COR.mostarda} />
+    </g>
+  ),
+  nuvem: (
+    <g>
+      <Camadas
+        d="M12 44L8 36L12 28L21 27L25 18L35 15L44 20L47 27L55 30L57 39L52 45Z"
+        fora={COR.azul}
+        dentro={COR.creme}
+      />
+      <Rosto x={33} y={35} e={0.8} dormindo bochecha={COR.lavanda} />
+    </g>
+  ),
+  xicara: (
+    <g>
+      <path d="M24 14q-4 4 0 8M32 11q-4 5 0 10M40 14q-4 4 0 8" fill="none" stroke={COR.azul} strokeWidth={2.5} strokeLinecap="round" />
+      <Camadas d="M46 31L55 32L55 41L46 43" fora={COR.pessego} dentro={COR.pessego} borda={5} />
+      <Camadas d="M13 27L49 27L46 49L38 54L24 54L16 49Z" fora={COR.pessego} dentro={COR.manteiga} />
+      <path d="M48 34L52 35L52 39L48 40" fill={COR.creme} />
+      <path d="M26 39q6 6 12 0" fill="none" stroke={COR.tomate} strokeWidth={2} strokeLinecap="round" />
+    </g>
+  ),
+  maoCoracao: (
+    <g>
+      <Camadas d="M7 40L12 35L17 39L22 35L27 39L32 36L37 39L42 35L47 39L52 35L57 40L51 52L32 57L13 52Z" fora={COR.pessego} dentro={COR.manteiga} />
+      <Camadas d="M32 37L18 25L17 16L23 10L32 15L41 10L47 16L46 25Z" fora={COR.rosa} dentro={COR.morango} />
+      <path d="M18 44q6 3 14 2M46 44q-6 3-14 2" fill="none" stroke={COR.laranja} strokeWidth={1.8} strokeLinecap="round" />
+    </g>
+  ),
+  // Decoração neutra (sem carinha)
+  folha: (
+    <g transform="rotate(-20 32 32)">
+      <Camadas d="M32 6L45 18L48 34L40 50L32 56L24 50L16 34L19 18Z" fora={COR.piscina} dentro={COR.menta} />
+      <path d="M32 14V56M32 28l-8-6M32 28l8-6M32 40l-9-6M32 40l9-6" fill="none" stroke={COR.piscina} strokeWidth={2} strokeLinecap="round" />
+    </g>
+  ),
+  raio: (
+    <g transform="rotate(10 32 32)">
+      <Camadas d="M37 5L15 35L29 35L24 59L49 25L35 25L42 5Z" fora={COR.mostarda} dentro={COR.manteiga} />
+    </g>
+  ),
+  planeta: (
+    <g transform="rotate(-18 32 32)">
+      <Camadas d={redondo(32, 32, 16, 13)} fora={COR.indigo} dentro={COR.azulLavanda} />
+      <path d="M6 33q26-12 52 0q-26 12-52 0z" fill="none" stroke={COR.mostarda} strokeWidth={4} strokeLinejoin="round" />
+      <path d="M22 26l6-2M36 40l6-2" stroke={COR.indigo} strokeWidth={2} strokeLinecap="round" />
+    </g>
+  ),
+  onda: (
+    <g>
+      <Camadas d="M6 50L8 38L16 26L28 18L42 17L54 24L52 32L44 28L38 32L44 40L56 42L58 50Z" fora={COR.indigo} dentro={COR.azul} />
+      <path d="M14 46q8-12 20-14" fill="none" stroke={COR.gelo} strokeWidth={2.5} strokeLinecap="round" />
+    </g>
+  ),
+  montanha: (
+    <g>
+      <Camadas d="M4 54L22 20L32 34L40 24L60 54Z" fora={COR.indigo} dentro={COR.azulLavanda} />
+      <path d="M22 20L28 31L24 29L19 32L16 31Z" fill={COR.gelo} />
+      <path d="M40 24L46 33L42 32L37 35L35 32Z" fill={COR.gelo} />
+      <circle cx="51" cy="12" r="5" fill={COR.mostarda} />
     </g>
   ),
 } satisfies Record<string, ReactNode>

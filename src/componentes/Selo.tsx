@@ -33,6 +33,9 @@ const FUNDOS = {
   agua: { fundo: 'var(--verde-agua)', texto: 'var(--chocolate)' },
   chocolate: { fundo: 'var(--chocolate)', texto: 'var(--creme)' },
   manteiga: { fundo: 'var(--manteiga)', texto: 'var(--chocolate)' },
+  indigo: { fundo: 'var(--indigo, #3949a3)', texto: 'var(--papel-gelo, #f3f2ee)' },
+  mostarda: { fundo: 'var(--mostarda, #e3a73b)', texto: 'var(--chocolate)' },
+  ameixa: { fundo: 'var(--ameixa)', texto: '#fff' },
 } as const
 
 type Props = {
@@ -51,7 +54,7 @@ export function Selo({ forma = 'flor', cor = 'rosa', numero, legenda, tamanho = 
       style={{ width: tamanho, height: tamanho, color: texto }}
     >
       <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full" aria-hidden="true">
-        <path d={caminhoSelo(forma)} fill={fundo} stroke="#422F0E" strokeWidth={2.5} />
+        <path d={caminhoSelo(forma)} fill={fundo} stroke="var(--chocolate)" strokeWidth={2.5} />
       </svg>
       <span className="relative flex flex-col items-center leading-none">
         <span className="font-titulo text-[1.75rem] font-bold">{numero}</span>

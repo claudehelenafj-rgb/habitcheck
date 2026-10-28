@@ -13,6 +13,7 @@ import { Remedios } from './paginas/Remedios'
 import { Consultas } from './paginas/Consultas'
 import { Calendario } from './paginas/Calendario'
 import { GuiaDeEstilo } from './paginas/GuiaDeEstilo'
+import { GuiaIndigo } from './paginas/GuiaIndigo'
 import { useAplicarPreferencias } from './preferencias'
 import { TELA_AJUSTES, TODAS_AS_TELAS } from './rotas'
 
@@ -40,6 +41,7 @@ const roteador = createHashRouter([
   { path: '/boas-vindas', element: <BoasVindas /> },
   { path: '/mini', element: <Mini /> },
   { path: '/estilo', element: <GuiaDeEstilo /> },
+  { path: '/estilo/indigo', element: <GuiaIndigo /> },
 ])
 
 export function App() {
