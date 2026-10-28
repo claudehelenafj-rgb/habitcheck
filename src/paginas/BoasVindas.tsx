@@ -1,4 +1,4 @@
-// Primeiro uso, em 3 passos curtos: oi (e nome opcional), escolher 1 ou 2 áreas, ver o plano de 2 semanas.
+// Primeiro uso, em 3 passos curtos: oi (nome opcional e tema), escolher 1 ou 2 áreas, ver o plano de 2 semanas.
 
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -11,6 +11,7 @@ import { AREAS_PRINCIPAIS, type IdArea } from '../design/areas'
 import { diaLocal } from '../logica/datas'
 import { alternarArea, FASES, LIMITE_AREAS_INICIO } from '../logica/planoInicio'
 import { CORES_FASE } from '../componentes/CartaoPlano'
+import { usePreferencias } from '../preferencias'
 
 const TOTAL = 3
 
@@ -18,6 +19,7 @@ export function BoasVindas() {
   const { t } = useTranslation()
   const navegar = useNavigate()
   const perfil = usePerfil()
+  const [prefs, mudarPrefs] = usePreferencias()
   const [passo, setPasso] = useState(1)
   const [nome, setNome] = useState('')
   const [areas, setAreas] = useState<IdArea[]>([])
@@ -76,6 +78,48 @@ export function BoasVindas() {
               />
               <span className="text-sm text-tinta-suave">{t('boasVindas.nomeDica')}</span>
             </label>
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-1.5 font-bold">{t('boasVindas.temaPergunta')}</legend>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {(
+                  [
+                    ['creme', t('boasVindas.temaClassico'), t('boasVindas.temaClassicoDesc'), ['#FBF6EE', '#422F0E', '#F9D4F8', '#FFD094']],
+                    ['indigo', t('boasVindas.temaIndigo'), t('boasVindas.temaIndigoDesc'), ['#F3F2EE', '#1E2350', '#3949A3', '#E3A73B']],
+                  ] as const
+                ).map(([tema, nomeTema, descricao, cores]) => {
+                  const ativo = tema === 'indigo' ? prefs.tema === 'indigo' : prefs.tema !== 'indigo'
+                  return (
+                    <label
+                      key={tema}
+                      className={`cartao flex cursor-pointer items-center gap-3 bg-papel p-4 has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 ${
+                        ativo ? 'ring-4 ring-linha ring-offset-2 ring-offset-papel' : ''
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="tema"
+                        className="so-leitor"
+                        checked={ativo}
+                        onChange={() => mudarPrefs({ tema })}
+                      />
+                      <span className="flex shrink-0" aria-hidden="true">
+                        {cores.map((cor) => (
+                          <span key={cor} className="-mr-2 h-8 w-8 rounded-full border-2 border-linha" style={{ background: cor }} />
+                        ))}
+                      </span>
+                      <span className="ml-2 flex-1">
+                        <span className="block text-lg font-bold">{nomeTema}</span>
+                        <span className="block text-sm">{descricao}</span>
+                      </span>
+                      <span aria-hidden="true" className="font-bold">
+                        {ativo ? '✓' : ''}
+                      </span>
+                    </label>
+                  )
+                })}
+              </div>
+              <span className="text-sm text-tinta-suave">{t('boasVindas.temaDica')}</span>
+            </fieldset>
             <Botao grande className="self-start" onClick={() => setPasso(2)}>
               {t('boasVindas.continuar')} →
             </Botao>

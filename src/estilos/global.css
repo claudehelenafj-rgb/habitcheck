@@ -323,6 +323,6 @@ h3 {
 
 /* Decoração neutra: adesivos sem carinha */
 .sem-rosto .rosto,
-:root[data-decoracao='neutra'] .rosto {
+:root[data-decoracao='neutra'] .rosto:not(.com-rosto .rosto) {
   display: none;
 }

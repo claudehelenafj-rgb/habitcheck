@@ -14,7 +14,9 @@ Autismo" (lido). Plano aprovado em 28/10/2026.
   - B8 PIN, avisos neutros, exportar/apagar só o Bem-estar.
 - Fica para depois (Fase 3, com o orçamento de energia): camuflagem, burnout, "conecte-se com quem entende".
 - Referências visuais novas (desenhadas do zero): cerebrinho meditando (adesivo do Bem-estar) e as estampas
-  patinhas, rabiscos, zebrinha e xadrez à mão.
+  patinhas, rabiscos e xadrez à mão (a zebrinha foi recusada).
+- Índigo aprovado: entra em Ajustes → Aparência e no primeiro uso. Decoração doce/neutra é independente do tema;
+  na neutra, adesivos sem carinha e coração, cereja, flor e sapinho viram estrela, planeta, folha e montanha.
 - Contraste: ameixa clareia no escuro (`#C49BD6`); mostarda só com contorno; botão do Índigo escuro é papel-gelo.
 
 ## Parte 1: aba "Bem-estar"

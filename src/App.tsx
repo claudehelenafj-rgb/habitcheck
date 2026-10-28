@@ -1,5 +1,5 @@
 import { createHashRouter, Navigate, RouterProvider } from 'react-router'
-import { DefinicoesAdesivo } from './componentes/Adesivo'
+import { DecoracaoNeutra, DefinicoesAdesivo } from './componentes/Adesivo'
 import { Moldura } from './componentes/Moldura'
 import { DefinicoesGiz } from './componentes/Papelaria'
 import { Ajustes } from './paginas/Ajustes'
@@ -45,12 +45,12 @@ const roteador = createHashRouter([
 ])
 
 export function App() {
-  useAplicarPreferencias()
+  const prefs = useAplicarPreferencias()
   return (
-    <>
+    <DecoracaoNeutra value={prefs.decoracao === 'neutra'}>
       <DefinicoesAdesivo />
       <DefinicoesGiz />
       <RouterProvider router={roteador} />
-    </>
+    </DecoracaoNeutra>
   )
 }

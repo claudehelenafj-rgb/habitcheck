@@ -19,12 +19,16 @@ export const ESTAMPAS = [
   'caderno',
   'confete',
   'oncinha',
+  'patinhas',
+  'rabiscos',
+  'xadrez-mao',
 ] as const
 export type Estampa = (typeof ESTAMPAS)[number]
 
 export type Preferencias = {
   modo: 'auto' | 'claro' | 'escuro'
-  tema: 'creme' | 'cereja' | 'piscina' | 'pessego'
+  tema: 'creme' | 'cereja' | 'piscina' | 'pessego' | 'indigo'
+  decoracao: 'doce' | 'neutra'
   estampa: Estampa
   calmo: boolean
   animacoes: boolean
@@ -36,6 +40,7 @@ export type Preferencias = {
 export const PADRAO: Preferencias = {
   modo: 'auto',
   tema: 'creme',
+  decoracao: 'doce',
   estampa: 'bolinhas',
   calmo: false,
   animacoes: true,
@@ -73,12 +78,14 @@ export function aplicar(p: Preferencias) {
   const escuro = p.modo === 'escuro' || (p.modo === 'auto' && sistemaEscuro)
   raiz.dataset.modo = escuro ? 'escuro' : 'claro'
   raiz.dataset.tema = p.tema
+  raiz.dataset.decoracao = p.decoracao
   raiz.dataset.estampa = p.estampa
   raiz.dataset.calmo = p.calmo ? 'sim' : 'nao'
   raiz.dataset.animacoes = p.animacoes ? 'sim' : 'nao'
   raiz.dataset.fonte = p.fonte
   raiz.dataset.tamanho = p.tamanho
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', escuro ? '#521429' : '#FBF6EE')
+  const corBarra = p.tema === 'indigo' ? (escuro ? '#1E2350' : '#F3F2EE') : escuro ? '#521429' : '#FBF6EE'
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', corBarra)
 }
 
 /** Preferências atuais e uma função para mudar algumas delas. */
@@ -102,8 +109,8 @@ export function usePreferencias(): [Preferencias, (mudanca: Partial<Preferencias
   return [prefs, mudar]
 }
 
-/** Aplica as preferências na página. Usar uma vez só, na raiz do app. */
-export function useAplicarPreferencias() {
+/** Aplica as preferências na página e devolve as atuais. Usar uma vez só, na raiz do app. */
+export function useAplicarPreferencias(): Preferencias {
   const [prefs] = usePreferencias()
   useEffect(() => {
     aplicar(prefs)
@@ -115,4 +122,5 @@ export function useAplicarPreferencias() {
     mq.addEventListener('change', ouvir)
     return () => mq.removeEventListener('change', ouvir)
   }, [prefs])
+  return prefs
 }

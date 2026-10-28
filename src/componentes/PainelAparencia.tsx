@@ -16,6 +16,9 @@ export const NOMES_ESTAMPAS: Record<Estampa, [pt: string, en: string]> = {
   caderno: ['Pauta de caderno', 'Notebook lines'],
   confete: ['Confete', 'Confetti'],
   oncinha: ['Oncinha', 'Leopard'],
+  patinhas: ['Patinhas', 'Paw prints'],
+  rabiscos: ['Rabiscos', 'Doodles'],
+  'xadrez-mao': ['Xadrez à mão', 'Hand-painted check'],
 }
 
 export function Opcoes<T extends string>({
@@ -75,8 +78,19 @@ export function PainelAparencia({ prefs, mudar }: { prefs: Preferencias; mudar: 
           ['cereja', t('ajustes.temaCereja')],
           ['piscina', t('ajustes.temaPiscina')],
           ['pessego', t('ajustes.temaPessego')],
+          ['indigo', t('ajustes.temaIndigo')],
         ]}
         mudar={(tema) => mudar({ tema })}
+      />
+      <Opcoes
+        legenda={t('ajustes.decoracao')}
+        dica={t('ajustes.decoracaoDica')}
+        valor={prefs.decoracao}
+        opcoes={[
+          ['doce', t('ajustes.decoracaoDoce')],
+          ['neutra', t('ajustes.decoracaoNeutra')],
+        ]}
+        mudar={(decoracao) => mudar({ decoracao })}
       />
       <div className="md:col-span-2">
         <Opcoes

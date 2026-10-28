@@ -229,37 +229,6 @@ def rabiscos():
     return svg(w, h, corpo)
 
 
-def zebrinha():
-    """Zebrinha: listras tortas e afinadas nas pontas, em chocolate, com estrelinhas rosa."""
-    w = h = 160
-    rnd = random.Random(17)
-    corpo = f"<rect width='{w}' height='{h}' fill='{MANTEIGA}'/>"
-
-    def listra(x0, y0, comprimento, grossura, inclinacao):
-        n = 8
-        cima, baixo = [], []
-        for k in range(n + 1):
-            t = k / n
-            x = x0 + t * comprimento
-            y = y0 + t * comprimento * inclinacao + 4 * math.sin(t * math.pi * 2 + x0)
-            g = grossura * math.sin(t * math.pi) ** 0.7 * rnd.uniform(0.85, 1.1)
-            cima.append((x, y - g / 2))
-            baixo.append((x, y + g / 2))
-        pts = cima + list(reversed(baixo))
-        return 'M' + 'L'.join(f'{x:.1f} {y:.1f}' for x, y in pts) + 'Z'
-
-    for k in range(9):
-        y = k * h / 9 + rnd.uniform(-3, 3)
-        x = rnd.uniform(-30, 20)
-        d = listra(0, 0, rnd.uniform(80, 130), rnd.uniform(6, 10), rnd.uniform(-0.25, 0.25))
-        corpo += repetido(w, h, x, y, lambda a, b: f"<path d='{d}' transform='translate({a:.1f} {b:.1f})' fill='{CHOC}'/>", margem=140)
-    estrela = 'M0 -5l1.4 3.3 3.6.3-2.7 2.4.8 3.5-3.1-1.9-3.1 1.9.8-3.5-2.7-2.4 3.6-.3z'
-    for x, y in [(30, 22), (118, 50), (64, 104), (140, 128), (18, 140)]:
-        corpo += repetido(w, h, x, y, lambda a, b: (
-            f"<path d='{estrela}' transform='translate({a} {b}) scale(1.3)' fill='{ROSA}' stroke='{CREME}' stroke-width='1' stroke-linejoin='round'/>"))
-    return svg(w, h, corpo)
-
-
 def xadrez_a_mao():
     """Xadrez pintado à mão: quadrados com bordas tortinhas em índigo."""
     lado, n = 24, 4
@@ -291,7 +260,6 @@ ESTAMPAS = {
     'oncinha': (oncinha(), '150px'),
     'patinhas': (patinhas(), '150px'),
     'rabiscos': (rabiscos(), '160px'),
-    'zebrinha': (zebrinha(), '150px'),
     'xadrez-mao': (xadrez_a_mao(), '72px'),
 }
 

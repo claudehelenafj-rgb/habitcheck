@@ -2,7 +2,7 @@
 // formas facetadas em duas camadas de cor, borda branca (classe .adesivo),
 // textura leve de papel e, em alguns, uma carinha.
 
-import type { ReactNode } from 'react'
+import { createContext, useContext, type ReactNode } from 'react'
 
 const COR = {
   creme: '#FBF6EE',
@@ -371,6 +371,18 @@ const desenhos = {
 } satisfies Record<string, ReactNode>
 
 export type NomeAdesivo = keyof typeof desenhos
+
+/**
+ * Decoração neutra: os enfeites "doces" viram formas neutras (a carinha some pelo CSS).
+ * Adesivos com significado (pílula, balão, lua...) continuam os mesmos.
+ */
+const TROCA_NEUTRA: Partial<Record<NomeAdesivo, NomeAdesivo>> = {
+  coracao: 'estrela',
+  cereja: 'planeta',
+  flor: 'folha',
+  sapinho: 'montanha',
+}
+export const DecoracaoNeutra = createContext(false)
 export const NOMES_ADESIVOS = Object.keys(desenhos) as NomeAdesivo[]
 
 /** Filtro de textura de papel. Renderizado uma vez na raiz do app. */
@@ -405,6 +417,8 @@ type Props = {
 }
 
 export function Adesivo({ nome, tamanho = 48, rotulo, className = '', decorativo = false }: Props) {
+  const neutra = useContext(DecoracaoNeutra)
+  const desenho = desenhos[(neutra && TROCA_NEUTRA[nome]) || nome]
   return (
     <svg
       viewBox="0 0 64 64"
@@ -416,7 +430,7 @@ export function Adesivo({ nome, tamanho = 48, rotulo, className = '', decorativo
       aria-hidden={rotulo ? undefined : true}
       focusable="false"
     >
-      <g filter="url(#textura-papel)">{desenhos[nome]}</g>
+      <g filter="url(#textura-papel)">{desenho}</g>
     </svg>
   )
 }

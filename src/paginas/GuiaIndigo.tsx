@@ -3,7 +3,7 @@
 
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
-import { Adesivo, type NomeAdesivo } from '../componentes/Adesivo'
+import { Adesivo, DecoracaoNeutra, type NomeAdesivo } from '../componentes/Adesivo'
 import { Botao } from '../componentes/Botao'
 import { TimerVisual } from '../componentes/Enfeites'
 import { MapaDeCalor, type DiaMapa } from '../componentes/Graficos'
@@ -35,7 +35,6 @@ const CONTRASTES: Array<[string, string, string, string, number]> = [
 const ESTAMPAS_NOVAS = [
   { id: 'patinhas', nome: 'Patinhas' },
   { id: 'rabiscos', nome: 'Rabiscos' },
-  { id: 'zebrinha', nome: 'Zebrinha' },
   { id: 'xadrez-mao', nome: 'Xadrez à mão' },
 ]
 
@@ -140,8 +139,8 @@ export function GuiaIndigo() {
           </Link>
           <h1 className="text-4xl font-semibold sm:text-5xl">Tema Índigo e Bem-estar</h1>
           <p className="mt-4 max-w-2xl text-lg">
-            Prévia para você aprovar. O tema ainda <strong>não</strong> aparece nos Ajustes: ele só entra no app depois
-            do seu “pode”. As cores das áreas não mudam em nenhum tema.
+            Aprovado. O tema Índigo e a decoração neutra ficam em Ajustes → Aparência, e o tema também aparece no
+            primeiro uso. As cores das áreas não mudam em nenhum tema.
           </p>
         </div>
       </header>
@@ -208,7 +207,7 @@ export function GuiaIndigo() {
         </Secao>
 
         <Secao id="estampas" rotulo="Novas" titulo="Estampas novas">
-          <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <ul className="grid grid-cols-2 gap-3 lg:grid-cols-3">
             {ESTAMPAS_NOVAS.map((e) => (
               <li key={e.id} className={`cartao estampa estampa-${e.id} flex h-36 items-end bg-papel p-3`}>
                 <span className="rounded-full border-2 border-linha bg-papel px-3 py-0.5 text-sm font-bold">{e.nome}</span>
@@ -223,8 +222,9 @@ export function GuiaIndigo() {
 
         <Secao id="decoracao" rotulo="Opção separada" titulo="Decoração: doce ou neutra">
           <div className="grid gap-4 lg:grid-cols-2">
-            <div className="cartao bg-papel p-5">
-              <h3 className="text-xl font-semibold">Doce (como hoje)</h3>
+            <DecoracaoNeutra value={false}>
+            <div className="cartao com-rosto bg-papel p-5">
+              <h3 className="text-xl font-semibold">Doce</h3>
               <p className="mb-3 text-sm">Adesivos com carinha, corações e cerejas.</p>
               <ul className="flex flex-wrap gap-3" aria-label="Adesivos doces">
                 {DOCE.map((n) => (
@@ -237,6 +237,7 @@ export function GuiaIndigo() {
                 </li>
               </ul>
             </div>
+            </DecoracaoNeutra>
             <div className="cartao sem-rosto bg-papel p-5">
               <h3 className="text-xl font-semibold">Neutra</h3>
               <p className="mb-3 text-sm">
