@@ -1,0 +1,162 @@
+// Cartão "Agora": uma única coisa em destaque, sem decoração.
+// Mostra o próximo passo físico, o "pronto quando", um botão para concluir e o timer que encolhe.
+
+import { useState, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
+import { alternarPasso, concluirTarefa, reabrirTarefa } from '../dados/tarefas'
+import { iniciarTimer, pararTimer, segundosRestantes, useAgora, useTimer } from '../dados/timer'
+import { AREAS } from '../design/areas'
+import { formatarDuracao, type Candidato } from '../logica/hoje'
+import { proximoPasso } from '../logica/tarefas'
+import { Adesivo } from './Adesivo'
+import { mostrarAviso } from './Avisos'
+import { Botao } from './Botao'
+import { TimerVisual } from './Enfeites'
+
+const TIMER_PADRAO_MIN = 25
+
+function semAnimacao() {
+  const raiz = document.documentElement
+  return raiz.dataset.animacoes === 'nao' || raiz.dataset.calmo === 'sim' || matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
+function relogio(segundos: number): string {
+  const m = Math.floor(segundos / 60)
+  const s = segundos % 60
+  return `${m}:${String(s).padStart(2, '0')}`
+}
+
+function Timer({ tarefaId, sugestaoMin, compacto }: { tarefaId?: string; sugestaoMin?: number; compacto?: boolean }) {
+  const { t } = useTranslation()
+  const timer = useTimer()
+  const agora = useAgora(1000)
+  const minutos = sugestaoMin ?? TIMER_PADRAO_MIN
+
+  if (!timer) {
+    return (
+      <Botao variante="secundario" tom="bg-azul-nevoa" onClick={() => iniciarTimer(minutos, tarefaId)} icone={<span aria-hidden="true">◔</span>}>
+        {t('hoje.timer', { n: minutos })}
+      </Botao>
+    )
+  }
+
+  const restante = segundosRestantes(timer, agora)
+  const total = timer.duracaoMin * 60
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <TimerVisual
+        fracaoRestante={restante / total}
+        rotulo={restante > 0 ? relogio(restante) : '0:00'}
+        cor={AREAS.consultas.forteCss}
+        tamanho={compacto ? 132 : 168}
+      />
+      <span className="so-leitor" aria-live="polite">
+        {restante === 0 ? t('hoje.acabouTempo') : t('hoje.timerRestante', { tempo: formatarDuracao(Math.ceil(restante / 60)) })}
+      </span>
+      {restante === 0 && <p className="max-w-60 text-center text-sm font-semibold">{t('hoje.acabouTempo')}</p>}
+      <div className="flex flex-wrap justify-center gap-2">
+        {restante === 0 && (
+          <Botao variante="secundario" tom="bg-azul-nevoa" className="min-h-10 px-4 text-sm" onClick={() => iniciarTimer(5, timer.tarefaId)}>
+            {t('hoje.mais5')}
+          </Botao>
+        )}
+        <Botao variante="contorno" className="min-h-10 px-4 text-sm" onClick={pararTimer}>
+          {t('hoje.pararTimer')}
+        </Botao>
+      </div>
+    </div>
+  )
+}
+
+type Props = {
+  candidato: Candidato | undefined
+  /** versão menor, para a janelinha flutuante */
+  compacto?: boolean
+  semNada?: ReactNode
+}
+
+export function CartaoAgora({ candidato, compacto = false, semNada }: Props) {
+  const { t } = useTranslation()
+  const [colando, setColando] = useState(false)
+
+  if (!candidato) {
+    return (
+      <section aria-labelledby="titulo-agora" className={`cartao flex flex-col gap-3 bg-papel ${compacto ? 'p-4' : 'p-6'}`}>
+        <p id="titulo-agora" className="rotulo">
+          {t('hoje.agora')}
+        </p>
+        <p className={`font-titulo font-semibold ${compacto ? 'text-2xl' : 'text-3xl'}`}>{t('hoje.tudoCerto')}</p>
+        <p>{t('hoje.tudoCertoTexto')}</p>
+        {semNada}
+        <div>
+          <Timer compacto={compacto} />
+        </div>
+      </section>
+    )
+  }
+
+  if (candidato.tipo !== 'tarefa') {
+    // remédios, transições, compromissos e hábitos chegam nas próximas etapas
+    return (
+      <section className="cartao bg-papel p-6">
+        <p className="rotulo">{t('hoje.agora')}</p>
+        <p className="font-titulo text-3xl font-semibold">{candidato.titulo}</p>
+      </section>
+    )
+  }
+
+  const tarefa = candidato.tarefa
+  const passo = proximoPasso(tarefa)
+  const area = tarefa.area ? AREAS[tarefa.area] : undefined
+
+  async function feito() {
+    if (passo) {
+      await alternarPasso(tarefa.id, passo.id)
+      return
+    }
+    setColando(true)
+    await new Promise((r) => setTimeout(r, semAnimacao() ? 0 : 520))
+    await concluirTarefa(tarefa.id)
+    await pararTimer()
+    setColando(false)
+    mostrarAviso(t('tarefas.concluida'), () => reabrirTarefa(tarefa.id))
+  }
+
+  return (
+    <section
+      aria-labelledby="titulo-agora"
+      className={`cartao flex flex-col gap-5 bg-papel ${compacto ? 'p-4' : 'p-6 sm:flex-row sm:items-center sm:gap-8'}`}
+    >
+      <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <p className="rotulo flex items-center gap-2">
+          <span id="titulo-agora">{t('hoje.agora')}</span>
+          {area && (
+            <>
+              <span aria-hidden="true">·</span>
+              <Adesivo nome={area.adesivo} tamanho={20} />
+              {t(`nav.${area.id}`)}
+            </>
+          )}
+        </p>
+        <p className={`font-titulo leading-tight font-semibold break-words ${compacto ? 'text-2xl' : 'text-3xl sm:text-4xl'}`}>
+          {passo ? passo.texto : tarefa.titulo}
+        </p>
+        {passo?.pronto && (
+          <p className="text-lg">
+            <span className="font-destaque text-2xl italic">{t('hoje.prontoQuando')}</span> {passo.pronto}
+          </p>
+        )}
+        {passo && <p className="text-sm">{t('hoje.passoDe', { tarefa: tarefa.titulo })}</p>}
+        {!passo && tarefa.recompensa && <p className="text-sm">{t('tarefas.depois', { recompensa: tarefa.recompensa })}</p>}
+        <div className="flex flex-wrap items-center gap-2">
+          <Botao grande onClick={feito} icone={colando ? <span className="colando"><Adesivo nome={area?.adesivo ?? 'estrela'} tamanho={30} /></span> : <span aria-hidden="true">✓</span>}>
+            {passo ? t('hoje.feitoPasso') : t('hoje.concluir')}
+          </Botao>
+        </div>
+      </div>
+      <div className="flex shrink-0 justify-center">
+        <Timer tarefaId={tarefa.id} sugestaoMin={tarefa.estimativaMin} compacto={compacto} />
+      </div>
+    </section>
+  )
+}

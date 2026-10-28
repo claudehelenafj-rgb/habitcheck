@@ -8,6 +8,7 @@ import { usePerfil } from '../dados/perfil'
 import { apagarTarefa, novoPasso, salvarTarefa, useTarefas } from '../dados/tarefas'
 import { AREAS } from '../design/areas'
 import { diaLocal } from '../logica/datas'
+import { BLOCOS } from '../logica/hoje'
 import { cabeTarefaA } from '../logica/tarefas'
 import { Adesivo } from './Adesivo'
 import { mostrarAviso } from './Avisos'
@@ -43,7 +44,7 @@ export function EditorTarefa({ tarefa, nova, fechar, aoSalvar }: Props) {
       return
     }
     setErro('')
-    mudar({ prioridade: p, dia: p === 'A' ? hoje : undefined })
+    mudar({ prioridade: p, dia: p === 'A' ? hoje : undefined, bloco: p === 'A' ? rascunho.bloco : undefined })
   }
 
   async function salvar() {
@@ -127,6 +128,26 @@ export function EditorTarefa({ tarefa, nova, fechar, aoSalvar }: Props) {
             ))}
           </div>
         </fieldset>
+
+        {rascunho.prioridade === 'A' && (
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-1.5 font-bold">{t('editor.quando')}</legend>
+            <div className="flex flex-wrap gap-2">
+              {([undefined, ...BLOCOS] as const).map((bloco) => (
+                <label
+                  key={bloco ?? 'qualquer'}
+                  className={`cursor-pointer rounded-full border-2 border-linha px-4 py-2 text-sm font-bold has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 ${
+                    rascunho.bloco === bloco ? 'bg-botao text-botao-texto' : 'bg-papel'
+                  }`}
+                >
+                  <input type="radio" name="bloco" className="so-leitor" checked={rascunho.bloco === bloco} onChange={() => mudar({ bloco })} />
+                  {rascunho.bloco === bloco && <span aria-hidden="true">✓ </span>}
+                  {bloco ? t(`hoje.blocos.${bloco}`) : t('editor.qualquerHora')}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
 
         {areasDisponiveis.length > 0 && (
           <fieldset className="flex flex-col gap-2">

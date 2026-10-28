@@ -8,6 +8,7 @@ import { EmBreve } from './paginas/EmBreve'
 import { Hoje } from './paginas/Hoje'
 import { Caixa } from './paginas/Caixa'
 import { Tarefas } from './paginas/Tarefas'
+import { Mini } from './paginas/Mini'
 import { GuiaDeEstilo } from './paginas/GuiaDeEstilo'
 import { useAplicarPreferencias } from './preferencias'
 import { TELA_AJUSTES, TODAS_AS_TELAS } from './rotas'
@@ -31,6 +32,7 @@ const roteador = createHashRouter([
     ],
   },
   { path: '/boas-vindas', element: <BoasVindas /> },
+  { path: '/mini', element: <Mini /> },
   { path: '/estilo', element: <GuiaDeEstilo /> },
 ])
 
