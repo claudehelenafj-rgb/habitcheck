@@ -290,23 +290,34 @@ const desenhos = {
   ),
 
   // Bem-estar
+  // cerebrinho meditando: lóbulos recortados (vários círculos facetados unidos), olhos fechados
   cerebro: (
     <g>
-      <Camadas d="M10 50L54 50L50 57L14 57Z" fora={COR.azul} dentro={COR.azulLavanda} borda={4} />
       <Camadas
-        d="M14 34L11 26L15 18L23 13L32 14L41 12L49 17L53 25L51 34L54 41L47 47L37 46L32 48L27 46L17 47L10 41Z"
+        d={[
+          [32, 31, 15],
+          [27, 18, 9],
+          [37, 18, 9],
+          [19, 25, 9],
+          [45, 25, 9],
+          [17, 36, 9],
+          [47, 36, 9],
+          [24, 43, 8.5],
+          [40, 43, 8.5],
+        ]
+          .map(([x, y, r]) => redondo(x, y, r, 9))
+          .join('')}
         fora={COR.rosa}
         dentro={COR.lavanda}
       />
       <path
-        d="M32 15v7M24 17q4 3 2 7M40 17q-4 3-2 7M15 29q4-1 6 2M49 29q-4-1-6 2"
+        d="M32 11q-2 3 0 6t0 6M17 23q3-3 6 0M23 14q4 0 4 4M47 23q-3-3-6 0M41 14q-4 0-4 4M15 35q3 1 3 4M49 35q-3 1-3 4"
         fill="none"
         stroke={COR.rosa}
         strokeWidth={1.8}
         strokeLinecap="round"
       />
-      <Rosto x={32} y={33} e={0.8} dormindo />
-      <path d="M8 22l1.5-3 1.5 3-3 0zM56 14l1.2-2.4 1.2 2.4zM57 30l1-2 1 2z" fill={COR.mostarda} />
+      <Rosto x={32} y={34} e={0.85} dormindo />
     </g>
   ),
   nuvem: (
