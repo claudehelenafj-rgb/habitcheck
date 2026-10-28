@@ -1,9 +1,10 @@
 // Aba Bem-estar: opcional, calma, com ferramentas que a pessoa liga uma ou duas de cada vez.
-// Nesta etapa (B1) só a base: as ferramentas ficam prontas nas etapas B2 a B7.
+// Cada ferramenta ligada aparece em "Ligadas agora"; as que ainda não estão prontas dizem em que etapa chegam.
 
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Adesivo } from '../componentes/Adesivo'
+import { CheckinEmocoes } from '../componentes/CheckinEmocoes'
 import { alternar, useBemEstar } from '../dados/bemEstar'
 import { FERRAMENTAS, type Ferramenta } from '../logica/bemEstar'
 
@@ -32,7 +33,7 @@ export function BemEstar() {
   return (
     <section className="flex flex-col gap-6">
       <header className="cartao flex flex-col gap-3 bg-lilas p-6">
-        <h1 tabIndex={-1} className="flex items-center gap-3 text-4xl font-semibold outline-none sm:text-5xl">
+        <h1 tabIndex={-1} className="flex items-center gap-3 text-3xl font-semibold outline-none sm:text-5xl">
           <Adesivo nome="cerebro" tamanho={60} />
           {t('nav.bemestar')}
         </h1>
@@ -46,15 +47,17 @@ export function BemEstar() {
         <h2 id="titulo-ligadas" className="text-2xl font-semibold">
           {t('bemEstar.ligadasTitulo')}
         </h2>
-        {ligadas.length ? (
+        {ligadas.some((f) => f.id === 'checkin') && <CheckinEmocoes />}
+        {ligadas.some((f) => f.etapa) && (
           <ul className="grid gap-3 sm:grid-cols-2">
-            {ligadas.map((f) => (
-              <CartaoLigada key={f.id} ferramenta={f} />
-            ))}
+            {ligadas
+              .filter((f) => f.etapa)
+              .map((f) => (
+                <CartaoLigada key={f.id} ferramenta={f} />
+              ))}
           </ul>
-        ) : (
-          <p className="cartao bg-papel p-4">{t('bemEstar.nenhumaLigada')}</p>
         )}
+        {ligadas.length === 0 && <p className="cartao bg-papel p-4">{t('bemEstar.nenhumaLigada')}</p>}
       </section>
 
       <section aria-labelledby="titulo-ferramentas" className="cartao flex flex-col gap-4 bg-papel p-5">
@@ -73,18 +76,18 @@ export function BemEstar() {
                   type="button"
                   aria-pressed={ligada}
                   onClick={async () => setMuitas(await alternar(f.id))}
-                  className={`flex h-full w-full items-center gap-3 rounded-2xl border-2 border-linha p-3 text-left ${
+                  className={`flex h-full w-full flex-wrap items-center gap-3 rounded-2xl border-2 border-linha p-3 text-left ${
                     ligada ? 'bg-lilas' : 'bg-papel'
                   }`}
                 >
                   <Adesivo nome={f.adesivo} tamanho={36} />
-                  <span className="flex-1">
+                  <span className="min-w-0 flex-1 basis-40">
                     <span className="block font-bold">{t(`bemEstar.ferramentas.${f.id}.nome`)}</span>
                     <span className="block text-sm">{t(`bemEstar.ferramentas.${f.id}.desc`)}</span>
                   </span>
                   <span
                     aria-hidden="true"
-                    className={`shrink-0 rounded-full border-2 border-linha px-3 py-0.5 text-sm font-bold ${
+                    className={`ml-auto shrink-0 rounded-full border-2 border-linha px-3 py-0.5 text-sm font-bold ${
                       ligada ? 'bg-botao text-botao-texto' : ''
                     }`}
                   >

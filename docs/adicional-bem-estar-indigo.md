@@ -7,6 +7,10 @@ Autismo" (lido). Plano aprovado em 28/10/2026.
 
 - **Sem botão "Por que isso funciona?"**, nem no Bem-estar (a pessoa preferiu tirar de vez).
 - **Sem botão "Em crise?"** (pedido na etapa B1).
+- Check-in (B2): termômetros de 0 a 10 em barrinhas que crescem; a faixa que escolhe o plano é a **maior entre
+  ansiedade e irritação** (a energia fica para as sugestões da B5); o plano de cada faixa é escrito pela pessoa,
+  e os exemplos aparecem só como dica dentro do campo. Lembretes de check-in entram com os avisos neutros (B8)
+  e com os rituais (etapa 14).
 - Ordem: **I1** tema Índigo (guia de estilo para aprovar, depois aplicar) e **B1–B8** Bem-estar,
   antes da etapa 9.
   - B1 base da aba (ativar nos Ajustes, cores, adesivos, ferramentas que se ligam uma ou duas por vez);
