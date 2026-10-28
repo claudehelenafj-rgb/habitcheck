@@ -1,0 +1,132 @@
+/*
+ * Tokens de cor do Caderninho.
+ * Este arquivo é a fonte única das cores: o teste src/design/contraste.test.ts
+ * lê os valores daqui e confere o contraste WCAG AA de cada combinação usada.
+ *
+ * Regras:
+ * - Tons claros = fundos de cartões e áreas, sempre com texto em "tinta".
+ * - Tons fortes = ícones, checks, barras e selos (nunca texto corrido).
+ * - "tinta" é chocolate no modo claro e creme no modo escuro.
+ */
+
+:root {
+  /* Paleta base (valores exatos pedidos) */
+  --creme: #fbf6ee;
+  --chocolate: #422f0e;
+
+  --lavanda: #f9d4f8;
+  --azul-nevoa: #aecfd0;
+  --pessego: #ffd094;
+  --manteiga: #f7e9b2;
+  --menta: #ddf2b8;
+  --morango-claro: #fcc4c0;
+
+  --rosa: #ea5e86;
+  --tomate: #ef6545;
+  --laranja: #f49625;
+  --verde-piscina: #037f71;
+  --verde-agua: #57b1a8;
+
+  /*
+   * Ajustes de contraste para selos com texto em chocolate.
+   * Rosa e tomate originais dão 3,9:1 e 4,0:1 (AA pede 4,5:1).
+   * Escurecer pioraria (o texto já é escuro), então clareamos levemente.
+   */
+  --rosa-selo: #ed7597;
+  --tomate-selo: #f1795d;
+
+  /* Papéis semânticos (modo claro) */
+  --fundo: var(--creme);
+  --papel: #fffdf8;
+  --tinta: var(--chocolate);
+  --tinta-suave: #67573b; /* só sobre fundo ou papel */
+  --linha: var(--chocolate);
+  --contorno-adesivo: #ffffff;
+
+  /* Tons claros usados como fundo de cartões */
+  --claro-lavanda: var(--lavanda);
+  --claro-azul-nevoa: var(--azul-nevoa);
+  --claro-pessego: var(--pessego);
+  --claro-manteiga: var(--manteiga);
+  --claro-menta: var(--menta);
+  --claro-morango: var(--morango-claro);
+
+  /* Tons fortes usados como ícone, check e barra */
+  --forte-rosa: var(--rosa);
+  --forte-tomate: var(--tomate);
+  --forte-laranja: var(--laranja);
+  --forte-piscina: var(--verde-piscina);
+  --forte-agua: var(--verde-agua);
+  --forte-chocolate: var(--chocolate);
+
+  /* Botão principal */
+  --botao-fundo: var(--chocolate);
+  --botao-texto: var(--creme);
+
+  /* Tema (troca a "embalagem", não o sistema) */
+  --destaque: var(--chocolate);
+  --destaque-texto: var(--creme);
+  --destaque-claro: var(--manteiga);
+
+  color-scheme: light;
+}
+
+/* Temas trocáveis */
+:root[data-tema='cereja'] {
+  --destaque: var(--rosa-selo);
+  --destaque-texto: var(--chocolate);
+  --destaque-claro: var(--morango-claro);
+}
+:root[data-tema='piscina'] {
+  --destaque: var(--verde-piscina);
+  --destaque-texto: var(--creme);
+  --destaque-claro: var(--azul-nevoa);
+}
+:root[data-tema='pessego'] {
+  --destaque: var(--laranja);
+  --destaque-texto: var(--chocolate);
+  --destaque-claro: var(--pessego);
+}
+
+/*
+ * Modo escuro: fundo chocolate, texto creme, tons claros "apagados"
+ * (22% do tom sobre chocolate) para não ofuscar.
+ */
+:root[data-modo='escuro'] {
+  --fundo: var(--chocolate);
+  --papel: #4d3b1b;
+  --tinta: var(--creme);
+  --tinta-suave: #d6cec1;
+  --linha: #d6cec1;
+
+  --claro-lavanda: #6a5341;
+  --claro-azul-nevoa: #5a5239;
+  --claro-pessego: #6c522b;
+  --claro-manteiga: #6a5832;
+  --claro-menta: #645a33;
+  --claro-morango: #6b5035;
+
+  /* verde-piscina some sobre chocolate (2,6:1); usamos uma versão mais clara */
+  --forte-piscina: #269082;
+  --forte-chocolate: var(--creme);
+
+  --botao-fundo: var(--creme);
+  --botao-texto: var(--chocolate);
+
+  color-scheme: dark;
+}
+:root[data-modo='escuro'][data-tema='creme'],
+:root[data-modo='escuro']:not([data-tema]) {
+  --destaque: var(--creme);
+  --destaque-texto: var(--chocolate);
+  --destaque-claro: #6a5832;
+}
+:root[data-modo='escuro'][data-tema='cereja'] {
+  --destaque-claro: #6b5035;
+}
+:root[data-modo='escuro'][data-tema='piscina'] {
+  --destaque-claro: #5a5239;
+}
+:root[data-modo='escuro'][data-tema='pessego'] {
+  --destaque-claro: #6c522b;
+}
