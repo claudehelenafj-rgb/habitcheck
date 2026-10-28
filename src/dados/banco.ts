@@ -4,6 +4,7 @@
 
 import Dexie, { type EntityTable } from 'dexie'
 import type { IdArea } from '../design/areas'
+import type { Evento } from '../logica/calendario'
 import type { Consulta } from '../logica/consultas'
 import type { RegistroDose, Remedio } from '../logica/remedios'
 
@@ -55,6 +56,7 @@ export class BancoCaderninho extends Dexie {
   remedios!: EntityTable<Remedio, 'id'>
   doses!: EntityTable<RegistroDose, 'id'>
   consultas!: EntityTable<Consulta, 'id'>
+  eventos!: EntityTable<Evento, 'id'>
 
   constructor(nome = 'caderninho') {
     super(nome)
@@ -72,6 +74,10 @@ export class BancoCaderninho extends Dexie {
     // etapa 7: consultas ("preciso marcar", marcadas e feitas)
     this.version(3).stores({
       consultas: 'id, status, data',
+    })
+    // etapa 8: eventos do calendário (criados aqui ou importados da Apple e do Google)
+    this.version(4).stores({
+      eventos: 'id, uidExterno, inicio',
     })
   }
 }

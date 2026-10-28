@@ -6,7 +6,9 @@ import { Adesivo } from '../componentes/Adesivo'
 import { mostrarAviso } from '../componentes/Avisos'
 import { Botao } from '../componentes/Botao'
 import { abrirCaptura, ATALHO_CAPTURA } from '../componentes/Captura'
+import { EditorEvento } from '../componentes/EditorEvento'
 import { EditorTarefa } from '../componentes/EditorTarefa'
+import { novoEvento } from '../dados/eventos'
 import type { ItemCaixa } from '../dados/banco'
 import { desfazerResolucao, novaTarefa, resolverItem, useCaixaAberta } from '../dados/tarefas'
 
@@ -26,6 +28,7 @@ export function Caixa() {
   const { t, i18n } = useTranslation()
   const itens = useCaixaAberta()
   const [virando, setVirando] = useState<ItemCaixa | null>(null)
+  const [virandoEvento, setVirandoEvento] = useState<ItemCaixa | null>(null)
   if (!itens) return null
 
   async function resolver(item: ItemCaixa, destino: 'feito' | 'lixo') {
@@ -69,6 +72,9 @@ export function Caixa() {
                   <Botao className="min-h-10 px-4 text-sm" onClick={() => setVirando(item)}>
                     {t('caixa.virarTarefa')}
                   </Botao>
+                  <Botao variante="secundario" tom="bg-manteiga" className="min-h-10 px-4 text-sm" onClick={() => setVirandoEvento(item)}>
+                    {t('caixa.virarEvento')}
+                  </Botao>
                   <Botao variante="secundario" tom="bg-menta" className="min-h-10 px-4 text-sm" onClick={() => resolver(item, 'feito')}>
                     ✓ {t('caixa.jaResolvi')}
                   </Botao>
@@ -81,6 +87,23 @@ export function Caixa() {
           </ul>
           <p className="text-sm text-tinta-suave">{t('caixa.emBreve')}</p>
         </>
+      )}
+
+      {virandoEvento && (
+        <EditorEvento
+          evento={(() => {
+            const amanha9 = new Date()
+            amanha9.setDate(amanha9.getDate() + 1)
+            amanha9.setHours(9, 0, 0, 0)
+            return novoEvento(amanha9, virandoEvento.texto)
+          })()}
+          novo
+          fechar={() => setVirandoEvento(null)}
+          aoSalvar={async () => {
+            await resolverItem(virandoEvento.id, 'evento')
+            mostrarAviso(t('editorEvento.virouEvento'))
+          }}
+        />
       )}
 
       {virando && (

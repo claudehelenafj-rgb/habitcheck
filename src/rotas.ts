@@ -32,7 +32,7 @@ export type Tela = {
 
 export const TELAS_PRINCIPAIS: Tela[] = [
   { id: 'hoje', caminho: '/hoje', adesivo: 'sol', atalho: 'h' },
-  { id: 'calendario', caminho: '/calendario', adesivo: 'calendario', atalho: 'c', etapa: 8 },
+  { id: 'calendario', caminho: '/calendario', adesivo: 'calendario', atalho: 'c' },
   { id: 'tarefas', caminho: '/tarefas', adesivo: 'lista', atalho: 't' },
   { id: 'caixa', caminho: '/caixa', adesivo: 'envelope', atalho: 'x' },
   { id: 'objetivos', caminho: '/objetivos', adesivo: 'estrela', atalho: 'o', etapa: 15 },

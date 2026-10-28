@@ -113,18 +113,19 @@ export function CartaoAgora({ candidato, compacto = false, semNada }: Props) {
   }
 
   if (candidato.tipo === 'transicao' || candidato.tipo === 'compromisso') {
+    const doCalendario = candidato.tipo === 'compromisso' && candidato.origem === 'evento'
     return (
-      <section aria-labelledby="titulo-agora" className={`cartao flex flex-col gap-3 bg-azul-nevoa ${compacto ? 'p-4' : 'p-6'}`}>
+      <section aria-labelledby="titulo-agora" className={`cartao flex flex-col gap-3 ${doCalendario ? 'bg-manteiga' : 'bg-azul-nevoa'} ${compacto ? 'p-4' : 'p-6'}`}>
         <p className="rotulo flex items-center gap-2">
           <span id="titulo-agora">{t('hoje.agora')}</span>
           <span aria-hidden="true">·</span>
-          <Adesivo nome="prancheta" tamanho={20} />
-          {t('nav.consultas')}
+          <Adesivo nome={doCalendario ? 'calendario' : 'prancheta'} tamanho={20} />
+          {doCalendario ? t('nav.calendario') : t('nav.consultas')}
         </p>
         <p className={`font-titulo leading-tight font-semibold break-words ${compacto ? 'text-2xl' : 'text-3xl sm:text-4xl'}`}>{candidato.titulo}</p>
         {candidato.detalhe && <p className="text-lg font-semibold tabular-nums">{candidato.detalhe}</p>}
-        <a href="#/consultas" className="self-start font-bold underline decoration-2 underline-offset-4">
-          {t('consultas.titulo')} →
+        <a href={doCalendario ? '#/calendario' : '#/consultas'} className="self-start font-bold underline decoration-2 underline-offset-4">
+          {doCalendario ? t('calendario.titulo') : t('consultas.titulo')} →
         </a>
       </section>
     )

@@ -1,6 +1,7 @@
 // Regras da tela Hoje: blocos do dia, quanto falta e a escolha do cartão "Agora".
 
 import type { Tarefa } from '../dados/banco'
+import type { Ocorrencia } from './calendario'
 import { planoReverso, type Consulta } from './consultas'
 import { estadoDose, textoDoLembrete, type DosePrevista, type RegistroDose } from './remedios'
 import type { Dia } from './datas'
@@ -61,7 +62,7 @@ export function blocoJaPassou(bloco: Bloco, atual: Bloco): boolean {
 export type Candidato =
   | { tipo: 'remedio'; id: string; titulo: string; horario: Date; dose?: DosePrevista }
   | { tipo: 'transicao'; id: string; titulo: string; horario: Date; detalhe?: string }
-  | { tipo: 'compromisso'; id: string; titulo: string; inicio: Date; fim?: Date; detalhe?: string }
+  | { tipo: 'compromisso'; id: string; titulo: string; inicio: Date; fim?: Date; detalhe?: string; origem?: 'consulta' | 'evento' }
   | { tipo: 'tarefa'; id: string; titulo: string; tarefa: Tarefa }
   | { tipo: 'habito'; id: string; titulo: string; bloco?: Bloco }
 
@@ -149,7 +150,22 @@ export function candidatosDeConsultas(consultas: Consulta[], agora: Date, textos
       lista.push({ tipo: 'transicao', id: `${c.id}|arrumar`, titulo: textos.arrumar(c.titulo), horario: plano.comecarArrumar, detalhe })
       lista.push({ tipo: 'transicao', id: `${c.id}|sair`, titulo: textos.sair(c.titulo), horario: plano.sairDeCasa, detalhe })
     }
-    lista.push({ tipo: 'compromisso', id: c.id, titulo: c.titulo, inicio: plano.inicio, fim: plano.fim, detalhe })
+    lista.push({ tipo: 'compromisso', id: c.id, titulo: c.titulo, inicio: plano.inicio, fim: plano.fim, detalhe, origem: 'consulta' })
   }
   return lista
+}
+
+/** Eventos com horário viram compromisso no "Agora" (15 minutos antes até acabar). Dia todo não entra. */
+export function candidatosDeEventos(lista: Ocorrencia[], agora: Date): Candidato[] {
+  return lista
+    .filter((o) => !o.evento.diaInteiro && o.fim > agora)
+    .map((o) => ({
+      tipo: 'compromisso',
+      id: `${o.evento.id}|${o.inicio.toISOString()}`,
+      titulo: o.evento.titulo,
+      inicio: o.inicio,
+      fim: o.fim,
+      detalhe: [o.inicio.toTimeString().slice(0, 5), o.evento.local].filter(Boolean).join(' · '),
+      origem: 'evento',
+    }))
 }

@@ -2,8 +2,10 @@
 
 import { useTranslation } from 'react-i18next'
 import { diaLocal } from '../logica/datas'
-import { candidatosDeConsultas, candidatosDeRemedios, candidatosDeTarefas, escolherAgora, type Candidato } from '../logica/hoje'
+import { ocorrencias } from '../logica/calendario'
+import { candidatosDeConsultas, candidatosDeEventos, candidatosDeRemedios, candidatosDeTarefas, escolherAgora, type Candidato } from '../logica/hoje'
 import { useConsultas } from './consultas'
+import { useEventos } from './eventos'
 import { useDosesDoDia } from './remedios'
 import { useTarefas } from './tarefas'
 
@@ -12,7 +14,8 @@ export function useCandidatoAgora(agora: Date): { candidato: Candidato | undefin
   const tarefas = useTarefas()
   const doses = useDosesDoDia(diaLocal(agora))
   const consultas = useConsultas()
-  if (!tarefas || !doses || !consultas) return { candidato: undefined, pronto: false }
+  const eventos = useEventos()
+  if (!tarefas || !doses || !consultas || !eventos) return { candidato: undefined, pronto: false }
   const textos = {
     arrumar: (titulo: string) => t('consultas.arrumarPara', { titulo }),
     sair: (titulo: string) => t('consultas.sairPara', { titulo }),
@@ -20,6 +23,7 @@ export function useCandidatoAgora(agora: Date): { candidato: Candidato | undefin
   const candidatos = [
     ...candidatosDeRemedios(doses.doses, doses.registros, agora),
     ...candidatosDeConsultas(consultas, agora, textos),
+    ...candidatosDeEventos(ocorrencias(eventos, diaLocal(agora), diaLocal(agora)), agora),
     ...candidatosDeTarefas(tarefas, diaLocal(agora)),
   ]
   return { candidato: escolherAgora(candidatos, agora), pronto: true }

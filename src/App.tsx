@@ -11,6 +11,7 @@ import { Tarefas } from './paginas/Tarefas'
 import { Mini } from './paginas/Mini'
 import { Remedios } from './paginas/Remedios'
 import { Consultas } from './paginas/Consultas'
+import { Calendario } from './paginas/Calendario'
 import { GuiaDeEstilo } from './paginas/GuiaDeEstilo'
 import { useAplicarPreferencias } from './preferencias'
 import { TELA_AJUSTES, TODAS_AS_TELAS } from './rotas'
@@ -27,6 +28,7 @@ const roteador = createHashRouter([
       { path: '/caixa', element: <Caixa /> },
       { path: '/remedios', element: <Remedios /> },
       { path: '/consultas', element: <Consultas /> },
+      { path: '/calendario', element: <Calendario /> },
       ...TODAS_AS_TELAS.filter((tela) => tela.etapa).map((tela) => ({
         path: tela.caminho,
         element: <EmBreve tela={tela} />,

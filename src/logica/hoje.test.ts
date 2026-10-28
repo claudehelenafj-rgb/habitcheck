@@ -166,3 +166,19 @@ describe('consultas no cartão Agora', () => {
     expect(candidatosDeConsultas([{ ...c, status: 'marcar' }], em(13, 15), textos)).toHaveLength(0)
   })
 })
+
+describe('eventos do calendário no cartão Agora', () => {
+  it('evento com hora entra 15 min antes; dia todo não entra', async () => {
+    const { candidatosDeEventos } = await import('./hoje')
+    const { ocorrencias } = await import('./calendario')
+    const ev = (id: string, h: number, diaInteiro = false) => ({
+      id, titulo: id, origem: 'caderninho' as const, criadoEm: '', diaInteiro,
+      inicio: (diaInteiro ? new Date(2026, 9, 28) : em(h)).toISOString(),
+      fim: (diaInteiro ? new Date(2026, 9, 29) : em(h + 1)).toISOString(),
+    })
+    const lista = ocorrencias([ev('Almoço', 13), ev('Feriado', 0, true)], '2026-10-28', '2026-10-28')
+    expect(escolherAgora(candidatosDeEventos(lista, em(12, 40)), em(12, 40))).toBeUndefined()
+    expect(escolherAgora(candidatosDeEventos(lista, em(12, 50)), em(12, 50))?.titulo).toBe('Almoço')
+    expect(escolherAgora(candidatosDeEventos(lista, em(14, 1)), em(14, 1))).toBeUndefined()
+  })
+})

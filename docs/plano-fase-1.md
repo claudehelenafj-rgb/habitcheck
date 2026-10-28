@@ -89,7 +89,7 @@ Registrado em [`adicional-bem-estar-indigo.md`](adicional-bem-estar-indigo.md). 
 | 5 | Tela Hoje e **janelinha flutuante** (widget) | Pronta |
 | 6 | Remédios e sistema de lembretes | Pronta |
 | 7 | Consultas e arquivo .ics | Pronta |
-| 8 | Calendário semana/mês e **importar calendário** | |
+| 8 | Calendário semana/mês e **importar calendário** | Pronta |
 | 9 | Faculdade, modo foco, saída do hiperfoco | |
 | 10 | Academia | |
 | 11 | Quarto | |
