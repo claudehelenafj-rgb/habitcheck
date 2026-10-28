@@ -11,6 +11,11 @@ Autismo" (lido). Plano aprovado em 28/10/2026.
   ansiedade e irritação** (a energia fica para as sugestões da B5); o plano de cada faixa é escrito pela pessoa,
   e os exemplos aparecem só como dica dentro do campo. Lembretes de check-in entram com os avisos neutros (B8)
   e com os rituais (etapa 14).
+- Sintomas (B3): caminho rápido em 4 toques (sintoma, intensidade, por quê, Registrar); duração, texto,
+  "o que ajudou" e "pode ser efeito do remédio?" ficam em "Mais detalhes". As listas de etiquetas são editáveis.
+  No mês, bolinhas de tamanho e tom diferentes pela maior intensidade do dia (nunca vermelho, nunca só a cor),
+  tabela equivalente, e o que mais se repete ("não sei" não entra nos porquês), sempre com o aviso de que
+  repetir junto não quer dizer causa. Os padrões com sono e remédio ficam para a B7.
 - Ordem: **I1** tema Índigo (guia de estilo para aprovar, depois aplicar) e **B1–B8** Bem-estar,
   antes da etapa 9.
   - B1 base da aba (ativar nos Ajustes, cores, adesivos, ferramentas que se ligam uma ou duas por vez);

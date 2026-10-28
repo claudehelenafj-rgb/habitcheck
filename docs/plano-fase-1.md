@@ -94,7 +94,8 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | I1 | **Tema Índigo**, estampas novas, decoração doce/neutra | Pronta (zebrinha recusada) |
 | B1 | **Bem-estar**: base da aba, ativada nos Ajustes (atalho B) | Pronta |
 | B2 | **Bem-estar**: check-in de emoções e plano por faixa | Pronta |
-| B3–B8 | **Bem-estar**: sintomas, hobbies, sugestões, sono, resumo, privacidade | |
+| B3 | **Bem-estar**: sintomas com o porquê e visão do mês | Pronta |
+| B4–B8 | **Bem-estar**: hobbies, sugestões, sono, resumo, privacidade | |
 | 9 | Faculdade, modo foco, saída do hiperfoco | |
 | 10 | Academia | |
 | 11 | Quarto | |

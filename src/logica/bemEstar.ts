@@ -13,7 +13,7 @@ export type Ferramenta = {
 
 export const FERRAMENTAS: Ferramenta[] = [
   { id: 'checkin', adesivo: 'nuvem' },
-  { id: 'sintomas', adesivo: 'interrogacao', etapa: 'B3' },
+  { id: 'sintomas', adesivo: 'interrogacao' },
   { id: 'hobbies', adesivo: 'flor', etapa: 'B4' },
   { id: 'sugestoes', adesivo: 'xicara', etapa: 'B5' },
   { id: 'sono', adesivo: 'lua', etapa: 'B6' },

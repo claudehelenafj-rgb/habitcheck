@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Adesivo } from '../componentes/Adesivo'
 import { CheckinEmocoes } from '../componentes/CheckinEmocoes'
+import { RegistroSintomas } from '../componentes/RegistroSintomas'
 import { alternar, useBemEstar } from '../dados/bemEstar'
 import { FERRAMENTAS, type Ferramenta } from '../logica/bemEstar'
 
@@ -48,6 +49,7 @@ export function BemEstar() {
           {t('bemEstar.ligadasTitulo')}
         </h2>
         {ligadas.some((f) => f.id === 'checkin') && <CheckinEmocoes />}
+        {ligadas.some((f) => f.id === 'sintomas') && <RegistroSintomas />}
         {ligadas.some((f) => f.etapa) && (
           <ul className="grid gap-3 sm:grid-cols-2">
             {ligadas

@@ -29,3 +29,24 @@ describe('traduções', () => {
     }
   })
 })
+
+describe('chaves usadas no código', () => {
+  // Lê todos os arquivos do app e confere cada t('chave.fixa') contra o português.
+  // Chaves montadas com crase (`nav.${id}`) não entram: o teste de paridade acima já cobre os dois idiomas.
+  const arquivos = import.meta.glob('../**/*.{ts,tsx}', { query: '?raw', import: 'default', eager: true }) as Record<string, string>
+  const existentes = new Set(chaves(ptBR).map((c) => c.replace(/_(one|other)$/, '')))
+
+  it('toda chave fixa de t(...) existe nas traduções', () => {
+    const faltando: string[] = []
+    let conferidas = 0
+    for (const [arquivo, codigo] of Object.entries(arquivos)) {
+      if (arquivo.includes('.test.')) continue
+      for (const [, chave] of codigo.matchAll(/\bt\(\s*'([\w.]+)'/g)) {
+        conferidas++
+        if (!existentes.has(chave)) faltando.push(`${arquivo}: ${chave}`)
+      }
+    }
+    expect(conferidas).toBeGreaterThan(100)
+    expect(faltando).toEqual([])
+  })
+})

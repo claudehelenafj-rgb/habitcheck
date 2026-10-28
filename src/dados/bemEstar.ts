@@ -12,7 +12,14 @@ export type ConfigBemEstar = {
   planoFaixas?: Partial<PlanoFaixas>
   /** etiquetas de sinais do corpo; ausente = lista inicial */
   sinais?: string[]
+  /** listas de etiquetas dos sintomas; ausente = lista inicial */
+  listaSintomas?: string[]
+  listaPorques?: string[]
+  listaAjudou?: string[]
 }
+
+/** Nome do campo de cada lista de etiquetas editável. */
+export type ListaEtiquetas = 'sinais' | 'listaSintomas' | 'listaPorques' | 'listaAjudou'
 
 const CHAVE = 'bemEstar'
 const VAZIA: ConfigBemEstar = { ferramentas: [] }

@@ -6,6 +6,7 @@ import Dexie, { type EntityTable } from 'dexie'
 import type { IdArea } from '../design/areas'
 import type { Evento } from '../logica/calendario'
 import type { Checkin } from '../logica/checkin'
+import type { RegistroSintoma } from '../logica/sintomas'
 import type { Consulta } from '../logica/consultas'
 import type { RegistroDose, Remedio } from '../logica/remedios'
 
@@ -59,6 +60,7 @@ export class BancoCaderninho extends Dexie {
   consultas!: EntityTable<Consulta, 'id'>
   eventos!: EntityTable<Evento, 'id'>
   checkins!: EntityTable<Checkin, 'id'>
+  sintomas!: EntityTable<RegistroSintoma, 'id'>
 
   constructor(nome = 'caderninho') {
     super(nome)
@@ -86,11 +88,15 @@ export class BancoCaderninho extends Dexie {
     this.version(5).stores({
       checkins: 'id, dia, quando',
     })
+    // Bem-estar (B3): sintomas com o porquê
+    this.version(6).stores({
+      sintomas: 'id, dia, quando',
+    })
   }
 }
 
 /** Tabelas com dados de saúde mental (exportar e apagar separado na etapa B8). */
-export const TABELAS_BEM_ESTAR = ['checkins'] as const
+export const TABELAS_BEM_ESTAR = ['checkins', 'sintomas'] as const
 
 export const banco = new BancoCaderninho()
 
