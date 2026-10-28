@@ -80,7 +80,7 @@ Valores guardados em centavos (números inteiros, sem erro de arredondamento) e 
 |---|---|---|
 | 1 | Guia de estilo (cores, fontes, adesivos, estampas, cartões, gráficos) | Aprovada |
 | 2 | Base: navegação, acessibilidade, PT/EN, banco local, exportar/apagar, PWA offline | Pronta |
-| 3 | Primeiro uso e plano de 2 semanas | |
+| 3 | Primeiro uso e plano de 2 semanas | Pronta |
 | 4 | Captura rápida, caixa de entrada, tarefas A/B/C com passos | |
 | 5 | Tela Hoje e **janelinha flutuante** (widget) | |
 | 6 | Remédios e sistema de lembretes | |

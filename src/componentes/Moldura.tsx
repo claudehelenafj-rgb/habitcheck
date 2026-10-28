@@ -1,10 +1,12 @@
 // Moldura do app: menu lateral (computador e tablet), barra de baixo (celular),
 // link "pular para o conteúdo", atalhos de teclado e avisos (sem internet, versão nova).
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router'
-import { TELA_AJUSTES, TELAS_AREAS, TELAS_BARRA_CELULAR, TELAS_PRINCIPAIS, TODAS_AS_TELAS, type Tela } from '../rotas'
+import { Link, Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
+import { atualizarPerfil, usePerfil, type Perfil } from '../dados/perfil'
+import { diaLocal, type Dia } from '../logica/datas'
+import { TELA_AJUSTES, TELAS_AREAS, TELAS_BARRA_CELULAR, TELAS_PRINCIPAIS, type Tela } from '../rotas'
 import { Adesivo } from './Adesivo'
 import { AvisoAtualizacao } from './AvisoAtualizacao'
 import { Micangas } from './Papelaria'
@@ -38,7 +40,14 @@ function ItemMenu({ tela, aoClicar }: { tela: Tela; aoClicar?: () => void }) {
   )
 }
 
-function MenuLateral() {
+/** O que as telas dentro da moldura recebem (via useOutletContext). */
+export type ContextoMoldura = {
+  perfil: Perfil
+  /** última visita antes desta abertura do app (para o "que bom te ver") */
+  visitaAnterior: Dia | undefined
+}
+
+function MenuLateral({ areas }: { areas: Tela[] }) {
   const { t } = useTranslation()
   return (
     <nav aria-label={t('app.menu')} className="flex h-full flex-col gap-4 overflow-y-auto px-3 py-5">
@@ -53,10 +62,13 @@ function MenuLateral() {
       <div>
         <p className="rotulo mb-1 px-3">{t('nav.areas')}</p>
         <ul className="flex flex-col gap-1">
-          {TELAS_AREAS.map((tela) => (
+          {areas.map((tela) => (
             <ItemMenu key={tela.id} tela={tela} />
           ))}
         </ul>
+        <Link to="/ajustes#areas" className="mt-1 ml-3 inline-block text-sm font-bold underline decoration-2 underline-offset-4">
+          {t('nav.maisAreas')}
+        </Link>
       </div>
       <ul className="mt-auto flex flex-col gap-1">
         <ItemMenu tela={TELA_AJUSTES} />
@@ -66,11 +78,11 @@ function MenuLateral() {
 }
 
 /** Barra de baixo para telas estreitas, com "Mais" abrindo o resto do menu. */
-function BarraCelular() {
+function BarraCelular({ telas }: { telas: Tela[] }) {
   const { t } = useTranslation()
   const [aberto, setAberto] = useState(false)
-  const principais = TODAS_AS_TELAS.filter((tela) => TELAS_BARRA_CELULAR.includes(tela.id))
-  const resto = TODAS_AS_TELAS.filter((tela) => !TELAS_BARRA_CELULAR.includes(tela.id))
+  const principais = telas.filter((tela) => TELAS_BARRA_CELULAR.includes(tela.id))
+  const resto = telas.filter((tela) => !TELAS_BARRA_CELULAR.includes(tela.id))
   return (
     <>
       {aberto && (
@@ -118,7 +130,7 @@ function BarraCelular() {
   )
 }
 
-function ListaAtalhos({ fechar }: { fechar: () => void }) {
+function ListaAtalhos({ telas, fechar }: { telas: Tela[]; fechar: () => void }) {
   const { t } = useTranslation()
   const ref = useRef<HTMLDialogElement>(null)
   useEffect(() => {
@@ -136,7 +148,7 @@ function ListaAtalhos({ fechar }: { fechar: () => void }) {
       </h2>
       <p className="mb-4 text-sm">{t('atalhos.dica')}</p>
       <ul className="grid gap-1.5 sm:grid-cols-2">
-        {TODAS_AS_TELAS.map((tela) => (
+        {telas.map((tela) => (
           <li key={tela.id} className="flex items-center gap-2">
             <Kbd>{tela.atalho}</Kbd>
             <span className="mr-auto">{t('atalhos.ir', { tela: t(`nav.${tela.id}`) })}</span>
@@ -161,7 +173,7 @@ function escrevendo(alvo: EventTarget | null): boolean {
   return !!el && (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName))
 }
 
-function useAtalhos(abrirLista: () => void) {
+function useAtalhos(telas: Tela[], abrirLista: () => void) {
   const navegar = useNavigate()
   useEffect(() => {
     const aoTeclar = (e: KeyboardEvent) => {
@@ -171,7 +183,7 @@ function useAtalhos(abrirLista: () => void) {
         abrirLista()
         return
       }
-      const tela = TODAS_AS_TELAS.find((x) => x.atalho === e.key.toLowerCase())
+      const tela = telas.find((x) => x.atalho === e.key.toLowerCase())
       if (tela) {
         e.preventDefault()
         navegar(tela.caminho)
@@ -179,7 +191,7 @@ function useAtalhos(abrirLista: () => void) {
     }
     window.addEventListener('keydown', aoTeclar)
     return () => window.removeEventListener('keydown', aoTeclar)
-  }, [navegar, abrirLista])
+  }, [navegar, telas, abrirLista])
 }
 
 function useOnline() {
@@ -197,13 +209,40 @@ function useOnline() {
   return online
 }
 
+/**
+ * Guarda a última visita de antes desta abertura e marca hoje como visitado.
+ * Assim a tela Hoje sabe se a pessoa ficou uns dias sem abrir o app.
+ */
+function useVisitaAnterior(perfil: Perfil | null | undefined) {
+  const [anterior, setAnterior] = useState<{ dia: Dia | undefined } | null>(null)
+  useEffect(() => {
+    if (!perfil || anterior) return
+    setAnterior({ dia: perfil.ultimaVisita })
+    const hoje = diaLocal()
+    if (perfil.ultimaVisita !== hoje) atualizarPerfil({ ultimaVisita: hoje })
+  }, [perfil, anterior])
+  return anterior
+}
+
 export function Moldura() {
+  const perfil = usePerfil()
+  const anterior = useVisitaAnterior(perfil)
+  // carregando: não desenha nada por um instante; primeiro uso: vai para as boas-vindas
+  if (perfil === null) return <Navigate to="/boas-vindas" replace />
+  if (!perfil || !anterior) return null
+  return <MolduraComPerfil perfil={perfil} visitaAnterior={anterior.dia} />
+}
+
+function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
   const { t } = useTranslation()
   const [atalhosAbertos, setAtalhosAbertos] = useState(false)
   const online = useOnline()
   const local = useLocation()
   const principal = useRef<HTMLElement>(null)
-  useAtalhos(() => setAtalhosAbertos(true))
+  const areas = useMemo(() => TELAS_AREAS.filter((tela) => tela.area && perfil.areasAtivas.includes(tela.area)), [perfil.areasAtivas])
+  const telas = useMemo(() => [...TELAS_PRINCIPAIS, ...areas, TELA_AJUSTES], [areas])
+  const abrirAtalhos = useCallback(() => setAtalhosAbertos(true), [])
+  useAtalhos(telas, abrirAtalhos)
 
   // Ao trocar de tela, o foco vai para o título da nova tela (bom para leitor de tela e teclado).
   const primeiraVez = useRef(true)
@@ -212,8 +251,8 @@ export function Moldura() {
       primeiraVez.current = false
       return
     }
-    principal.current?.querySelector<HTMLElement>('h1')?.focus()
-  }, [local.pathname])
+    principal.current?.querySelector<HTMLElement>('h1')?.focus({ preventScroll: !!local.hash })
+  }, [local.pathname, local.hash])
 
   return (
     <div className="min-h-screen md:grid md:grid-cols-[15rem_1fr]">
@@ -228,7 +267,7 @@ export function Moldura() {
         {t('app.pularParaConteudo')}
       </a>
       <aside className="sticky top-0 hidden h-screen border-r-2 border-linha/15 md:block">
-        <MenuLateral />
+        <MenuLateral areas={areas} />
       </aside>
       <div className="flex min-w-0 flex-col">
         {!online && (
@@ -238,7 +277,7 @@ export function Moldura() {
         )}
         <AvisoAtualizacao />
         <main id="conteudo" ref={principal} className="mx-auto w-full max-w-5xl flex-1 px-4 pt-6 pb-32 sm:px-8 md:pb-12">
-          <Outlet />
+          <Outlet context={{ perfil, visitaAnterior } satisfies ContextoMoldura} />
         </main>
         <footer className="px-4 pb-28 text-center text-xs text-tinta-suave md:pb-6">
           {t('app.aviso')}{' '}
@@ -248,9 +287,9 @@ export function Moldura() {
         </footer>
       </div>
       <div className="md:hidden">
-        <BarraCelular />
+        <BarraCelular telas={telas} />
       </div>
-      {atalhosAbertos && <ListaAtalhos fechar={() => setAtalhosAbertos(false)} />}
+      {atalhosAbertos && <ListaAtalhos telas={telas} fechar={() => setAtalhosAbertos(false)} />}
     </div>
   )
 }

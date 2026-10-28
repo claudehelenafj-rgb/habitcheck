@@ -3,7 +3,9 @@ import { DefinicoesAdesivo } from './componentes/Adesivo'
 import { Moldura } from './componentes/Moldura'
 import { DefinicoesGiz } from './componentes/Papelaria'
 import { Ajustes } from './paginas/Ajustes'
+import { BoasVindas } from './paginas/BoasVindas'
 import { EmBreve } from './paginas/EmBreve'
+import { Hoje } from './paginas/Hoje'
 import { GuiaDeEstilo } from './paginas/GuiaDeEstilo'
 import { useAplicarPreferencias } from './preferencias'
 import { TELA_AJUSTES, TODAS_AS_TELAS } from './rotas'
@@ -15,7 +17,8 @@ const roteador = createHashRouter([
     element: <Moldura />,
     children: [
       { index: true, element: <Navigate to="/hoje" replace /> },
-      ...TODAS_AS_TELAS.filter((tela) => tela.id !== 'ajustes').map((tela) => ({
+      { path: '/hoje', element: <Hoje /> },
+      ...TODAS_AS_TELAS.filter((tela) => tela.id !== 'ajustes' && tela.id !== 'hoje').map((tela) => ({
         path: tela.caminho,
         element: <EmBreve tela={tela} />,
       })),
@@ -23,6 +26,7 @@ const roteador = createHashRouter([
       { path: '*', element: <Navigate to="/hoje" replace /> },
     ],
   },
+  { path: '/boas-vindas', element: <BoasVindas /> },
   { path: '/estilo', element: <GuiaDeEstilo /> },
 ])
 
