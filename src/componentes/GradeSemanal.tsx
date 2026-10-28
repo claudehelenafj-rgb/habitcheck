@@ -20,7 +20,7 @@ const DESCRICAO: Record<EstadoDia, string> = {
 /** Traço de caneta desenhado à mão para circular o dia de hoje. */
 export function CirculoCaneta({ className = '' }: { className?: string }) {
   return (
-    <svg viewBox="0 0 80 96" className={`pointer-events-none absolute -inset-1.5 h-[calc(100%+0.75rem)] w-[calc(100%+0.75rem)] overflow-visible ${className}`} aria-hidden="true" preserveAspectRatio="none">
+    <svg viewBox="0 0 80 96" className={`pointer-events-none absolute -inset-1.5 z-10 h-[calc(100%+0.75rem)] w-[calc(100%+0.75rem)] overflow-visible ${className}`} aria-hidden="true" preserveAspectRatio="none">
       <path
         className="traco-caneta"
         d="M44 6C20 4 6 22 6 48s14 44 36 42 32-20 32-44S60 6 36 8"

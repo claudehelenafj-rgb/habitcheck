@@ -1,6 +1,7 @@
 // Regras da tela Hoje: blocos do dia, quanto falta e a escolha do cartão "Agora".
 
 import type { Tarefa } from '../dados/banco'
+import { estadoDose, textoDoLembrete, type DosePrevista, type RegistroDose } from './remedios'
 import type { Dia } from './datas'
 import { proximoPasso } from './tarefas'
 
@@ -57,7 +58,7 @@ export function blocoJaPassou(bloco: Bloco, atual: Bloco): boolean {
  * remédios, transições, compromissos e hábitos entram nas próximas etapas.
  */
 export type Candidato =
-  | { tipo: 'remedio'; id: string; titulo: string; horario: Date }
+  | { tipo: 'remedio'; id: string; titulo: string; horario: Date; dose?: DosePrevista }
   | { tipo: 'transicao'; id: string; titulo: string; horario: Date }
   | { tipo: 'compromisso'; id: string; titulo: string; inicio: Date; fim?: Date }
   | { tipo: 'tarefa'; id: string; titulo: string; tarefa: Tarefa }
@@ -121,4 +122,11 @@ export function candidatosDeTarefas(tarefas: Tarefa[], hoje: Dia): Candidato[] {
 /** Tarefas de hoje que aparecem na linha do dia: A marcadas para hoje e tudo o que foi feito hoje. */
 export function tarefasDoDia(tarefas: Tarefa[], hoje: Dia): Tarefa[] {
   return tarefas.filter((t) => (t.prioridade === 'A' && t.dia === hoje) || t.feitaNoDia === hoje)
+}
+
+/** Doses na hora (ou atrasadas) e ainda sem resposta viram candidatas ao "Agora". */
+export function candidatosDeRemedios(doses: DosePrevista[], registros: RegistroDose[], agora: Date): Candidato[] {
+  return doses
+    .filter((d) => estadoDose(d, registros.find((r) => r.id === d.id), agora) === 'agora')
+    .map((dose) => ({ tipo: 'remedio', id: dose.id, titulo: textoDoLembrete(dose.remedio), horario: dose.quando, dose }))
 }

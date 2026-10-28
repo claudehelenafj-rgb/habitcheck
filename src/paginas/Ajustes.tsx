@@ -11,6 +11,7 @@ import { apagarTudo, BackupInvalido, exportarTudo, importarTudo, lerBackup, nome
 import { IDIOMAS } from '../i18n'
 import { estaInstalado, instalar, usePodeInstalar } from '../instalacao'
 import { usePreferencias } from '../preferencias'
+import { salvarConfigAvisos, useConfigAvisos } from '../dados/remedios'
 import { atualizarPerfil, usePerfil } from '../dados/perfil'
 import { AREAS_PRINCIPAIS } from '../design/areas'
 import { diaLocal } from '../logica/datas'
@@ -200,6 +201,32 @@ function Nome() {
   )
 }
 
+function Silencio() {
+  const { t } = useTranslation()
+  const config = useConfigAvisos()
+  const s = config.silencio
+  const mudar = (m: Partial<typeof s>) => salvarConfigAvisos({ ...config, silencio: { ...s, ...m } })
+  return (
+    <div className="cartao flex flex-col gap-3 bg-papel p-5">
+      <label className="flex items-center gap-2 font-bold">
+        <input id="silencio-ativo" type="checkbox" checked={s.ativo} onChange={(e) => mudar({ ativo: e.target.checked })} className="h-5 w-5 accent-[var(--chocolate)]" />
+        {t('ajustes.silencio')}
+      </label>
+      <div className="flex flex-wrap items-center gap-2">
+        <label className="flex items-center gap-2">
+          {t('ajustes.silencioDe')}
+          <input id="silencio-inicio" type="time" value={s.inicio} disabled={!s.ativo} onChange={(e) => e.target.value && mudar({ inicio: e.target.value })} className="min-h-11 rounded-xl border-2 border-linha bg-papel px-3 tabular-nums" />
+        </label>
+        <label className="flex items-center gap-2">
+          {t('ajustes.silencioAte')}
+          <input id="silencio-fim" type="time" value={s.fim} disabled={!s.ativo} onChange={(e) => e.target.value && mudar({ fim: e.target.value })} className="min-h-11 rounded-xl border-2 border-linha bg-papel px-3 tabular-nums" />
+        </label>
+      </div>
+      <p className="text-sm">{t('ajustes.silencioDica')}</p>
+    </div>
+  )
+}
+
 function Instalar() {
   const { t } = useTranslation()
   const podeInstalar = usePodeInstalar()
@@ -244,6 +271,10 @@ export function Ajustes() {
 
       <Bloco id="nome" titulo={t('ajustes.nome')} adesivo="sapinho">
         <Nome />
+      </Bloco>
+
+      <Bloco id="avisos" titulo={t('ajustes.avisos')} adesivo="lua">
+        <Silencio />
       </Bloco>
 
       <Bloco id="aparencia" titulo={t('ajustes.aparencia')} adesivo="flor">

@@ -4,6 +4,7 @@
 
 import Dexie, { type EntityTable } from 'dexie'
 import type { IdArea } from '../design/areas'
+import type { RegistroDose, Remedio } from '../logica/remedios'
 
 /** Item despejado na captura rápida, esperando virar tarefa, evento, hábito ou lixo. */
 export type ItemCaixa = {
@@ -50,6 +51,8 @@ export class BancoCaderninho extends Dexie {
   caixaEntrada!: EntityTable<ItemCaixa, 'id'>
   tarefas!: EntityTable<Tarefa, 'id'>
   objetivos!: EntityTable<Objetivo, 'id'>
+  remedios!: EntityTable<Remedio, 'id'>
+  doses!: EntityTable<RegistroDose, 'id'>
 
   constructor(nome = 'caderninho') {
     super(nome)
@@ -58,6 +61,11 @@ export class BancoCaderninho extends Dexie {
       caixaEntrada: 'id, criadoEm, resolvidoEm',
       tarefas: 'id, dia, prioridade, area, objetivoId, feitaEm',
       objetivos: 'id, criadoEm',
+    })
+    // etapa 6: remédios e registro de cada dose (tomei, pulei, adiei, quantos avisos)
+    this.version(2).stores({
+      remedios: 'id, ativo',
+      doses: 'id, remedioId, dia',
     })
   }
 }

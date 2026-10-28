@@ -11,6 +11,7 @@ import { proximoPasso } from '../logica/tarefas'
 import { Adesivo } from './Adesivo'
 import { mostrarAviso } from './Avisos'
 import { Botao } from './Botao'
+import { BotoesDose } from './BotoesDose'
 import { TimerVisual } from './Enfeites'
 
 const TIMER_PADRAO_MIN = 25
@@ -91,6 +92,22 @@ export function CartaoAgora({ candidato, compacto = false, semNada }: Props) {
         <div>
           <Timer compacto={compacto} />
         </div>
+      </section>
+    )
+  }
+
+  if (candidato.tipo === 'remedio' && candidato.dose) {
+    return (
+      <section aria-labelledby="titulo-agora" className={`cartao flex flex-col gap-4 bg-morango-claro ${compacto ? 'p-4' : 'p-6'}`}>
+        <p className="rotulo flex items-center gap-2">
+          <span id="titulo-agora">{t('hoje.agora')}</span>
+          <span aria-hidden="true">·</span>
+          <Adesivo nome="pilula" tamanho={20} />
+          {t('nav.remedios')} · {candidato.dose.horario}
+        </p>
+        <p className={`font-titulo leading-tight font-semibold break-words ${compacto ? 'text-2xl' : 'text-3xl sm:text-4xl'}`}>{candidato.titulo}</p>
+        {candidato.dose.remedio.observacao && <p>{candidato.dose.remedio.observacao}</p>}
+        <BotoesDose dose={candidato.dose} grande={!compacto} />
       </section>
     )
   }

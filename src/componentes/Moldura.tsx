@@ -10,6 +10,8 @@ import { TELA_AJUSTES, TELAS_AREAS, TELAS_BARRA_CELULAR, TELAS_PRINCIPAIS, type 
 import { Adesivo } from './Adesivo'
 import { AvisoAtualizacao } from './AvisoAtualizacao'
 import { Avisos } from './Avisos'
+import { BannerLembrete } from './BannerLembrete'
+import { useLembretes } from '../lembretes'
 import { ATALHO_CAPTURA, Captura } from './Captura'
 import { Micangas } from './Papelaria'
 
@@ -249,6 +251,7 @@ function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
   const telas = useMemo(() => [...TELAS_PRINCIPAIS, ...areas, TELA_AJUSTES], [areas])
   const abrirAtalhos = useCallback(() => setAtalhosAbertos(true), [])
   useAtalhos(telas, abrirAtalhos)
+  useLembretes(t('remedios.lembrete'))
 
   // Ao trocar de tela, o foco vai para o título da nova tela (bom para leitor de tela e teclado).
   const primeiraVez = useRef(true)
@@ -282,6 +285,7 @@ function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
           </p>
         )}
         <AvisoAtualizacao />
+        <BannerLembrete />
         <main id="conteudo" ref={principal} className="mx-auto w-full max-w-5xl flex-1 px-4 pt-6 pb-32 sm:px-8">
           <Outlet context={{ perfil, visitaAnterior } satisfies ContextoMoldura} />
         </main>

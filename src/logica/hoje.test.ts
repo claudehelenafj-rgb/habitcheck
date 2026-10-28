@@ -135,3 +135,16 @@ describe('tarefas da tela Hoje', () => {
     expect(tarefasDoDia(lista, '2026-10-28').map((t) => t.titulo)).toEqual(['a hoje', 'b feita hoje'])
   })
 })
+
+describe('remédios no cartão Agora', () => {
+  it('só doses na hora e sem resposta viram candidatas, com a ação escrita', async () => {
+    const { candidatosDeRemedios } = await import('./hoje')
+    const { dosesDoDia } = await import('./remedios')
+    const r = { id: 'r1', nome: 'Vitamina D', horarios: ['08:00', '20:00'], repetir: { vezes: 2, intervaloMin: 10 }, ativo: true, criadoEm: '' }
+    const doses = dosesDoDia([r], '2026-10-28')
+    const lista = candidatosDeRemedios(doses, [], em(9))
+    expect(lista.map((x) => x.titulo)).toEqual(['Tomar Vitamina D e marcar no app'])
+    const tomada = { id: doses[0].id, remedioId: 'r1', dia: '2026-10-28', horario: '08:00', avisos: 1, status: 'tomei' as const }
+    expect(candidatosDeRemedios(doses, [tomada], em(9))).toHaveLength(0)
+  })
+})

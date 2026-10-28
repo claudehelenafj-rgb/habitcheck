@@ -15,6 +15,7 @@ import { AnelProgresso } from '../componentes/Enfeites'
 import type { ContextoMoldura } from '../componentes/Moldura'
 import type { Tarefa } from '../dados/banco'
 import { atualizarPerfil } from '../dados/perfil'
+import { useDosesDoDia } from '../dados/remedios'
 import { useTarefas } from '../dados/tarefas'
 import { useAgora } from '../dados/timer'
 import { AREAS } from '../design/areas'
@@ -24,6 +25,7 @@ import {
   BLOCOS,
   blocoDoHorario,
   blocoJaPassou,
+  candidatosDeRemedios,
   candidatosDeTarefas,
   escolherAgora,
   fimDoBloco,
@@ -144,12 +146,22 @@ function ItemLinha({ tarefa }: { tarefa: Tarefa }) {
   )
 }
 
-function ProgressoAreas({ tarefas, areasAtivas }: { tarefas: Tarefa[]; areasAtivas: ContextoMoldura['perfil']['areasAtivas'] }) {
+function ProgressoAreas({
+  tarefas,
+  areasAtivas,
+  extras = {},
+}: {
+  tarefas: Tarefa[]
+  areasAtivas: ContextoMoldura['perfil']['areasAtivas']
+  /** contagens que não vêm de tarefas (doses de remédio, refeições...) */
+  extras?: Partial<Record<string, { feitos: number; total: number }>>
+}) {
   const { t } = useTranslation()
   const porArea = areasAtivas
     .map((id) => {
       const daArea = tarefas.filter((x) => x.area === id)
-      return { area: AREAS[id], feitos: daArea.filter((x) => x.feitaEm).length, total: daArea.length }
+      const extra = extras[id] ?? { feitos: 0, total: 0 }
+      return { area: AREAS[id], feitos: daArea.filter((x) => x.feitaEm).length + extra.feitos, total: daArea.length + extra.total }
     })
     .filter((x) => x.total > 0)
   return (
@@ -177,6 +189,7 @@ export function Hoje() {
   const [editando, setEditando] = useState<Tarefa | null>(null)
   const agora = useAgora(15_000)
   const tarefas = useTarefas()
+  const doses = useDosesDoDia(diaLocal(agora))
   const hoje = diaLocal(agora)
   const dia = diaDoPlano(perfil.inicioPlano, hoje)
 
@@ -184,10 +197,11 @@ export function Hoje() {
   const diaAlcancado = visitaAnterior ? diaDoPlano(perfil.inicioPlano, visitaAnterior) : dia
   const podeContinuar = acolher && visitaAnterior && diaAlcancado < DURACAO_PLANO
 
-  if (!tarefas) return null
+  if (!tarefas || !doses) return null
   const doDia = tarefasDoDia(tarefas, hoje)
   const grupos = agruparTarefas(tarefas, hoje)
-  const candidato = escolherAgora(candidatosDeTarefas(tarefas, hoje), agora)
+  const candidato = escolherAgora([...candidatosDeRemedios(doses.doses, doses.registros, agora), ...candidatosDeTarefas(tarefas, hoje)], agora)
+  const remediosHoje = { feitos: doses.registros.filter((r) => r.status === 'tomei').length, total: doses.doses.length }
   const tarefasA = doDia.filter((x) => x.prioridade === 'A')
   const bonus = [...grupos.b, ...grupos.c]
 
@@ -270,7 +284,7 @@ export function Hoje() {
         </section>
 
         <div className="flex flex-col gap-4">
-          <ProgressoAreas tarefas={doDia} areasAtivas={perfil.areasAtivas} />
+          <ProgressoAreas tarefas={doDia} areasAtivas={perfil.areasAtivas} extras={{ remedios: remediosHoje }} />
           <div className="cartao flex flex-col gap-2 bg-papel p-5">
             <Botao variante="secundario" tom="bg-azul-nevoa" className="self-start" onClick={() => abrirJanelinha()} icone={<Adesivo nome="balao" tamanho={24} />}>
               {t('hoje.janelinha')}
