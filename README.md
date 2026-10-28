@@ -16,6 +16,12 @@ npm run dev
 
 Depois abra o endereço que aparecer (normalmente http://localhost:5173).
 
+## Publicar (GitHub Pages)
+
+O arquivo `.github/workflows/publicar.yml` testa e publica o app a cada mudança no branch `main`.
+Na primeira vez, em **Settings → Pages**, escolha **Source: GitHub Actions**.
+O endereço fica `https://claudehelenafj-rgb.github.io/habitcheck/`.
+
 ## Testes
 
 ```bash

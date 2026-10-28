@@ -6,9 +6,20 @@ import type { ReactNode } from 'react'
  * Palavra escrita em miçangas de letrinhas. Só para palavras curtas (até ~10 letras):
  * o leitor de tela lê a palavra inteira.
  */
-export function Micangas({ texto, tamanho = 40, className = '' }: { texto: string; tamanho?: number; className?: string }) {
+export function Micangas({
+  texto,
+  tamanho = 40,
+  quebrar = true,
+  className = '',
+}: {
+  texto: string
+  tamanho?: number
+  /** se false, as miçangas ficam sempre numa linha só */
+  quebrar?: boolean
+  className?: string
+}) {
   return (
-    <span className={`inline-flex flex-wrap items-center gap-1 ${className}`} role="img" aria-label={texto}>
+    <span className={`inline-flex items-center ${quebrar ? 'flex-wrap gap-1' : 'gap-0.5'} ${className}`} role="img" aria-label={texto}>
       {[...texto.toUpperCase()].map((letra, i) =>
         letra === ' ' ? (
           <span key={i} style={{ width: tamanho * 0.4 }} />

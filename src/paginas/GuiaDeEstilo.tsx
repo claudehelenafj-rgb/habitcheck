@@ -2,6 +2,7 @@
 // Os dados aqui são fictícios, só para demonstrar.
 
 import { useEffect, useState, type ReactNode } from 'react'
+import { Link } from 'react-router'
 import { Adesivo, NOMES_ADESIVOS, type NomeAdesivo } from '../componentes/Adesivo'
 import { Botao } from '../componentes/Botao'
 import { AdesivoSolto, AnelProgresso, Anotacao, FotoComFita, Letreiro, TimerVisual } from '../componentes/Enfeites'
@@ -10,7 +11,8 @@ import { CartaoNumero, ColunasSemanais, MapaDeCalor, type DiaMapa } from '../com
 import { EstrelaGiz, FolhaCaderno, Micangas } from '../componentes/Papelaria'
 import { Selo } from '../componentes/Selo'
 import { AREAS, AREAS_PRINCIPAIS } from '../design/areas'
-import { aplicar, carregar, ESTAMPAS, salvar, type Estampa, type Preferencias } from '../preferencias'
+import { NOMES_ESTAMPAS, PainelAparencia } from '../componentes/PainelAparencia'
+import { ESTAMPAS, usePreferencias } from '../preferencias'
 
 const PALETA = [
   { nome: 'creme', hex: '#FBF6EE', tipo: 'base' },
@@ -27,20 +29,6 @@ const PALETA = [
   { nome: 'verde-piscina', hex: '#037F71', tipo: 'forte' },
   { nome: 'verde-água', hex: '#57B1A8', tipo: 'forte' },
 ]
-
-const NOMES_ESTAMPAS: Record<Estampa, string> = {
-  bolinhas: 'Bolinhas',
-  xadrez: 'Xadrez',
-  listras: 'Listras à mão',
-  coracoes: 'Coraçõezinhos',
-  cerejas: 'Cerejas',
-  estrelas: 'Estrelinhas',
-  flores: 'Flores retrô',
-  ondas: 'Ondinhas',
-  caderno: 'Pauta de caderno',
-  confete: 'Confete',
-  oncinha: 'Oncinha',
-}
 
 const NOMES_ADESIVO: Record<NomeAdesivo, string> = {
   pilula: 'Pílula',
@@ -63,6 +51,7 @@ const NOMES_ADESIVO: Record<NomeAdesivo, string> = {
   explosao: 'Explosão',
   interrogacao: 'Interrogação',
   exclamacao: 'Exclamação',
+  engrenagem: 'Engrenagem',
 }
 
 const SEMANA: Dia[] = [
@@ -106,110 +95,6 @@ function Secao({ id, rotulo, titulo, children, estampa }: { id: string; rotulo: 
       </h2>
       {children}
     </section>
-  )
-}
-
-function Opcoes<T extends string>({
-  legenda,
-  valor,
-  opcoes,
-  mudar,
-}: {
-  legenda: string
-  valor: T
-  opcoes: Array<[T, string]>
-  mudar: (v: T) => void
-}) {
-  return (
-    <fieldset className="flex flex-wrap items-center gap-2">
-      <legend className="rotulo mb-1.5 w-full">{legenda}</legend>
-      {opcoes.map(([v, nome]) => (
-        <label
-          key={v}
-          className={`cursor-pointer rounded-full border-2 border-linha px-3.5 py-1.5 text-sm font-bold has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 ${
-            valor === v ? 'bg-botao text-botao-texto' : 'bg-papel'
-          }`}
-        >
-          <input type="radio" className="so-leitor" checked={valor === v} onChange={() => mudar(v)} />
-          {valor === v && <span aria-hidden="true">✓ </span>}
-          {nome}
-        </label>
-      ))}
-    </fieldset>
-  )
-}
-
-function PainelAjustes({ prefs, mudar }: { prefs: Preferencias; mudar: (p: Partial<Preferencias>) => void }) {
-  return (
-    <div className="cartao grid gap-4 bg-papel p-5 md:grid-cols-2">
-      <Opcoes
-        legenda="Modo"
-        valor={prefs.modo}
-        opcoes={[
-          ['auto', 'Automático'],
-          ['claro', 'Claro'],
-          ['escuro', 'Escuro'],
-        ]}
-        mudar={(modo) => mudar({ modo })}
-      />
-      <Opcoes
-        legenda="Tema de cor"
-        valor={prefs.tema}
-        opcoes={[
-          ['creme', 'Creme'],
-          ['cereja', 'Cereja'],
-          ['piscina', 'Piscina'],
-          ['pessego', 'Pêssego'],
-        ]}
-        mudar={(tema) => mudar({ tema })}
-      />
-      <div className="md:col-span-2">
-        <Opcoes
-          legenda="Estampa"
-          valor={prefs.estampa}
-          opcoes={ESTAMPAS.map((e) => [e, NOMES_ESTAMPAS[e]])}
-          mudar={(estampa) => mudar({ estampa })}
-        />
-      </div>
-      <Opcoes
-        legenda="Modo calmo (sem estampas, adesivos soltos e animações)"
-        valor={prefs.calmo ? 'sim' : 'nao'}
-        opcoes={[
-          ['nao', 'Desligado'],
-          ['sim', 'Ligado'],
-        ]}
-        mudar={(v) => mudar({ calmo: v === 'sim' })}
-      />
-      <Opcoes
-        legenda="Animações"
-        valor={prefs.animacoes ? 'sim' : 'nao'}
-        opcoes={[
-          ['sim', 'Ligadas'],
-          ['nao', 'Desligadas'],
-        ]}
-        mudar={(v) => mudar({ animacoes: v === 'sim' })}
-      />
-      <Opcoes
-        legenda="Fonte"
-        valor={prefs.fonte}
-        opcoes={[
-          ['padrao', 'Padrão'],
-          ['legivel', 'Alta legibilidade'],
-        ]}
-        mudar={(fonte) => mudar({ fonte })}
-      />
-      <Opcoes
-        legenda="Tamanho do texto"
-        valor={prefs.tamanho}
-        opcoes={[
-          ['normal', 'A'],
-          ['grande', 'A+'],
-          ['maior', 'A++'],
-          ['enorme', 'A+++'],
-        ]}
-        mudar={(tamanho) => mudar({ tamanho })}
-      />
-    </div>
   )
 }
 
@@ -263,24 +148,18 @@ function DemoColar() {
 }
 
 export function GuiaDeEstilo() {
-  const [prefs, setPrefs] = useState<Preferencias>(carregar)
-  useEffect(() => {
-    aplicar(prefs)
-    salvar(prefs)
-    if (prefs.modo !== 'auto') return
-    const mq = matchMedia('(prefers-color-scheme: dark)')
-    const ouvir = () => aplicar(prefs)
-    mq.addEventListener('change', ouvir)
-    return () => mq.removeEventListener('change', ouvir)
-  }, [prefs])
-  const mudar = (p: Partial<Preferencias>) => setPrefs((atual) => ({ ...atual, ...p }))
+  const [prefs, mudar] = usePreferencias()
 
   return (
     <div className="min-h-screen pb-24">
       {/* Topo: folha destacável */}
       <header className="estampa estampa-atual relative overflow-hidden bg-destaque-claro">
         <div className="folha-destacavel mx-auto max-w-6xl bg-papel px-5 pb-8 sm:px-10">
+          <Link to="/ajustes" className="mb-4 inline-block font-bold underline decoration-2 underline-offset-4">
+            ← Voltar para os Ajustes
+          </Link>
           <div className="flex flex-wrap items-center gap-4">
+            <h1 className="so-leitor">Caderninho: guia de estilo</h1>
             <Micangas texto="Caderninho" tamanho={44} />
             <Adesivo nome="estrela" tamanho={52} decorativo className="-rotate-12" />
           </div>
@@ -295,7 +174,7 @@ export function GuiaDeEstilo() {
 
       <main className="mx-auto flex max-w-6xl flex-col gap-4 px-4 pt-8 sm:px-6">
         <Secao id="ajustes" rotulo="Experimente" titulo="Ajustes de aparência">
-          <PainelAjustes prefs={prefs} mudar={mudar} />
+          <PainelAparencia prefs={prefs} mudar={mudar} />
         </Secao>
 
         <Secao id="cores" rotulo="Paleta" titulo="Cores">
@@ -395,7 +274,7 @@ export function GuiaDeEstilo() {
                 >
                   <span className="rounded-full border-2 border-linha bg-papel px-3 py-0.5 text-sm font-bold">
                     {prefs.estampa === e && '✓ '}
-                    {NOMES_ESTAMPAS[e]}
+                    {NOMES_ESTAMPAS[e][0]}
                   </span>
                 </button>
               </li>

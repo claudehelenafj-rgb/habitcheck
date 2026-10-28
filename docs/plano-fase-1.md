@@ -49,15 +49,22 @@ Base: guia "Estratégias de organização para pessoas com TDAH e Autismo" (PubM
   - Eventos importados ficam marcados com a origem ("veio da Apple", "veio do Google").
 - **Fase 2:** assinar o link do calendário (atualiza sozinho). Precisa de servidor, porque o navegador não consegue buscar esses links diretamente.
 
+### Widget no Mac
+- Widget nativo do macOS (Central de Widgets) só existe para apps nativos em Swift; um app web não consegue criar.
+- **Fase 1 (etapa 5):** "Janelinha flutuante" com o cartão Agora, timer e remédios do dia.
+  - Chrome e Edge: fica sempre por cima das outras janelas (Document Picture-in-Picture).
+  - Safari: app instalado no Dock abre em modo compacto, numa janela pequena.
+- **Fase 3 (opcional):** widget nativo de verdade, com um pequeno app para Mac.
+
 ## Etapas
 
 | Etapa | O que entra | Situação |
 |---|---|---|
-| 1 | Guia de estilo (cores, fontes, adesivos, estampas, cartões, gráficos) | Aguardando aprovação |
-| 2 | Base: navegação, acessibilidade, PT/EN, banco local, exportar/apagar, PWA offline | |
+| 1 | Guia de estilo (cores, fontes, adesivos, estampas, cartões, gráficos) | Aprovada |
+| 2 | Base: navegação, acessibilidade, PT/EN, banco local, exportar/apagar, PWA offline | Pronta |
 | 3 | Primeiro uso e plano de 2 semanas | |
 | 4 | Captura rápida, caixa de entrada, tarefas A/B/C com passos | |
-| 5 | Tela Hoje | |
+| 5 | Tela Hoje e **janelinha flutuante** (widget) | |
 | 6 | Remédios e sistema de lembretes | |
 | 7 | Consultas e arquivo .ics | |
 | 8 | Calendário semana/mês e **importar calendário** | |

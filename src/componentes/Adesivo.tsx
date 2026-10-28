@@ -242,6 +242,17 @@ const desenhos = {
       <Camadas d="M27 47L37 46L38 57L27 58Z" fora={COR.lavanda} dentro={COR.rosa} borda={5} />
     </g>
   ),
+  engrenagem: (
+    <g transform="rotate(8 32 32)">
+      <Camadas
+        d={poligono(32, 32, Array.from({ length: 32 }, (_, i) => (i % 4 < 2 ? 26 : 20)), Math.PI / 32)}
+        fora={COR.azul}
+        dentro={COR.lavanda}
+      />
+      <path d={redondo(32, 32, 9, 9)} fill={COR.creme} />
+      <Rosto x={32} y={32} e={0.55} bochecha={COR.morango} />
+    </g>
+  ),
 } satisfies Record<string, ReactNode>
 
 export type NomeAdesivo = keyof typeof desenhos

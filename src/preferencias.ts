@@ -1,15 +1,11 @@
-// Preferências visuais. Por enquanto ficam no navegador (localStorage);
-// na etapa 2 passam para o banco local junto com o resto dos dados.
+// Preferências de aparência e idioma.
+// A fonte da verdade é o banco local (tabela configuracoes). Uma cópia fica no localStorage
+// só para o app abrir já com o tema certo, sem piscar, antes de o banco responder.
 
-export type Preferencias = {
-  modo: 'auto' | 'claro' | 'escuro'
-  tema: 'creme' | 'cereja' | 'piscina' | 'pessego'
-  estampa: Estampa
-  calmo: boolean
-  animacoes: boolean
-  fonte: 'padrao' | 'legivel'
-  tamanho: 'normal' | 'grande' | 'maior' | 'enorme'
-}
+import { useLiveQuery } from 'dexie-react-hooks'
+import { useCallback, useEffect, useMemo } from 'react'
+import { banco } from './dados/banco'
+import { mudarIdioma, type Idioma } from './i18n'
 
 export const ESTAMPAS = [
   'bolinhas',
@@ -26,6 +22,17 @@ export const ESTAMPAS = [
 ] as const
 export type Estampa = (typeof ESTAMPAS)[number]
 
+export type Preferencias = {
+  modo: 'auto' | 'claro' | 'escuro'
+  tema: 'creme' | 'cereja' | 'piscina' | 'pessego'
+  estampa: Estampa
+  calmo: boolean
+  animacoes: boolean
+  fonte: 'padrao' | 'legivel'
+  tamanho: 'normal' | 'grande' | 'maior' | 'enorme'
+  idioma: Idioma
+}
+
 export const PADRAO: Preferencias = {
   modo: 'auto',
   tema: 'creme',
@@ -34,24 +41,27 @@ export const PADRAO: Preferencias = {
   animacoes: true,
   fonte: 'padrao',
   tamanho: 'normal',
+  idioma: 'pt-BR',
 }
 
-const CHAVE = 'caderninho:preferencias'
+const CHAVE_ESPELHO = 'caderninho:preferencias'
+const CHAVE_BANCO = 'preferencias'
 
+/** Lê a cópia rápida do localStorage (pode não existir, por exemplo numa janela anônima). */
 export function carregar(): Preferencias {
   try {
-    const salvo = localStorage.getItem(CHAVE)
+    const salvo = localStorage.getItem(CHAVE_ESPELHO)
     return salvo ? { ...PADRAO, ...JSON.parse(salvo) } : PADRAO
   } catch {
     return PADRAO
   }
 }
 
-export function salvar(p: Preferencias) {
+function espelhar(p: Preferencias) {
   try {
-    localStorage.setItem(CHAVE, JSON.stringify(p))
+    localStorage.setItem(CHAVE_ESPELHO, JSON.stringify(p))
   } catch {
-    // sem armazenamento (janela anônima etc.): segue só nesta visita
+    // sem armazenamento rápido: o app só pode piscar um instante ao abrir
   }
 }
 
@@ -68,5 +78,41 @@ export function aplicar(p: Preferencias) {
   raiz.dataset.animacoes = p.animacoes ? 'sim' : 'nao'
   raiz.dataset.fonte = p.fonte
   raiz.dataset.tamanho = p.tamanho
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', escuro ? '#422F0E' : '#FBF6EE')
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', escuro ? '#521429' : '#FBF6EE')
+}
+
+/** Preferências atuais e uma função para mudar algumas delas. */
+export function usePreferencias(): [Preferencias, (mudanca: Partial<Preferencias>) => void] {
+  // null = banco respondeu e não há nada salvo; undefined = ainda carregando
+  const salvo = useLiveQuery(async () => (await banco.configuracoes.get(CHAVE_BANCO)) ?? null, [])
+  const prefs = useMemo<Preferencias>(() => {
+    if (salvo === undefined) return carregar()
+    return { ...PADRAO, ...((salvo?.valor as Partial<Preferencias>) ?? {}) }
+  }, [salvo])
+
+  const mudar = useCallback(
+    (mudanca: Partial<Preferencias>) => {
+      const novas = { ...prefs, ...mudanca }
+      aplicar(novas)
+      espelhar(novas)
+      banco.configuracoes.put({ chave: CHAVE_BANCO, valor: novas })
+    },
+    [prefs],
+  )
+  return [prefs, mudar]
+}
+
+/** Aplica as preferências na página. Usar uma vez só, na raiz do app. */
+export function useAplicarPreferencias() {
+  const [prefs] = usePreferencias()
+  useEffect(() => {
+    aplicar(prefs)
+    espelhar(prefs)
+    mudarIdioma(prefs.idioma)
+    if (prefs.modo !== 'auto') return
+    const mq = matchMedia('(prefers-color-scheme: dark)')
+    const ouvir = () => aplicar(prefs)
+    mq.addEventListener('change', ouvir)
+    return () => mq.removeEventListener('change', ouvir)
+  }, [prefs])
 }
