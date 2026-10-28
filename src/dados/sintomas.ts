@@ -44,3 +44,13 @@ export function useSintomasDoMes(dia: Dia): RegistroSintoma[] | undefined {
     [inicio, fim],
   )
 }
+
+/** O registro de sintoma mais recente (null = nenhum ainda; undefined = carregando). */
+export function useUltimoSintoma(): RegistroSintoma | null | undefined {
+  return useLiveQuery(async () => (await banco.sintomas.orderBy('quando').last()) ?? null, [])
+}
+
+/** Registros a partir de um dia (para contar o que mais ajudou nos últimos tempos). */
+export function useSintomasDesde(dia: Dia): RegistroSintoma[] | undefined {
+  return useLiveQuery(() => banco.sintomas.where('dia').aboveOrEqual(dia).toArray(), [dia])
+}

@@ -37,3 +37,8 @@ export async function restaurarCheckin(checkin: Checkin) {
 export function useCheckinsDoDia(dia: Dia): Checkin[] | undefined {
   return useLiveQuery(async () => doDia(await banco.checkins.where('dia').equals(dia).toArray(), dia), [dia])
 }
+
+/** O check-in mais recente de todos (null = nenhum ainda; undefined = carregando). */
+export function useUltimoCheckin(): Checkin | null | undefined {
+  return useLiveQuery(async () => (await banco.checkins.orderBy('quando').last()) ?? null, [])
+}

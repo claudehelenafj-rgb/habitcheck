@@ -7,6 +7,7 @@ import { Adesivo } from '../componentes/Adesivo'
 import { CheckinEmocoes } from '../componentes/CheckinEmocoes'
 import { Hobbies } from '../componentes/Hobbies'
 import { RegistroSintomas } from '../componentes/RegistroSintomas'
+import { Sugestoes } from '../componentes/Sugestoes'
 import { alternar, useBemEstar } from '../dados/bemEstar'
 import { FERRAMENTAS, type Ferramenta } from '../logica/bemEstar'
 
@@ -51,6 +52,8 @@ export function BemEstar() {
         </h2>
         {ligadas.some((f) => f.id === 'checkin') && <CheckinEmocoes />}
         {ligadas.some((f) => f.id === 'sintomas') && <RegistroSintomas />}
+        {/* logo depois do check-in e dos sintomas, que dão o contexto das ideias */}
+        {ligadas.some((f) => f.id === 'sugestoes') && <Sugestoes />}
         {ligadas.some((f) => f.id === 'hobbies') && <Hobbies />}
         {ligadas.some((f) => f.etapa) && (
           <ul className="grid gap-3 sm:grid-cols-2">

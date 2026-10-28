@@ -11,6 +11,7 @@ import { Adesivo } from './Adesivo'
 import { mostrarAviso } from './Avisos'
 import { Botao } from './Botao'
 import { Etiquetas } from './Etiquetas'
+import { irParaSugestoes } from './Sugestoes'
 
 const COR_FAIXA: Record<Faixa, string> = { leve: 'bg-menta', media: 'bg-manteiga', alta: 'bg-pessego' }
 const VALORES = Array.from({ length: 11 }, (_, i) => i)
@@ -146,6 +147,11 @@ function UltimoCheckin({ checkin, abrirPlano }: { checkin: Checkin; abrirPlano: 
             {t('checkin.combinarAgora')}
           </button>
         </p>
+      )}
+      {config?.ferramentas.includes('sugestoes') && (
+        <button type="button" onClick={irParaSugestoes} className="self-start font-bold underline decoration-2 underline-offset-4">
+          {t('sugestoes.irPara')} ↓
+        </button>
       )}
     </div>
   )

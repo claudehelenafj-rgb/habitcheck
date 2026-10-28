@@ -25,6 +25,8 @@ import { mostrarAviso } from './Avisos'
 import { Botao } from './Botao'
 import { Termometro } from './CheckinEmocoes'
 import { Etiquetas } from './Etiquetas'
+import { irParaSugestoes } from './Sugestoes'
+import { useBemEstar } from '../dados/bemEstar'
 
 // Tamanho e cor juntos: nunca só a cor diz a intensidade. Nada de vermelho.
 const BOLINHA: Record<Exclude<NivelBolinha, 0>, string> = {
@@ -45,6 +47,8 @@ function FormularioSintoma() {
   const [ajudouTexto, setAjudouTexto] = useState('')
   const [duracao, setDuracao] = useState<Duracao>()
   const [efeitoRemedio, setEfeitoRemedio] = useState(false)
+  const [registrou, setRegistrou] = useState(false)
+  const config = useBemEstar()
   const faltam = [!sintoma.length && t('sintomas.faltaSintoma'), intensidade === undefined && t('sintomas.faltaIntensidade')].filter(Boolean)
 
   async function registrar() {
@@ -58,6 +62,7 @@ function FormularioSintoma() {
     setAjudouTexto('')
     setDuracao(undefined)
     setEfeitoRemedio(false)
+    setRegistrou(true)
     mostrarAviso(t('sintomas.registrado'), () => apagarSintoma(r.id))
   }
 
@@ -138,6 +143,11 @@ function FormularioSintoma() {
           {t('sintomas.registrar')}
         </Botao>
         {faltam.length > 0 && <span className="text-sm">{t('sintomas.falta', { lista: faltam.join(', ') })}</span>}
+        {registrou && config?.ferramentas.includes('sugestoes') && (
+          <button type="button" onClick={irParaSugestoes} className="font-bold underline decoration-2 underline-offset-4">
+            {t('sugestoes.irPara')} ↓
+          </button>
+        )}
       </div>
     </form>
   )

@@ -22,6 +22,13 @@ Autismo" (lido). Plano aprovado em 28/10/2026.
   dívida: a contagem recomeça quando acaba. O porquê do hobby parado guarda histórico (para a B7) e só aparece se
   foi anotado depois da última vez. Adesivos novos: música, pincel, novelo e videogame. A seção de hobbies na
   revisão semanal entra com a etapa 14.
+- Sugestões (B5): contexto = check-in ou sintoma das últimas 4 horas (vale o mais novo); sem contexto, a pessoa
+  diz a energia em um toque e, até lá, só aparecem ideias leves. Nunca sugere algo que pede mais energia do que a
+  pessoa tem; hobbies pedem energia média. Tensão alta (7 a 10) põe primeiro o que acalma. Pontos: "ajudou?"
+  (sim +3, mais ou menos +1, não −3, últimas 5 respostas), hobby parado (até +3), o que ajudou nos sintomas
+  dos últimos 60 dias (até +3), e −1 se já foi escolhida hoje. "Outras ideias" passa para as próximas.
+  Responder sobre um hobby registra a vez dele. A atenção plena de 3 a 5 minutos e a caminhada estão entre as
+  ideias iniciais, que a pessoa edita.
 - Ordem: **I1** tema Índigo (guia de estilo para aprovar, depois aplicar) e **B1–B8** Bem-estar,
   antes da etapa 9.
   - B1 base da aba (ativar nos Ajustes, cores, adesivos, ferramentas que se ligam uma ou duas por vez);

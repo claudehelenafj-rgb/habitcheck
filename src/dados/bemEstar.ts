@@ -4,6 +4,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { alternarFerramenta, type IdFerramenta } from '../logica/bemEstar'
 import type { PlanoFaixas } from '../logica/checkin'
+import type { Atividade } from '../logica/sugestoes'
 import { banco } from './banco'
 
 export type ConfigBemEstar = {
@@ -17,6 +18,8 @@ export type ConfigBemEstar = {
   listaPorques?: string[]
   listaAjudou?: string[]
   listaMotivosHobby?: string[]
+  /** ideias de atividade; ausente = lista inicial */
+  atividades?: Atividade[]
 }
 
 /** Nome do campo de cada lista de etiquetas editável. */

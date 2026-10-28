@@ -8,6 +8,7 @@ import type { Evento } from '../logica/calendario'
 import type { Checkin } from '../logica/checkin'
 import type { Hobby, VezHobby } from '../logica/hobbies'
 import type { RegistroSintoma } from '../logica/sintomas'
+import type { RegistroSugestao } from '../logica/sugestoes'
 import type { Consulta } from '../logica/consultas'
 import type { RegistroDose, Remedio } from '../logica/remedios'
 
@@ -64,6 +65,7 @@ export class BancoCaderninho extends Dexie {
   sintomas!: EntityTable<RegistroSintoma, 'id'>
   hobbies!: EntityTable<Hobby, 'id'>
   vezesHobby!: EntityTable<VezHobby, 'id'>
+  sugestoes!: EntityTable<RegistroSugestao, 'id'>
 
   constructor(nome = 'caderninho') {
     super(nome)
@@ -100,11 +102,15 @@ export class BancoCaderninho extends Dexie {
       hobbies: 'id, arquivadoEm',
       vezesHobby: 'id, hobbyId, dia',
     })
+    // Bem-estar (B5): sugestões escolhidas e a resposta de "ajudou?"
+    this.version(8).stores({
+      sugestoes: 'id, chave, dia',
+    })
   }
 }
 
 /** Tabelas com dados de saúde mental (exportar e apagar separado na etapa B8). */
-export const TABELAS_BEM_ESTAR = ['checkins', 'sintomas', 'hobbies', 'vezesHobby'] as const
+export const TABELAS_BEM_ESTAR = ['checkins', 'sintomas', 'hobbies', 'vezesHobby', 'sugestoes'] as const
 
 export const banco = new BancoCaderninho()
 
