@@ -15,6 +15,7 @@ export type IdTela =
   | 'faculdade'
   | 'quarto'
   | 'alimentacao'
+  | 'dinheiro'
   | 'ajustes'
 
 export type Tela = {
@@ -32,8 +33,8 @@ export const TELAS_PRINCIPAIS: Tela[] = [
   { id: 'hoje', caminho: '/hoje', adesivo: 'sol', atalho: 'h', etapa: 5 },
   { id: 'calendario', caminho: '/calendario', adesivo: 'calendario', atalho: 'c', etapa: 8 },
   { id: 'caixa', caminho: '/caixa', adesivo: 'envelope', atalho: 'x', etapa: 4 },
-  { id: 'objetivos', caminho: '/objetivos', adesivo: 'estrela', atalho: 'o', etapa: 14 },
-  { id: 'rituais', caminho: '/rituais', adesivo: 'lua', atalho: 'r', etapa: 13 },
+  { id: 'objetivos', caminho: '/objetivos', adesivo: 'estrela', atalho: 'o', etapa: 15 },
+  { id: 'rituais', caminho: '/rituais', adesivo: 'lua', atalho: 'r', etapa: 14 },
 ]
 
 export const TELAS_AREAS: Tela[] = [
@@ -43,6 +44,7 @@ export const TELAS_AREAS: Tela[] = [
   { id: 'faculdade', caminho: '/faculdade', adesivo: 'livro', atalho: 'f', etapa: 9, area: 'faculdade' },
   { id: 'quarto', caminho: '/quarto', adesivo: 'vassoura', atalho: 'q', etapa: 11, area: 'quarto' },
   { id: 'alimentacao', caminho: '/alimentacao', adesivo: 'prato', atalho: 'l', etapa: 12, area: 'alimentacao' },
+  { id: 'dinheiro', caminho: '/dinheiro', adesivo: 'cofrinho', atalho: 'd', etapa: 13, area: 'dinheiro' },
 ]
 
 export const TELA_AJUSTES: Tela = { id: 'ajustes', caminho: '/ajustes', adesivo: 'engrenagem', atalho: ',' }

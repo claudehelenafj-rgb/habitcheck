@@ -49,6 +49,24 @@ Base: guia "Estratégias de organização para pessoas com TDAH e Autismo" (PubM
   - Eventos importados ficam marcados com a origem ("veio da Apple", "veio do Google").
 - **Fase 2:** assinar o link do calendário (atualiza sozinho). Precisa de servidor, porque o navegador não consegue buscar esses links diretamente.
 
+### Dinheiro (planejamento financeiro)
+Área nova, cor menta + verde-piscina, adesivo de cofrinho. Nada se conecta ao banco; tudo fica no aparelho;
+sem conselho de investimento. O guia científico não trata de finanças: os recursos usam as estratégias gerais
+(lembrete com a ação escrita, deixar à vista, revisão semanal).
+
+Na Fase 1:
+1. **Contas a pagar:** vencimento, valor, repetição mensal; lembrete com a ação ("pagar a conta de luz no app do
+   banco e marcar aqui") alguns dias antes e no dia; vencimentos aparecem no calendário.
+2. **Potes da semana:** quanto posso gastar em cada pote (mercado, lazer, transporte...); a barra esvazia conforme
+   os gastos; gasto rápido pelo Cmd+K ("35 ifood").
+3. **Pausa antes de comprar:** a compra por impulso vai para uma lista de desejos e espera 48 h; depois, "ainda quero?".
+4. **Cofrinho:** meta de economia ligada a um objetivo, com gráfico do que já foi guardado.
+5. **Dinheiro na revisão semanal:** 5 minutos para contas, potes e cofrinho.
+
+Depois: assinaturas (aviso antes de renovar).
+
+Valores guardados em centavos (números inteiros, sem erro de arredondamento) e mostrados em reais.
+
 ### Widget no Mac
 - Widget nativo do macOS (Central de Widgets) só existe para apps nativos em Swift; um app web não consegue criar.
 - **Fase 1 (etapa 5):** "Janelinha flutuante" com o cartão Agora, timer e remédios do dia.
@@ -72,12 +90,14 @@ Base: guia "Estratégias de organização para pessoas com TDAH e Autismo" (PubM
 | 10 | Academia | |
 | 11 | Quarto | |
 | 12 | Alimentação | |
-| 13 | Rituais e revisão semanal | |
-| 14 | **Meus objetivos** com gráficos | |
-| 15 | Álbum de adesivos, recompensas e conferência final | |
+| 13 | **Dinheiro**: contas a pagar, potes da semana, pausa antes de comprar, cofrinho | |
+| 14 | Rituais e revisão semanal (com 5 min de dinheiro) | |
+| 15 | **Meus objetivos** com gráficos | |
+| 16 | Álbum de adesivos, recompensas e conferência final | |
 
 ## Lógica com testes automáticos
 
-Horários de lembretes (adiar, repetir, silêncio), recorrências, planejamento reverso (prova → sessões; consulta → alarmes),
+Horários de lembretes (adiar, repetir, silêncio), recorrências, vencimento de contas (ex.: dia 31 em mês de 30 dias),
+saldo dos potes e virada da semana, espera de 48 h da lista de desejos, progresso do cofrinho, planejamento reverso (prova → sessões; consulta → alarmes),
 avisos do semestre, estoque de remédio, "X de 7 dias", limite de 3 tarefas A, escolha do cartão "Agora",
 importação de .ics sem duplicar, e o contraste de todas as cores usadas.

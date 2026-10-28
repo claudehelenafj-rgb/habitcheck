@@ -25,6 +25,7 @@ export const en: Recursos = {
     faculdade: 'Studies',
     quarto: 'Bedroom',
     alimentacao: 'Food',
+    dinheiro: 'Money',
     ajustes: 'Settings',
     areas: 'Areas',
     mais: 'More',

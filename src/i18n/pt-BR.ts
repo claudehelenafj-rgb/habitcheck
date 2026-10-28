@@ -24,6 +24,7 @@ export const ptBR = {
     faculdade: 'Faculdade',
     quarto: 'Quarto',
     alimentacao: 'Alimentação',
+    dinheiro: 'Dinheiro',
     ajustes: 'Ajustes',
     areas: 'Áreas',
     mais: 'Mais',

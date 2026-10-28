@@ -1,6 +1,14 @@
 import type { NomeAdesivo } from '../componentes/Adesivo'
 
-export type IdArea = 'remedios' | 'consultas' | 'academia' | 'faculdade' | 'quarto' | 'alimentacao' | 'base'
+export type IdArea =
+  | 'remedios'
+  | 'consultas'
+  | 'academia'
+  | 'faculdade'
+  | 'quarto'
+  | 'alimentacao'
+  | 'dinheiro'
+  | 'base'
 
 export type Area = {
   id: IdArea
@@ -62,6 +70,16 @@ export const AREAS: Record<IdArea, Area> = {
     claro: 'bg-menta',
     forte: 'bg-verde-agua',
     forteCss: 'var(--forte-agua)',
+  },
+  // menta + verde-piscina: verde de dinheiro. Divide um tom com Alimentação e outro com Consultas,
+  // mas a combinação é única, e o adesivo e o nome sempre aparecem.
+  dinheiro: {
+    id: 'dinheiro',
+    nome: 'Dinheiro',
+    adesivo: 'cofrinho',
+    claro: 'bg-menta',
+    forte: 'bg-verde-piscina',
+    forteCss: 'var(--forte-piscina)',
   },
   base: {
     id: 'base',

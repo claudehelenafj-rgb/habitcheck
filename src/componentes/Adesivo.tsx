@@ -242,6 +242,25 @@ const desenhos = {
       <Camadas d="M27 47L37 46L38 57L27 58Z" fora={COR.lavanda} dentro={COR.rosa} borda={5} />
     </g>
   ),
+  cofrinho: (
+    <g>
+      <path d="M27 6L37 6L38 12L26 12Z" fill={COR.laranja} />
+      <path d="M28 8.5h8" stroke={COR.manteiga} strokeWidth={1.5} />
+      <Camadas
+        d="M14 24L20 19L30 17L42 18L50 23L54 30L54 38L50 45L46 47L45 55L39 55L38 49L26 49L25 55L19 55L18 47L12 43L9 36L10 28Z"
+        fora={COR.morango}
+        dentro={COR.rosa}
+      />
+      <path d="M16 22L14 13L22 19Z" fill={COR.morango} />
+      <path d="M27 21h10" stroke={COR.chocolate} strokeWidth={2.5} strokeLinecap="round" />
+      <ellipse cx="53" cy="34" rx="5" ry="6" fill={COR.morango} />
+      <circle cx="52" cy="32.5" r="1" fill={COR.chocolate} />
+      <circle cx="52" cy="35.5" r="1" fill={COR.chocolate} />
+      <circle cx="41" cy="29" r="1.8" fill={COR.chocolate} />
+      <ellipse cx="44" cy="37" rx="3" ry="1.8" fill={COR.morango} />
+      <path d="M9 31q-5 -1 -4 -5" fill="none" stroke={COR.rosa} strokeWidth={2.2} strokeLinecap="round" />
+    </g>
+  ),
   engrenagem: (
     <g transform="rotate(8 32 32)">
       <Camadas
