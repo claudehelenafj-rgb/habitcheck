@@ -2,6 +2,7 @@
 
 import type { Tarefa } from '../dados/banco'
 import type { Ocorrencia } from './calendario'
+import { pendenteHoje, type Habito, type RegistroHabito } from './habitos'
 import { planoReverso, type Consulta } from './consultas'
 import { estadoDose, textoDoLembrete, type DosePrevista, type RegistroDose } from './remedios'
 import type { Dia } from './datas'
@@ -55,16 +56,13 @@ export function blocoJaPassou(bloco: Bloco, atual: Bloco): boolean {
 
 // ---------- Cartão "Agora" ----------
 
-/**
- * Tudo o que pode aparecer no cartão "Agora". Hoje só existem tarefas;
- * remédios, transições, compromissos e hábitos entram nas próximas etapas.
- */
+/** Tudo o que pode aparecer no cartão "Agora". */
 export type Candidato =
   | { tipo: 'remedio'; id: string; titulo: string; horario: Date; dose?: DosePrevista }
   | { tipo: 'transicao'; id: string; titulo: string; horario: Date; detalhe?: string }
   | { tipo: 'compromisso'; id: string; titulo: string; inicio: Date; fim?: Date; detalhe?: string; origem?: 'consulta' | 'evento' }
   | { tipo: 'tarefa'; id: string; titulo: string; tarefa: Tarefa }
-  | { tipo: 'habito'; id: string; titulo: string; bloco?: Bloco }
+  | { tipo: 'habito'; id: string; titulo: string; bloco?: Bloco; habito?: Habito }
 
 /** Compromisso entra no "Agora" a partir de 15 minutos antes. */
 export const ANTECEDENCIA_COMPROMISSO_MIN = 15
@@ -119,6 +117,21 @@ export function candidatosDeTarefas(tarefas: Tarefa[], hoje: Dia): Candidato[] {
   return tarefas
     .filter((t) => t.prioridade === 'A' && t.dia === hoje && !t.feitaEm)
     .map((tarefa) => ({ tipo: 'tarefa', id: tarefa.id, titulo: proximoPasso(tarefa)?.texto ?? tarefa.titulo, tarefa }))
+}
+
+/** Hábitos ainda pendentes hoje viram candidatos ao "Agora" (no bloco deles, ou a qualquer hora). */
+export function candidatosDeHabitos(habitos: Habito[], registros: RegistroHabito[], hoje: Dia): Candidato[] {
+  return habitos
+    .filter((h) => pendenteHoje(h, registros.filter((r) => r.habitoId === h.id), hoje))
+    .map((h) => ({ tipo: 'habito', id: h.id, titulo: h.titulo, bloco: h.bloco, habito: h }))
+}
+
+/** Hábitos que aparecem na linha do dia: os pendentes hoje e os que já foram feitos hoje. */
+export function habitosDoDia(habitos: Habito[], registros: RegistroHabito[], hoje: Dia): Array<{ habito: Habito; registro?: RegistroHabito }> {
+  return habitos
+    .filter((h) => !h.arquivadoEm)
+    .map((h) => ({ habito: h, registro: registros.find((r) => r.habitoId === h.id && r.dia === hoje) }))
+    .filter(({ habito, registro }) => registro || pendenteHoje(habito, registros.filter((r) => r.habitoId === habito.id), hoje))
 }
 
 /** Tarefas de hoje que aparecem na linha do dia: A marcadas para hoje e tudo o que foi feito hoje. */

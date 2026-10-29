@@ -7,8 +7,10 @@ import { useBemEstar } from './dados/bemEstar'
 import { useUltimoCheckin } from './dados/checkins'
 import { useAvaliacoes, useConfigFaculdade } from './dados/faculdade'
 import { marcarAvisoFoco, useEstadoFoco } from './dados/foco'
+import { useHabitosAtivos } from './dados/habitos'
 import { avisoAcompanhado, lembreteDeHoje, type Avaliacao } from './logica/faculdade'
 import { acabouFase, type EstadoFoco, type FaseFoco } from './logica/foco'
+import { deveLembrar, type Habito } from './logica/habitos'
 import { tocarSino } from './telaFoco'
 import { jaAvisouTransicao, registrarTransicao, useConsultas } from './dados/consultas'
 import { registrarAviso, useConfigAvisos, useDosesDoDia } from './dados/remedios'
@@ -60,6 +62,8 @@ export type TextosLembretes = {
   avaliacao: (a: Avaliacao, dias: number) => [string, string]
   /** estudo acompanhado daqui a 10 min: [título, texto] */
   acompanhado: (onde: string, hora: string) => [string, string]
+  /** lembrete do hábito, com o plano se-então escrito: [título, texto] */
+  habito: (h: Habito) => [string, string]
   /** fim de uma fase do modo foco: [título, texto] */
   fimFoco: (fase: FaseFoco) => [string, string]
   /** "avisos discretos": título e texto que trocam todos os outros */
@@ -198,6 +202,27 @@ export async function avisarFimDeFase(e: EstadoFoco, textos: TextosDiscretos & P
   }
 }
 
+/** Hábitos com lembrete: no horário (até 30 min depois), uma vez por dia, só se ainda não fez hoje. */
+function useAvisosHabitos(agora: Date, textos: TextosLembretes, discretos: boolean) {
+  const dados = useHabitosAtivos()
+  const emAndamento = useRef(new Set<string>())
+  useEffect(() => {
+    if (!dados) return
+    const hoje = diaLocal(agora)
+    for (const h of dados.habitos) {
+      if (!deveLembrar(h, dados.registros.filter((r) => r.habitoId === h.id), agora)) continue
+      const id = `habito|${h.id}|${hoje}`
+      if (emAndamento.current.has(id)) continue
+      emAndamento.current.add(id)
+      ;(async () => {
+        if (await jaAvisouTransicao(id)) return
+        await registrarTransicao(id)
+        await mostrarAvisoSistema(...comDiscricao(textos, discretos, ...textos.habito(h)), id)
+      })().finally(() => emAndamento.current.delete(id))
+    }
+  }, [dados, agora, textos, discretos])
+}
+
 /** Com a pessoa em outra tela do app, o fim da fase de foco também avisa (a cada 20 s). */
 function useAvisosFoco(agora: Date, textos: TextosLembretes, discretos: boolean) {
   const foco = useEstadoFoco()
@@ -220,6 +245,7 @@ export function useLembretes(textos: TextosLembretes, areas: AreasDosLembretes =
   useAvisosBemEstar(agora, textos, !!areas.bemEstar, discretos)
   useAvisosFaculdade(agora, textos, !!areas.faculdade, discretos)
   useAvisosFoco(agora, textos, discretos)
+  useAvisosHabitos(agora, textos, discretos)
 
   useEffect(() => {
     if (!dados) return

@@ -8,6 +8,7 @@ import type { Evento } from '../logica/calendario'
 import type { Checkin } from '../logica/checkin'
 import type { Avaliacao } from '../logica/faculdade'
 import type { SessaoFoco } from '../logica/foco'
+import type { Habito, RegistroHabito } from '../logica/habitos'
 import type { Hobby, VezHobby } from '../logica/hobbies'
 import type { NotaRemedio } from '../logica/remedioNoPlano'
 import type { RegistroSintoma } from '../logica/sintomas'
@@ -76,6 +77,8 @@ export class BancoCaderninho extends Dexie {
   notasRemedio!: EntityTable<NotaRemedio, 'id'>
   avaliacoes!: EntityTable<Avaliacao, 'id'>
   sessoesFoco!: EntityTable<SessaoFoco, 'id'>
+  habitos!: EntityTable<Habito, 'id'>
+  registrosHabito!: EntityTable<RegistroHabito, 'id'>
 
   constructor(nome = 'caderninho') {
     super(nome)
@@ -129,6 +132,11 @@ export class BancoCaderninho extends Dexie {
       tarefas: 'id, dia, prioridade, area, objetivoId, feitaEm, avaliacaoId',
       avaliacoes: 'id, data, materia',
       sessoesFoco: 'id, dia, tarefaId',
+    })
+    // etapa 10: hábitos (academia) e um registro por hábito e por dia
+    this.version(12).stores({
+      habitos: 'id, area, arquivadoEm',
+      registrosHabito: 'id, habitoId, dia',
     })
   }
 }

@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import type { Tarefa } from '../dados/banco'
+import type { Habito, RegistroHabito } from './habitos'
 import {
   blocoDoHorario,
   blocoJaPassou,
+  candidatosDeHabitos,
   candidatosDeTarefas,
   escolherAgora,
   fimDoBloco,
   formatarDuracao,
+  habitosDoDia,
   minutosAte,
   tarefasDoDia,
   type Candidato,
@@ -180,5 +183,40 @@ describe('eventos do calendário no cartão Agora', () => {
     expect(escolherAgora(candidatosDeEventos(lista, em(12, 40)), em(12, 40))).toBeUndefined()
     expect(escolherAgora(candidatosDeEventos(lista, em(12, 50)), em(12, 50))?.titulo).toBe('Almoço')
     expect(escolherAgora(candidatosDeEventos(lista, em(14, 1)), em(14, 1))).toBeUndefined()
+  })
+})
+
+describe('hábitos na tela Hoje', () => {
+  const hoje = '2026-10-29' // quinta
+  const h = (id: string, extra: Partial<Habito> = {}): Habito => ({
+    id,
+    titulo: id,
+    adesivo: 'haltere',
+    se: 'x',
+    entao: 'y',
+    minima: 'z',
+    meta: 3,
+    dias: [],
+    criadoEm: '',
+    ...extra,
+  })
+  const reg = (habitoId: string, dia: string): RegistroHabito => ({ id: `${habitoId}|${dia}`, habitoId, dia, nivel: 'completo', quando: '' })
+
+  it('candidatos: só os pendentes hoje, cada um com o seu bloco', () => {
+    const lista = candidatosDeHabitos(
+      [h('a', { bloco: 'tarde' }), h('b', { dias: [1] }), h('c'), h('d', { arquivadoEm: 'x' })],
+      [reg('c', hoje), reg('a', '2026-10-27')],
+      hoje,
+    )
+    expect(lista.map((c) => c.id)).toEqual(['a'])
+    expect(lista[0]).toMatchObject({ tipo: 'habito', bloco: 'tarde' })
+  })
+
+  it('linha do dia: pendentes e os já feitos hoje', () => {
+    const lista = habitosDoDia([h('a'), h('b', { dias: [1] }), h('c')], [reg('c', hoje)], hoje)
+    expect(lista.map((x) => [x.habito.id, !!x.registro])).toEqual([
+      ['a', false],
+      ['c', true],
+    ])
   })
 })

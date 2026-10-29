@@ -7,12 +7,14 @@ import { Link } from 'react-router'
 import { alternarPasso, concluirTarefa, reabrirTarefa } from '../dados/tarefas'
 import { iniciarTimer, pararTimer, segundosRestantes, useAgora, useTimer } from '../dados/timer'
 import { AREAS } from '../design/areas'
+import { diaLocal } from '../logica/datas'
 import { formatarDuracao, type Candidato } from '../logica/hoje'
 import { proximoPasso } from '../logica/tarefas'
 import { Adesivo } from './Adesivo'
 import { mostrarAviso } from './Avisos'
 import { Botao } from './Botao'
 import { BotoesDose } from './BotoesDose'
+import { BotoesHabito, PlanoSeEntao } from './CartaoHabito'
 import { TimerVisual } from './Enfeites'
 
 const TIMER_PADRAO_MIN = 25
@@ -132,8 +134,29 @@ export function CartaoAgora({ candidato, compacto = false, semNada }: Props) {
     )
   }
 
+  if (candidato.tipo === 'habito') {
+    const habito = candidato.habito
+    const area = AREAS[habito?.area ?? 'academia']
+    return (
+      <section aria-labelledby="titulo-agora" className={`cartao flex flex-col gap-3 ${area.claro} ${compacto ? 'p-4' : 'p-6'}`}>
+        <p className="rotulo flex items-center gap-2">
+          <span id="titulo-agora">{t('hoje.agora')}</span>
+          <span aria-hidden="true">·</span>
+          <Adesivo nome={habito?.adesivo ?? area.adesivo} tamanho={20} />
+          {t(`nav.${area.id}`)}
+        </p>
+        <p className={`font-titulo leading-tight font-semibold break-words ${compacto ? 'text-2xl' : 'text-3xl sm:text-4xl'}`}>{candidato.titulo}</p>
+        {habito && (
+          <>
+            <PlanoSeEntao habito={habito} className="text-lg" />
+            <BotoesHabito habito={habito} hoje={diaLocal()} grande={!compacto} />
+          </>
+        )}
+      </section>
+    )
+  }
+
   if (candidato.tipo !== 'tarefa') {
-    // hábitos chegam na etapa da academia
     return (
       <section className="cartao bg-papel p-6">
         <p className="rotulo">{t('hoje.agora')}</p>

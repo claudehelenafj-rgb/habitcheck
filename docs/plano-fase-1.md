@@ -102,7 +102,8 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | B8 | **Bem-estar**: PIN, avisos discretos, lembretes de check-in, baixar/apagar só o Bem-estar | Pronta |
 | 9 | Faculdade: semestre, provas e entregas, planejamento de trás para frente (parte 1) | Pronta |
 | 9 | Modo foco, saída do hiperfoco, estudo acompanhado (parte 2) | Pronta |
-| 10 | Academia | |
+| 10 | Academia: hábitos com plano se-então, versão mínima e "X de 7 dias" (parte 1) | Pronta |
+| 10 | Base de lançamento e treino acompanhado (parte 2) | |
 | 11 | Quarto | |
 | 12 | Alimentação | |
 | 13 | **Dinheiro**: contas a pagar, potes da semana, pausa antes de comprar, cofrinho | |
@@ -135,6 +136,24 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 - Entradas: "Estudar agora", cartão "Agora" da tela Hoje e cada cartão de tarefa (volta para a tela de onde saiu).
 - Estudo acompanhado: combinados com onde, dias da semana e hora, aviso 10 min antes (uma vez por encontro, só com a
   Faculdade ligada, respeita os avisos discretos), o próximo encontro à vista e o aviso de que a pesquisa ainda é inicial.
+
+## Academia (etapa 10)
+
+- Hábitos com plano se-então ("Se eu chegar da faculdade, então troco de roupa antes de sentar") e versão mínima,
+  que também conta como feito. Modelos prontos e editáveis (ir à academia, caminhada, alongar) ou do zero.
+- Dias combinados (a meta vem dos dias) ou "qualquer dia" com quantas vezes por semana; parte do dia opcional
+  (manhã, tarde, noite) para o cartão "Agora" e a linha do dia.
+- Registro: "Fiz!" ou "Fiz a versão mínima", com desfazer. Um registro por dia. Na grade da semana (segunda a
+  domingo, "X de 7 dias") dá para tocar num dia esquecido (feito → mínima → nada); dia sem registro tem só contorno,
+  nunca cor de erro; dia não combinado fica com um pontinho e, se fizer, conta.
+- Meta da semana sem cobrança: "Nesta semana: 2 de 3" ou "Meta da semana feita!".
+- Tela Hoje: hábito pendente do bloco atual (ou sem bloco) entra no "Agora" depois das tarefas A; os hábitos de hoje
+  aparecem na linha do dia (com ✓ e "mín.") e no anel de progresso da Academia. Só das áreas ligadas.
+- Lembrete opcional no horário escolhido, com o plano escrito ("Ir à academia: Se…, então…"), uma vez por dia e só se
+  ainda não fez (respeita os avisos discretos).
+- Arquivar sem culpa (não apaga, dá para trazer de volta); apagar com desfazer. Na caixa de entrada, "Virar hábito".
+- A grade da semana agora fala português e inglês; nos remédios, dia sem dose aparece como "não estava combinado"
+  e o meio-termo como "só parte das doses".
 
 ## Lógica com testes automáticos
 

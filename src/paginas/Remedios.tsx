@@ -73,7 +73,7 @@ function CartaoRemedio({ remedio, registros, hoje, editar }: { remedio: Remedio;
       rotulo: data.toLocaleDateString(i18n.language, { weekday: 'short' }).replace('.', '').toUpperCase(),
       nomeCompleto: data.toLocaleDateString(i18n.language, { weekday: 'long' }),
       numero: data.getDate(),
-      estado: estado === 'nao-toma' ? 'futuro' : estado,
+      estado: estado === 'nao-toma' ? 'livre' : estado,
       hoje: dia === hoje,
     }
   })
@@ -95,7 +95,7 @@ function CartaoRemedio({ remedio, registros, hoje, editar }: { remedio: Remedio;
         </button>
       </div>
       {remedio.observacao && <p className="text-sm">{remedio.observacao}</p>}
-      <GradeSemanal titulo={t('remedios.semana')} adesivo="pilula" tom="bg-morango-claro" dias={dias} />
+      <GradeSemanal titulo={t('remedios.semana')} adesivo="pilula" tom="bg-morango-claro" dias={dias} textoMinimo={t('remedios.parteDasDoses')} />
       {estoque !== null && (
         <div className={`flex flex-wrap items-center gap-3 rounded-2xl border-2 p-3 ${precisaComprar(remedio) ? 'border-linha bg-manteiga' : 'border-linha/40'}`}>
           <span className="font-bold">{t('remedios.estoque')}:</span>

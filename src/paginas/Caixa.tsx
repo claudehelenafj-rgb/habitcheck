@@ -2,11 +2,15 @@
 
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useOutletContext } from 'react-router'
 import { Adesivo } from '../componentes/Adesivo'
 import { mostrarAviso } from '../componentes/Avisos'
 import { Botao } from '../componentes/Botao'
 import { abrirCaptura, ATALHO_CAPTURA } from '../componentes/Captura'
 import { EditorEvento } from '../componentes/EditorEvento'
+import { EditorHabito } from '../componentes/EditorHabito'
+import type { ContextoMoldura } from '../componentes/Moldura'
+import { novoHabito } from '../dados/habitos'
 import { EditorTarefa } from '../componentes/EditorTarefa'
 import { novoEvento } from '../dados/eventos'
 import type { ItemCaixa } from '../dados/banco'
@@ -29,6 +33,9 @@ export function Caixa() {
   const itens = useCaixaAberta()
   const [virando, setVirando] = useState<ItemCaixa | null>(null)
   const [virandoEvento, setVirandoEvento] = useState<ItemCaixa | null>(null)
+  const [virandoHabito, setVirandoHabito] = useState<ItemCaixa | null>(null)
+  const { perfil } = useOutletContext<ContextoMoldura>()
+  const comAcademia = perfil.areasAtivas.includes('academia')
   if (!itens) return null
 
   async function resolver(item: ItemCaixa, destino: 'feito' | 'lixo') {
@@ -75,6 +82,11 @@ export function Caixa() {
                   <Botao variante="secundario" tom="bg-manteiga" className="min-h-10 px-4 text-sm" onClick={() => setVirandoEvento(item)}>
                     {t('caixa.virarEvento')}
                   </Botao>
+                  {comAcademia && (
+                    <Botao variante="secundario" tom="bg-pessego" className="min-h-10 px-4 text-sm" onClick={() => setVirandoHabito(item)}>
+                      {t('caixa.virarHabito')}
+                    </Botao>
+                  )}
                   <Botao variante="secundario" tom="bg-menta" className="min-h-10 px-4 text-sm" onClick={() => resolver(item, 'feito')}>
                     ✓ {t('caixa.jaResolvi')}
                   </Botao>
@@ -85,8 +97,19 @@ export function Caixa() {
               </li>
             ))}
           </ul>
-          <p className="text-sm text-tinta-suave">{t('caixa.emBreve')}</p>
         </>
+      )}
+
+      {virandoHabito && (
+        <EditorHabito
+          habito={novoHabito({ area: 'academia', titulo: virandoHabito.texto })}
+          novo
+          fechar={() => setVirandoHabito(null)}
+          aoSalvar={async () => {
+            await resolverItem(virandoHabito.id, 'habito')
+            mostrarAviso(t('caixa.virouHabito'))
+          }}
+        />
       )}
 
       {virandoEvento && (

@@ -17,6 +17,8 @@ import type { Tarefa } from '../dados/banco'
 import type { Consulta } from '../logica/consultas'
 import type { Avaliacao } from '../logica/faculdade'
 import { useAvaliacoes } from '../dados/faculdade'
+import { useHabitosAtivos } from '../dados/habitos'
+import type { Habito, RegistroHabito } from '../logica/habitos'
 import { momento } from '../logica/remedios'
 import { dentroDoEfeito, janelasDeHoje } from '../logica/remedioNoPlano'
 import { atualizarPerfil } from '../dados/perfil'
@@ -36,6 +38,7 @@ import {
   blocoJaPassou,
   fimDoBloco,
   formatarDuracao,
+  habitosDoDia,
   minutosAte,
   tarefasDoDia,
   type Bloco,
@@ -81,10 +84,27 @@ function FolhaDoDia({ agora, nome }: { agora: Date; nome?: string }) {
   )
 }
 
-function LinhaDoDia({ tarefas, agora, consultas, eventos, avaliacoes }: { tarefas: Tarefa[]; agora: Date; consultas: Consulta[]; eventos: Ocorrencia[]; avaliacoes: Avaliacao[] }) {
+type HabitoDoDia = { habito: Habito; registro?: RegistroHabito }
+
+function LinhaDoDia({
+  tarefas,
+  agora,
+  consultas,
+  eventos,
+  avaliacoes,
+  habitos,
+}: {
+  tarefas: Tarefa[]
+  agora: Date
+  consultas: Consulta[]
+  eventos: Ocorrencia[]
+  avaliacoes: Avaliacao[]
+  habitos: HabitoDoDia[]
+}) {
   const { t } = useTranslation()
   const atual = blocoDoHorario(agora)
   const semBloco = tarefas.filter((x) => !x.bloco)
+  const habitosSemBloco = habitos.filter((x) => !x.habito.bloco)
   const diaTodo = eventos.filter((o) => o.evento.diaInteiro)
   return (
     <section aria-labelledby="titulo-linha" className="flex flex-col gap-3">
@@ -113,6 +133,7 @@ function LinhaDoDia({ tarefas, agora, consultas, eventos, avaliacoes }: { tarefa
           const doBloco = tarefas.filter((x) => x.bloco === bloco)
           const consultasDoBloco = consultas.filter((c) => c.hora && blocoDoHorario(momento(c.data!, c.hora)) === bloco)
           const eventosDoBloco = eventos.filter((o) => !o.evento.diaInteiro && blocoDoHorario(o.inicio) === bloco)
+          const habitosDoBloco = habitos.filter((x) => x.habito.bloco === bloco)
           const passou = blocoJaPassou(bloco, atual)
           const eAgora = bloco === atual
           return (
@@ -142,10 +163,13 @@ function LinhaDoDia({ tarefas, agora, consultas, eventos, avaliacoes }: { tarefa
                   <span className="tabular-nums">{o.inicio.toTimeString().slice(0, 5)}</span> {o.evento.titulo}
                 </p>
               ))}
-              {doBloco.length ? (
+              {doBloco.length || habitosDoBloco.length ? (
                 <ul className="flex flex-col gap-1.5">
                   {doBloco.map((x) => (
                     <ItemLinha key={x.id} tarefa={x} />
+                  ))}
+                  {habitosDoBloco.map((x) => (
+                    <ItemHabito key={x.habito.id} {...x} />
                   ))}
                 </ul>
               ) : consultasDoBloco.length || eventosDoBloco.length ? null : (
@@ -155,12 +179,15 @@ function LinhaDoDia({ tarefas, agora, consultas, eventos, avaliacoes }: { tarefa
           )
         })}
       </ol>
-      {semBloco.length > 0 && (
+      {(semBloco.length > 0 || habitosSemBloco.length > 0) && (
         <div className="flex flex-col gap-1.5 rounded-[1.5rem] border-2 border-linha/40 p-4">
           <p className="font-bold">{t('hoje.qualquerHora')}</p>
           <ul className="flex flex-wrap gap-2">
             {semBloco.map((x) => (
               <ItemLinha key={x.id} tarefa={x} />
+            ))}
+            {habitosSemBloco.map((x) => (
+              <ItemHabito key={x.habito.id} {...x} />
             ))}
           </ul>
         </div>
@@ -180,6 +207,22 @@ function ItemLinha({ tarefa }: { tarefa: Tarefa }) {
       {area && <Adesivo nome={area.adesivo} tamanho={18} />}
       <span className={feita ? 'line-through decoration-2' : ''}>{tarefa.titulo}</span>
       <span className="so-leitor">{feita ? '(feita)' : ''}</span>
+    </li>
+  )
+}
+
+function ItemHabito({ habito, registro }: HabitoDoDia) {
+  const { t } = useTranslation()
+  const area = AREAS[habito.area ?? 'academia']
+  return (
+    <li className={`flex items-center gap-2 rounded-full border-2 border-linha/60 py-1 pr-3 pl-1 text-sm font-semibold ${area.claro}`}>
+      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 border-linha bg-papel text-xs" aria-hidden="true">
+        {registro ? '✓' : ''}
+      </span>
+      <Adesivo nome={habito.adesivo} tamanho={18} />
+      <span className={registro ? 'line-through decoration-2' : ''}>{habito.titulo}</span>
+      {registro?.nivel === 'minimo' && <span className="text-xs">({t('grade.min')})</span>}
+      <span className="so-leitor">{registro ? `(${t(registro.nivel === 'completo' ? 'grade.feito' : 'grade.minimo')})` : ''}</span>
     </li>
   )
 }
@@ -231,6 +274,7 @@ export function Hoje() {
   const consultas = useConsultas()
   const avaliacoes = useAvaliacoes()
   const eventos = useEventos()
+  const habitos = useHabitosAtivos()
   const { candidato } = useCandidatoAgora(agora)
   const hoje = diaLocal(agora)
   const dia = diaDoPlano(perfil.inicioPlano, hoje)
@@ -239,10 +283,12 @@ export function Hoje() {
   const diaAlcancado = visitaAnterior ? diaDoPlano(perfil.inicioPlano, visitaAnterior) : dia
   const podeContinuar = acolher && visitaAnterior && diaAlcancado < DURACAO_PLANO
 
-  if (!tarefas || !doses || !consultas || !eventos || !avaliacoes) return null
+  if (!tarefas || !doses || !consultas || !eventos || !avaliacoes || !habitos) return null
   const doDia = tarefasDoDia(tarefas, hoje)
   const grupos = agruparTarefas(tarefas, hoje)
   const remediosHoje = { feitos: doses.registros.filter((r) => r.status === 'tomei').length, total: doses.doses.length }
+  const habitosHoje = habitosDoDia(habitos.habitos, habitos.registros, hoje)
+  const academiaHoje = { feitos: habitosHoje.filter((x) => x.registro).length, total: habitosHoje.length }
   const tarefasA = doDia.filter((x) => x.prioridade === 'A')
   const bonus = [...grupos.b, ...grupos.c]
 
@@ -335,7 +381,7 @@ export function Hoje() {
         </section>
 
         <div className="flex flex-col gap-4">
-          <ProgressoAreas tarefas={doDia} areasAtivas={perfil.areasAtivas} extras={{ remedios: remediosHoje }} />
+          <ProgressoAreas tarefas={doDia} areasAtivas={perfil.areasAtivas} extras={{ remedios: remediosHoje, academia: academiaHoje }} />
           <div className="cartao flex flex-col gap-2 bg-papel p-5">
             <Botao variante="secundario" tom="bg-azul-nevoa" className="self-start" onClick={() => abrirJanelinha()} icone={<Adesivo nome="balao" tamanho={24} />}>
               {t('hoje.janelinha')}
@@ -345,7 +391,14 @@ export function Hoje() {
         </div>
       </div>
 
-      <LinhaDoDia tarefas={doDia} agora={agora} consultas={consultas.filter((c) => c.status === 'marcada' && c.data === hoje)} eventos={ocorrencias(eventos, hoje, hoje)} avaliacoes={avaliacoes.filter((a) => a.data === hoje && !a.feitaEm)} />
+      <LinhaDoDia
+        tarefas={doDia}
+        agora={agora}
+        consultas={consultas.filter((c) => c.status === 'marcada' && c.data === hoje)}
+        eventos={ocorrencias(eventos, hoje, hoje)}
+        avaliacoes={avaliacoes.filter((a) => a.data === hoje && !a.feitaEm)}
+        habitos={habitosHoje}
+      />
 
       {!perfil.planoEscondido && <CartaoPlano dia={dia} />}
 

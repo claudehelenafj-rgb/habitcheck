@@ -1,6 +1,8 @@
+import { useTranslation } from 'react-i18next'
 import { Adesivo, type NomeAdesivo } from './Adesivo'
 
-export type EstadoDia = 'feito' | 'minimo' | 'vazio' | 'futuro'
+/** livre: dia que não estava combinado (fica só com um pontinho, como o futuro) */
+export type EstadoDia = 'feito' | 'minimo' | 'vazio' | 'futuro' | 'livre'
 
 export type Dia = {
   rotulo: string
@@ -8,13 +10,8 @@ export type Dia = {
   numero: number
   estado: EstadoDia
   hoje?: boolean
-}
-
-const DESCRICAO: Record<EstadoDia, string> = {
-  feito: 'feito',
-  minimo: 'feito na versão mínima',
-  vazio: 'sem registro',
-  futuro: 'ainda não chegou',
+  /** com isto, o dia vira um botão (ex.: marcar um dia que esqueceu de registrar) */
+  aoTocar?: () => void
 }
 
 /** Traço de caneta desenhado à mão para circular o dia de hoje. */
@@ -39,48 +36,63 @@ type Props = {
   adesivo: NomeAdesivo
   dias: Dia[]
   tom: string
+  /** como chamar o "meio feito" (padrão: versão mínima) */
+  textoMinimo?: string
 }
 
-export function GradeSemanal({ titulo, adesivo, dias, tom }: Props) {
+export function GradeSemanal({ titulo, adesivo, dias, tom, textoMinimo }: Props) {
+  const { t } = useTranslation()
   const feitos = dias.filter((d) => d.estado === 'feito' || d.estado === 'minimo').length
+  const descricao = (e: EstadoDia) => (e === 'minimo' && textoMinimo ? textoMinimo : t(`grade.${e}`))
   return (
     <section className={`cartao ${tom} p-4 sm:p-5`} aria-label={titulo}>
       <div className="mb-3 flex items-center gap-3">
         <Adesivo nome={adesivo} tamanho={36} />
-        <h3 className="text-xl font-semibold">{titulo}</h3>
-        <span className="ml-auto rounded-full border-2 border-linha bg-papel px-3 py-0.5 text-sm font-bold">
-          {feitos} de {dias.length} dias
+        <h3 className="min-w-0 flex-1 text-xl font-semibold break-words">{titulo}</h3>
+        <span className="shrink-0 rounded-full border-2 border-linha bg-papel px-3 py-0.5 text-sm font-bold">
+          {t('grade.deDias', { feitos, total: dias.length })}
         </span>
       </div>
       <ol className="grid grid-cols-7 gap-1.5 sm:gap-2">
-        {dias.map((dia) => (
-          <li
-            key={dia.rotulo}
-            className="relative flex flex-col items-center gap-1 rounded-2xl bg-papel/70 px-1 pb-2 pt-1.5"
-            aria-label={`${dia.nomeCompleto}, dia ${dia.numero}: ${DESCRICAO[dia.estado]}${dia.hoje ? ' (hoje)' : ''}`}
-          >
-            {dia.hoje && <CirculoCaneta />}
-            <span className="rotulo text-[0.65rem]" aria-hidden="true">
-              {dia.rotulo}
-            </span>
-            <span className="font-titulo text-lg font-semibold leading-none" aria-hidden="true">
-              {dia.numero}
-            </span>
-            <span className="grid h-9 w-9 place-items-center" aria-hidden="true">
-              {dia.estado === 'feito' && <Adesivo nome={adesivo} tamanho={32} />}
-              {dia.estado === 'minimo' && (
-                <span className="relative">
-                  <Adesivo nome={adesivo} tamanho={24} />
-                  <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-papel px-1 text-[0.6rem] font-bold">
-                    mín.
+        {dias.map((dia) => {
+          const rotulo = `${t('grade.dia', { nome: dia.nomeCompleto, numero: dia.numero })}: ${descricao(dia.estado)}${dia.hoje ? ` (${t('grade.hoje')})` : ''}`
+          const conteudo = (
+            <>
+              {dia.hoje && <CirculoCaneta />}
+              <span className="rotulo text-[0.65rem]" aria-hidden="true">
+                {dia.rotulo}
+              </span>
+              <span className="font-titulo text-lg leading-none font-semibold" aria-hidden="true">
+                {dia.numero}
+              </span>
+              <span className="grid h-9 w-9 place-items-center" aria-hidden="true">
+                {dia.estado === 'feito' && <Adesivo nome={adesivo} tamanho={32} />}
+                {dia.estado === 'minimo' && (
+                  <span className="relative">
+                    <Adesivo nome={adesivo} tamanho={24} />
+                    <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-papel px-1 text-[0.6rem] font-bold">
+                      {t('grade.min')}
+                    </span>
                   </span>
-                </span>
-              )}
-              {dia.estado === 'vazio' && <span className="h-7 w-7 rounded-full border-2 border-dashed border-linha/60" />}
-              {dia.estado === 'futuro' && <span className="h-2 w-2 rounded-full bg-linha/30" />}
-            </span>
-          </li>
-        ))}
+                )}
+                {dia.estado === 'vazio' && <span className="h-7 w-7 rounded-full border-2 border-dashed border-linha/60" />}
+                {(dia.estado === 'futuro' || dia.estado === 'livre') && <span className="h-2 w-2 rounded-full bg-linha/30" />}
+              </span>
+            </>
+          )
+          const caixa = 'relative flex w-full flex-col items-center gap-1 rounded-2xl bg-papel/70 px-1 pb-2 pt-1.5'
+          return dia.aoTocar ? (
+            <li key={dia.rotulo}>
+              <button type="button" onClick={dia.aoTocar} aria-label={rotulo} className={`${caixa} hover:bg-papel`}>
+                {conteudo}
+              </button>
+            </li>
+          ) : (
+            <li key={dia.rotulo} className={caixa} aria-label={rotulo}>
+              {conteudo}
+            </li>
+          )
+        })}
       </ol>
     </section>
   )

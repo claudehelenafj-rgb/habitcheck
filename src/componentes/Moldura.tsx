@@ -275,6 +275,7 @@ function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
         ] as [string, string],
       acompanhado: (onde: string, hora: string) =>
         [t('faculdade.avisoAcompanhadoTitulo', { hora }), t('faculdade.avisoAcompanhadoCorpo', { onde })] as [string, string],
+      habito: (h: { titulo: string; se: string; entao: string }) => [h.titulo, t('academia.seEntao', { se: h.se, entao: h.entao })] as [string, string],
       fimFoco: textosFimFoco(t),
       discretoTitulo: t('avisos.discretoTitulo'),
       discretoCorpo: t('avisos.discretoCorpo'),
