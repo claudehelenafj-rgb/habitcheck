@@ -1,4 +1,5 @@
-// Dinheiro: contas a pagar com lembrete antes e no dia, e o resumo neutro do mês.
+// Dinheiro: contas a pagar com lembrete antes e no dia, o resumo neutro do mês e os potes da semana
+// (com gasto rápido pelo ⌘K).
 // Tudo fica no aparelho; nada se conecta ao banco; sem conselho de investimento.
 
 import { useState } from 'react'
@@ -7,7 +8,9 @@ import { Adesivo } from '../componentes/Adesivo'
 import { mostrarAviso } from '../componentes/Avisos'
 import { Botao } from '../componentes/Botao'
 import { EditorConta } from '../componentes/EditorConta'
-import { despagarConta, novaConta, pagarConta, useContas } from '../dados/dinheiro'
+import { PotesDaSemana } from '../componentes/Potes'
+import { despagarConta, novaConta, pagarConta, useContas, useGastos, usePotes } from '../dados/dinheiro'
+import { diasDaSemana } from '../logica/remedios'
 import { useAgora } from '../dados/timer'
 import { diaLocal } from '../logica/datas'
 import { formatarValor, mesDe, ordenarContas, resumoDoMes, type Conta, type Vencimento } from '../logica/dinheiro'
@@ -164,7 +167,9 @@ export function Dinheiro() {
   const { t } = useTranslation()
   const hoje = diaLocal(useAgora(60_000))
   const contas = useContas()
-  if (!contas) return null
+  const potes = usePotes()
+  const gastos = useGastos()
+  if (!contas || !potes || !gastos) return null
   return (
     <div className="flex flex-col gap-8">
       <h1 tabIndex={-1} className="flex items-center gap-3 text-4xl font-semibold outline-none sm:text-5xl">
@@ -173,6 +178,7 @@ export function Dinheiro() {
       </h1>
       <p className="max-w-prose">{t('dinheiro.intro')}</p>
       <ContasAPagar contas={contas} hoje={hoje} />
+      <PotesDaSemana potes={potes} gastos={gastos} semana={diasDaSemana(hoje)} />
     </div>
   )
 }

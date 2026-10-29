@@ -12,7 +12,12 @@ import {
   valorParaCampo,
   vencimentoNoMes,
   vencimentosEntre,
+  lerGastoRapido,
+  poteDoGasto,
+  saldoDoPote,
   type Conta,
+  type Gasto,
+  type Pote,
 } from './dinheiro'
 
 const conta = (extra: Partial<Conta> = {}): Conta => ({
@@ -120,5 +125,52 @@ describe('resumo do mês', () => {
     expect(resumoDoMes([luz, net, variavel, ipva], '2026-11')).toEqual({ total: 72980, pago: 0, contas: 4, pagas: 0 })
     // conta criada depois do vencimento deste mês não entra
     expect(resumoDoMes([conta({ criadaEm: '2026-10-15T10:00:00Z' })], '2026-10').contas).toBe(0)
+  })
+})
+
+describe('potes da semana', () => {
+  const semana = ['2026-10-26', '2026-10-27', '2026-10-28', '2026-10-29', '2026-10-30', '2026-10-31', '2026-11-01']
+  const mercado: Pote = { id: 'm', nome: 'Mercado', limite: 30000, palavras: [], ordem: 0 }
+  const fora: Pote = { id: 'f', nome: 'Comida fora', limite: 10000, palavras: ['ifood', 'restaurante'], ordem: 1 }
+  const g = (valor: number, poteId: string | undefined, dia: string): Gasto => ({ id: `${valor}${dia}`, valor, descricao: '', poteId, dia, quando: '' })
+
+  it('saldo da semana: só os gastos de segunda a domingo; a barra esvazia', () => {
+    const gastos = [g(5000, 'm', '2026-10-25'), g(12000, 'm', '2026-10-26'), g(3000, 'm', '2026-11-01'), g(2000, 'f', '2026-10-27'), g(9999, undefined, '2026-10-28')]
+    expect(saldoDoPote(mercado, gastos, semana)).toEqual({ gasto: 15000, saldo: 15000, fracao: 0.5 })
+    expect(saldoDoPote(fora, gastos, semana)).toEqual({ gasto: 2000, saldo: 8000, fracao: 0.8 })
+  })
+
+  it('virada da semana: na segunda o pote começa cheio de novo', () => {
+    const proxima = semana.map((d) => {
+      const x = new Date(`${d}T12:00:00`)
+      x.setDate(x.getDate() + 7)
+      return x.toISOString().slice(0, 10)
+    })
+    expect(saldoDoPote(mercado, [g(12000, 'm', '2026-10-30')], proxima)).toEqual({ gasto: 0, saldo: 30000, fracao: 1 })
+  })
+
+  it('passar do combinado: saldo negativo, barra vazia (sem drama)', () => {
+    expect(saldoDoPote(fora, [g(13000, 'f', '2026-10-27')], semana)).toEqual({ gasto: 13000, saldo: -3000, fracao: 0 })
+  })
+
+  it('gasto rápido: número primeiro, depois o que foi', () => {
+    expect(lerGastoRapido('35 ifood')).toEqual({ valor: 3500, descricao: 'ifood' })
+    expect(lerGastoRapido('35,90 mercado do bairro')).toEqual({ valor: 3590, descricao: 'mercado do bairro' })
+    expect(lerGastoRapido('R$ 12 uber')).toEqual({ valor: 1200, descricao: 'uber' })
+    expect(lerGastoRapido('1.250 aluguel')).toEqual({ valor: 125000, descricao: 'aluguel' })
+    expect(lerGastoRapido('12.5 pão')).toEqual({ valor: 1250, descricao: 'pão' })
+    expect(lerGastoRapido('35')).toBeNull()
+    expect(lerGastoRapido('ligar 35 vezes')).toBeNull()
+    expect(lerGastoRapido('comprar pão')).toBeNull()
+  })
+
+  it('o pote do gasto: pelo nome ou pelas palavras, sem acento nem maiúscula', () => {
+    expect(poteDoGasto('ifood', [mercado, fora])?.id).toBe('f')
+    expect(poteDoGasto('Restaurante japonês', [mercado, fora])?.id).toBe('f')
+    expect(poteDoGasto('mercado do bairro', [mercado, fora])?.id).toBe('m')
+    expect(poteDoGasto('comida fora com amigos', [mercado, fora])?.id).toBe('f')
+    expect(poteDoGasto('uber', [mercado, fora])).toBeUndefined()
+    // palavra pela metade não conta
+    expect(poteDoGasto('supermercado', [mercado, fora])).toBeUndefined()
   })
 })

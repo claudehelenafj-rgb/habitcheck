@@ -109,7 +109,8 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | 12 | Alimentação: bolinhas das refeições e da água, horários e lembretes (parte 1) | Pronta |
 | 12 | Comidas fáceis, "não sei o que comer" e lista de compras (parte 2) | Pronta |
 | 13 | **Dinheiro**: contas a pagar (parte 1) | Pronta |
-| 13 | **Dinheiro**: potes da semana, pausa antes de comprar, cofrinho (parte 2) | |
+| 13 | **Dinheiro**: potes da semana e gasto rápido pelo ⌘K (parte 2) | Pronta |
+| 13 | **Dinheiro**: pausa antes de comprar e cofrinho (parte 3) | |
 | 14 | Rituais e revisão semanal (com 5 min de dinheiro) | |
 | 15 | **Meus objetivos** com gráficos | |
 | 16 | Álbum de adesivos, recompensas e conferência final | |
@@ -224,6 +225,13 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 - Lembrete a partir das 9h, no dia de avisar e no dia do vencimento, só se não foi paga (respeita os avisos discretos).
 - Vencimentos no calendário; na tela Hoje, a conta que vence hoje ou que venceu aparece no topo da linha do dia.
   Só com a área ligada.
+- Potes da semana: quanto dá para gastar de segunda a domingo em cada pote; a barra esvazia com os gastos (os números
+  dizem o mesmo em texto) e na segunda o pote começa cheio de novo. Passar do combinado: "R$ 15,00 além do combinado",
+  barra vazia, sem cor de alerta. Ideias de nome (Mercado, Comida fora, Transporte, Lazer); editar, apagar com desfazer
+  (os gastos ficam sem pote).
+- Gasto: pelo formulário ou pelo ⌘K, com a área ligada: linha que começa com um valor ("35 ifood", "R$ 12 uber") vira
+  gasto; cai no pote pelo nome ou pelas palavras do pote; "Não era gasto" desfaz e manda a linha para a caixa.
+  Gastos da semana com o pote de cada um (sem pote: a lista vem aberta para escolher), apagar com desfazer.
 
 ## Lógica com testes automáticos
 

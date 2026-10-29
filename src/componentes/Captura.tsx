@@ -1,9 +1,12 @@
 // Captura rápida: Cmd+K (ou Ctrl+K) ou o botão flutuante abrem uma janelinha
 // para despejar qualquer coisa em 2 segundos. Cada linha vira um item da caixa de entrada.
+// Com a área Dinheiro ligada, linha que começa com um valor ("35 ifood") vira gasto (com "não era gasto").
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
+import { anotarGasto, apagarGasto, dinheiroLigado, usePotes } from '../dados/dinheiro'
 import { capturar } from '../dados/tarefas'
+import { formatarValor, lerGastoRapido, type Gasto } from '../logica/dinheiro'
 import { separarItens } from '../logica/tarefas'
 import { Adesivo } from './Adesivo'
 
@@ -31,11 +34,13 @@ const ehMac = typeof navigator !== 'undefined' && /Mac|iPad|iPhone/.test(navigat
 export const ATALHO_CAPTURA = ehMac ? '⌘K' : 'Ctrl+K'
 
 function JanelaCaptura() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const ref = useRef<HTMLDialogElement>(null)
   const campo = useRef<HTMLTextAreaElement>(null)
   const [texto, setTexto] = useState('')
   const [anotados, setAnotados] = useState(0)
+  const [gastos, setGastos] = useState<Array<{ gasto: Gasto; linha: string }>>([])
+  const potes = usePotes()
 
   useEffect(() => {
     ref.current?.showModal()
@@ -43,12 +48,31 @@ function JanelaCaptura() {
   }, [])
 
   async function guardar() {
-    const itens = separarItens(texto)
-    if (!itens.length) return
-    await capturar(itens)
+    const linhas = separarItens(texto)
+    if (!linhas.length) return
+    const comDinheiro = await dinheiroLigado()
+    const novos: Array<{ gasto: Gasto; linha: string }> = []
+    const itens: string[] = []
+    for (const linha of linhas) {
+      const g = comDinheiro ? lerGastoRapido(linha) : null
+      if (g) novos.push({ gasto: await anotarGasto(g.valor, g.descricao), linha })
+      else itens.push(linha)
+    }
+    if (itens.length) await capturar(itens)
     setAnotados(itens.length)
+    setGastos(novos)
     setTexto('')
     campo.current?.focus()
+  }
+
+  /** "Não era gasto": desfaz o gasto e põe a linha na caixa de entrada. */
+  async function naoEraGasto(id: string) {
+    const item = gastos.find((x) => x.gasto.id === id)
+    if (!item) return
+    await apagarGasto(id)
+    await capturar([item.linha])
+    setGastos((gs) => gs.filter((x) => x.gasto.id !== id))
+    setAnotados((n) => n + 1)
   }
 
   return (
@@ -81,6 +105,7 @@ function JanelaCaptura() {
           onChange={(e) => {
             setTexto(e.target.value)
             setAnotados(0)
+            setGastos([])
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
@@ -95,9 +120,23 @@ function JanelaCaptura() {
         <p id="dica-captura" className="text-sm text-tinta-suave">
           {t('captura.dica')}
         </p>
-        <p aria-live="polite" className="min-h-6 font-semibold">
-          {anotados > 0 && <>✓ {t('captura.anotado', { count: anotados })}</>}
-        </p>
+        <div aria-live="polite" className="flex min-h-6 flex-col gap-1 font-semibold">
+          {anotados > 0 && <p>✓ {t('captura.anotado', { count: anotados })}</p>}
+          {gastos.map(({ gasto }) => {
+            const pote = potes?.find((p) => p.id === gasto.poteId)
+            return (
+              <p key={gasto.id} className="flex flex-wrap items-center gap-x-3">
+                <span>
+                  ✓ {t('captura.gasto', { valor: formatarValor(gasto.valor, i18n.language), descricao: gasto.descricao })}
+                  {pote ? ` · ${t('captura.noPote', { pote: pote.nome })}` : ` · ${t('captura.semPote')}`}
+                </span>
+                <button type="button" onClick={() => naoEraGasto(gasto.id)} className="text-sm underline decoration-2 underline-offset-4">
+                  {t('captura.naoEraGasto')}
+                </button>
+              </p>
+            )
+          })}
+        </div>
         <div className="flex flex-wrap justify-end gap-2">
           <button
             type="button"

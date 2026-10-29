@@ -11,7 +11,7 @@ import type { SessaoFoco } from '../logica/foco'
 import type { Habito, RegistroHabito } from '../logica/habitos'
 import type { Foto, Lugar, ResetQuarto, Zona } from '../logica/quarto'
 import type { Comida, DiaAlimentacao, ItemCompra } from '../logica/alimentacao'
-import type { Conta } from '../logica/dinheiro'
+import type { Cofrinho, Conta, Deposito, Desejo, Gasto, Pote } from '../logica/dinheiro'
 import type { Hobby, VezHobby } from '../logica/hobbies'
 import type { NotaRemedio } from '../logica/remedioNoPlano'
 import type { RegistroSintoma } from '../logica/sintomas'
@@ -90,6 +90,11 @@ export class BancoCaderninho extends Dexie {
   comidas!: EntityTable<Comida, 'id'>
   compras!: EntityTable<ItemCompra, 'id'>
   contas!: EntityTable<Conta, 'id'>
+  potes!: EntityTable<Pote, 'id'>
+  gastos!: EntityTable<Gasto, 'id'>
+  desejos!: EntityTable<Desejo, 'id'>
+  cofrinhos!: EntityTable<Cofrinho, 'id'>
+  depositos!: EntityTable<Deposito, 'id'>
 
   constructor(nome = 'caderninho') {
     super(nome)
@@ -165,6 +170,14 @@ export class BancoCaderninho extends Dexie {
     // etapa 13: contas a pagar (com os pagamentos de cada mês)
     this.version(15).stores({
       contas: 'id',
+    })
+    // etapa 13: potes da semana e gastos, lista de desejos (pausa de 48 h), cofrinhos e o que foi guardado
+    this.version(16).stores({
+      potes: 'id, ordem',
+      gastos: 'id, dia, poteId',
+      desejos: 'id, criadoEm',
+      cofrinhos: 'id',
+      depositos: 'id, cofrinhoId, dia',
     })
   }
 }

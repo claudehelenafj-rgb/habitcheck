@@ -171,3 +171,70 @@ export function valorParaCampo(centavos: Centavos | undefined): string {
   if (centavos === undefined) return ''
   return (centavos / 100).toFixed(2).replace('.', ',')
 }
+
+// ---------- potes da semana ----------
+
+/** Pote da semana: quanto dá para gastar de segunda a domingo (mercado, lazer, transporte...). */
+export type Pote = {
+  id: string
+  nome: string
+  limite: Centavos
+  /** palavras que levam um gasto rápido para este pote (ex.: "ifood, restaurante") */
+  palavras: string[]
+  ordem: number
+}
+
+export type Gasto = { id: string; valor: Centavos; descricao: string; poteId?: string; dia: Dia; quando: string }
+
+/** Gastos da semana (segunda a domingo) do dia dado. A semana vira na segunda: cada pote começa cheio de novo. */
+export function gastosDaSemana(gastos: Gasto[], semana: Dia[]): Gasto[] {
+  const dias = new Set(semana)
+  return gastos.filter((g) => dias.has(g.dia))
+}
+
+export function saldoDoPote(pote: Pote, gastos: Gasto[], semana: Dia[]): { gasto: Centavos; saldo: Centavos; fracao: number } {
+  const gasto = gastosDaSemana(gastos, semana)
+    .filter((g) => g.poteId === pote.id)
+    .reduce((soma, g) => soma + g.valor, 0)
+  const saldo = pote.limite - gasto
+  return { gasto, saldo, fracao: pote.limite > 0 ? Math.max(0, Math.min(1, saldo / pote.limite)) : 0 }
+}
+
+const normalizar = (s: string) =>
+  s
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .trim()
+
+/**
+ * Gasto rápido na captura: "35 ifood", "35,90 mercado", "R$ 12 uber". O número vem primeiro e precisa de algo
+ * escrito depois. Devolve null para o resto (vira item da caixa de entrada, como sempre).
+ */
+export function lerGastoRapido(linha: string): { valor: Centavos; descricao: string } | null {
+  const m = linha.trim().match(/^(?:r\$\s*)?(\d[\d.]*(?:,\d{1,2})?|\d+\.\d{1,2})\s+(.*\S)$/i)
+  if (!m) return null
+  const valor = lerValor(m[1])
+  if (!valor || valor <= 0) return null
+  return { valor, descricao: m[2].trim() }
+}
+
+/** Em que pote cai o gasto: o nome do pote ou uma das palavras dele aparece na descrição. */
+export function poteDoGasto(descricao: string, potes: Pote[]): Pote | undefined {
+  const palavras = normalizar(descricao).split(/[^a-z0-9]+/).filter(Boolean)
+  const texto = ` ${palavras.join(' ')} `
+  return [...potes]
+    .sort((a, b) => a.ordem - b.ordem)
+    .find((p) => [p.nome, ...p.palavras].some((x) => normalizar(x) && texto.includes(` ${normalizar(x).split(/[^a-z0-9]+/).filter(Boolean).join(' ')} `)))
+}
+
+// ---------- pausa antes de comprar e cofrinho ----------
+
+/** Compra por impulso que foi para a lista de desejos e espera 48 h antes do "ainda quero?". */
+export type Desejo = { id: string; nome: string; valor?: Centavos; criadoEm: string; decididoEm?: string; decisao?: 'comprei' | 'desisti' }
+
+/** Meta de economia (pode ficar ligada a um objetivo). */
+export type Cofrinho = { id: string; nome: string; meta: Centavos; objetivoId?: string; criadoEm: string; arquivadoEm?: string }
+
+/** Dinheiro guardado (positivo) ou tirado (negativo) de um cofrinho. */
+export type Deposito = { id: string; cofrinhoId: string; valor: Centavos; dia: Dia; quando: string }

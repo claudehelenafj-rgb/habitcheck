@@ -21,3 +21,25 @@ describe('contas no banco', () => {
     expect((await banco.contas.get(c.id))!.nome).toBe('Luz')
   })
 })
+
+describe('potes e gastos no banco', () => {
+  it('gasto rápido cai no pote pela palavra; apagar o pote deixa os gastos sem pote, com desfazer', async () => {
+    const { novoPote, anotarGasto, apagarPote, restaurarPote } = await import('./dinheiro')
+    await novoPote({ nome: 'Mercado', limite: 30000 })
+    await novoPote({ nome: 'Comida fora', limite: 10000 })
+    const fora = (await banco.potes.toArray()).find((p) => p.nome === 'Comida fora')!
+    await banco.potes.update(fora.id, { palavras: ['ifood'] })
+    const g1 = await anotarGasto(3500, 'ifood', undefined, new Date('2026-10-29T20:00:00'))
+    const g2 = await anotarGasto(1200, 'uber', undefined, new Date('2026-10-29T21:00:00'))
+    expect(g1).toMatchObject({ poteId: fora.id, dia: '2026-10-29' })
+    expect(g2.poteId).toBeUndefined()
+    const apagado = await apagarPote(fora.id)
+    expect((await banco.gastos.get(g1.id))!.poteId).toBeUndefined()
+    await restaurarPote(apagado)
+    expect((await banco.gastos.get(g1.id))!.poteId).toBe(fora.id)
+    expect((await banco.potes.toArray()).map((p) => [p.nome, p.ordem])).toEqual([
+      ['Mercado', 0],
+      ['Comida fora', 1],
+    ])
+  })
+})
