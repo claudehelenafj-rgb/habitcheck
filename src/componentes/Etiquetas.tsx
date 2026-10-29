@@ -3,7 +3,7 @@
 
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { atualizarBemEstar, useBemEstar, type ListaEtiquetas } from '../dados/bemEstar'
+import { mudarBemEstar, useBemEstar, type ListaEtiquetas } from '../dados/bemEstar'
 import { etiqueta } from '../logica/sintomas'
 import { Botao } from './Botao'
 
@@ -32,7 +32,10 @@ export function Etiquetas({ legenda, lista, inicial, escolhidos, mudar, uma = fa
   function acrescentar() {
     const s = etiqueta(novo)
     if (!s) return
-    if (!itens.includes(s)) atualizarBemEstar({ [lista]: [...itens, s] })
+    mudarBemEstar((c) => {
+      const atual = c[lista] ?? inicial
+      return atual.includes(s) ? {} : { [lista]: [...atual, s] }
+    })
     if (!escolhidos.includes(s)) mudar(uma ? [s] : [...escolhidos, s])
     setNovo('')
   }
@@ -57,7 +60,7 @@ export function Etiquetas({ legenda, lista, inicial, escolhidos, mudar, uma = fa
               <button
                 type="button"
                 onClick={() => {
-                  atualizarBemEstar({ [lista]: itens.filter((x) => x !== s) })
+                  mudarBemEstar((c) => ({ [lista]: (c[lista] ?? inicial).filter((x) => x !== s) }))
                   mudar(escolhidos.filter((x) => x !== s))
                 }}
                 aria-label={t('etiquetas.tirar', { nome: s })}

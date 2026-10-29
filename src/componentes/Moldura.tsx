@@ -260,10 +260,14 @@ function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
       transicao: t('consultas.avisoTransicao'),
       arrumar: (titulo: string) => t('consultas.arrumarPara', { titulo }),
       sair: (titulo: string) => t('consultas.sairPara', { titulo }),
+      acordarTitulo: t('sono.lembreteAcordarTitulo'),
+      acordarCorpo: t('sono.lembreteAcordarCorpo'),
+      desacelerarTitulo: t('sono.lembreteDesacelerarTitulo'),
+      desacelerarCorpo: t('sono.lembreteDesacelerarCorpo'),
     }),
     [t],
   )
-  useLembretes(textosLembretes)
+  useLembretes(textosLembretes, perfil.areasAtivas.includes('bemestar'))
 
   // Ao trocar de tela, o foco vai para o título da nova tela (bom para leitor de tela e teclado).
   const primeiraVez = useRef(true)

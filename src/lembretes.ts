@@ -3,12 +3,14 @@
 // com a ação escrita e conta o aviso (para repetir com gentileza e para a revisão semanal).
 
 import { useEffect, useRef } from 'react'
+import { useBemEstar } from './dados/bemEstar'
 import { jaAvisouTransicao, registrarTransicao, useConsultas } from './dados/consultas'
 import { registrarAviso, useConfigAvisos, useDosesDoDia } from './dados/remedios'
 import { planoReverso } from './logica/consultas'
 import { useAgora } from './dados/timer'
 import { diaLocal } from './logica/datas'
 import { deveAvisar, textoDoLembrete, type DosePrevista } from './logica/remedios'
+import { dentroDaJanela, horaDeDesacelerar, noiteDaRotina } from './logica/sono'
 
 export type PermissaoAvisos = NotificationPermission | 'sem-suporte'
 
@@ -42,6 +44,10 @@ export type TextosLembretes = {
   transicao: string
   arrumar: (titulo: string) => string
   sair: (titulo: string) => string
+  acordarTitulo: string
+  acordarCorpo: string
+  desacelerarTitulo: string
+  desacelerarCorpo: string
 }
 
 /** Avisos de transição das consultas: "começar a se arrumar" e "sair de casa" (uma vez cada, até 30 min depois). */
@@ -72,8 +78,38 @@ function useAvisosTransicao(agora: Date, textos: TextosLembretes) {
   }, [consultas, agora, textos])
 }
 
-/** Usar uma vez, na moldura do app. */
-export function useLembretes(textos: TextosLembretes) {
+/**
+ * Sono (Bem-estar): "hora de levantar" no horário fixo de acordar e "hora de desacelerar" 30 min antes de deitar.
+ * Uma vez por dia cada, até 30 min depois do horário. Só com a aba Bem-estar e a ferramenta Sono ligadas.
+ */
+function useAvisosSono(agora: Date, textos: TextosLembretes, ativo: boolean) {
+  const config = useBemEstar()
+  const emAndamento = useRef(new Set<string>())
+  useEffect(() => {
+    const sono = config?.sono
+    if (!ativo || !sono || !config.ferramentas.includes('sono')) return
+    const hoje = diaLocal(agora)
+    const avisos: Array<[string, string, string]> = []
+    if (sono.lembreteAcordar && sono.acordarAs && dentroDaJanela(sono.acordarAs, agora)) {
+      avisos.push([`sono|acordar|${hoje}`, textos.acordarTitulo, `${sono.acordarAs} · ${textos.acordarCorpo}`])
+    }
+    if (sono.lembreteRotina && sono.deitarAs && dentroDaJanela(horaDeDesacelerar(sono.deitarAs), agora)) {
+      avisos.push([`sono|desacelerar|${noiteDaRotina(agora, hoje)}`, textos.desacelerarTitulo, textos.desacelerarCorpo])
+    }
+    for (const [id, titulo, corpo] of avisos) {
+      if (emAndamento.current.has(id)) continue
+      emAndamento.current.add(id)
+      ;(async () => {
+        if (await jaAvisouTransicao(id)) return
+        await registrarTransicao(id)
+        await mostrarAvisoSistema(titulo, corpo, id)
+      })().finally(() => emAndamento.current.delete(id))
+    }
+  }, [config, agora, textos, ativo])
+}
+
+/** Usar uma vez, na moldura do app. `bemEstar` = a aba Bem-estar está ligada. */
+export function useLembretes(textos: TextosLembretes, bemEstar = false) {
   const tituloAviso = textos.remedio
   const agora = useAgora(20_000)
   const hoje = diaLocal(agora)
@@ -81,6 +117,7 @@ export function useLembretes(textos: TextosLembretes) {
   const { silencio } = useConfigAvisos()
   const emAndamento = useRef(new Set<string>())
   useAvisosTransicao(agora, textos)
+  useAvisosSono(agora, textos, bemEstar)
 
   useEffect(() => {
     if (!dados) return

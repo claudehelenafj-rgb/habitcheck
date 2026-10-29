@@ -29,6 +29,15 @@ Autismo" (lido). Plano aprovado em 28/10/2026.
   dos últimos 60 dias (até +3), e −1 se já foi escolhida hoje. "Outras ideias" passa para as próximas.
   Responder sobre um hobby registra a vez dele. A atenção plena de 3 a 5 minutos e a caminhada estão entre as
   ideias iniciais, que a pessoa edita.
+- Sono (B6): horário fixo de acordar (todos os dias) e horário de deitar, com avisos opcionais "hora de levantar"
+  e "hora de desacelerar" (30 min antes), uma vez por dia, só com a aba e a ferramenta ligadas. Diário com uma
+  anotação por noite (deitou, levantou, demora em faixas, despertares, qualidade 1 a 5, nota); o sono é estimado
+  como tempo na cama menos o meio da faixa de demora. Noite difícil = qualidade 1 ou 2, mais de 30 min para dormir
+  ou menos de 6 h. Se nas últimas 3 semanas, com pelo menos 10 noites anotadas, mais da metade foi difícil, aparece
+  um cartão gentil sugerindo conversar com um profissional; fechado, só volta 30 dias depois. "Não consigo dormir"
+  é uma tela escura fixa (8,4:1 de contraste), sem relógio e sem animação, com a regra dos ~20 minutos, respiração
+  4–6 escrita e "tirar da cabeça" que guarda na caixa de entrada. Gráfico das 2 semanas com linha de 7 h; noites
+  difíceis listradas (não só por cor). A rotina de desacelerar entra no ritual da noite na etapa 14.
 - Ordem: **I1** tema Índigo (guia de estilo para aprovar, depois aplicar) e **B1–B8** Bem-estar,
   antes da etapa 9.
   - B1 base da aba (ativar nos Ajustes, cores, adesivos, ferramentas que se ligam uma ou duas por vez);

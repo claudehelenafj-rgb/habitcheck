@@ -3,7 +3,7 @@
 
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { atualizarBemEstar, useBemEstar } from '../dados/bemEstar'
+import { atualizarBemEstar, mudarBemEstar, useBemEstar } from '../dados/bemEstar'
 import { useUltimoCheckin } from '../dados/checkins'
 import { useHobbies } from '../dados/hobbies'
 import { useSintomasDesde, useUltimoSintoma } from '../dados/sintomas'
@@ -117,7 +117,7 @@ function MinhasIdeias({ atividades }: { atividades: Atividade[] }) {
   async function acrescentar() {
     const limpo = texto.trim()
     if (!limpo) return
-    await atualizarBemEstar({ atividades: [...atividades, { id: crypto.randomUUID(), texto: limpo, energia, acalma }] })
+    await mudarBemEstar((c) => ({ atividades: [...(c.atividades ?? ATIVIDADES_INICIAIS), { id: crypto.randomUUID(), texto: limpo, energia, acalma }] }))
     setTexto('')
   }
   return (
@@ -133,7 +133,7 @@ function MinhasIdeias({ atividades }: { atividades: Atividade[] }) {
               <button
                 type="button"
                 onClick={async () => {
-                  await atualizarBemEstar({ atividades: atividades.filter((x) => x.id !== a.id) })
+                  await mudarBemEstar((c) => ({ atividades: (c.atividades ?? ATIVIDADES_INICIAIS).filter((x) => x.id !== a.id) }))
                   mostrarAviso(t('sugestoes.ideiaTirada'), () => atualizarBemEstar({ atividades }))
                 }}
                 aria-label={t('etiquetas.tirar', { nome: a.texto })}

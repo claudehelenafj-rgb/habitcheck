@@ -97,7 +97,8 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | B3 | **Bem-estar**: sintomas com o porquê e visão do mês | Pronta |
 | B4 | **Bem-estar**: hobbies (desbote, porquê, pausar, arquivar, agenda, mês) | Pronta |
 | B5 | **Bem-estar**: sugestões de atividade e "ajudou?" | Pronta |
-| B6–B8 | **Bem-estar**: sono, resumo, privacidade | |
+| B6 | **Bem-estar**: sono (horários, rotina, diário, "Não consigo dormir") | Pronta |
+| B7–B8 | **Bem-estar**: resumo, privacidade | |
 | 9 | Faculdade, modo foco, saída do hiperfoco | |
 | 10 | Academia | |
 | 11 | Quarto | |

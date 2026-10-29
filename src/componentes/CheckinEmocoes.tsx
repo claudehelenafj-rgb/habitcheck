@@ -3,7 +3,7 @@
 
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { atualizarBemEstar, useBemEstar } from '../dados/bemEstar'
+import { mudarBemEstar, useBemEstar } from '../dados/bemEstar'
 import { apagarCheckin, restaurarCheckin, salvarCheckin, useCheckinsDoDia } from '../dados/checkins'
 import { FAIXAS, faixaDoCheckin, MEDIDAS, SINAIS_INICIAIS, type Checkin, type Faixa, type Medida } from '../logica/checkin'
 import { diaLocal } from '../logica/datas'
@@ -114,7 +114,10 @@ export function PlanoPorFaixa({ aoFechar }: { aoFechar: () => void }) {
             rows={2}
             defaultValue={config.planoFaixas?.[f] ?? ''}
             placeholder={t(`checkin.exemplos.${f}`)}
-            onBlur={(e) => atualizarBemEstar({ planoFaixas: { ...config.planoFaixas, [f]: e.target.value.trim() } })}
+            onBlur={(e) => {
+              const texto = e.target.value.trim()
+              mudarBemEstar((c) => ({ planoFaixas: { ...c.planoFaixas, [f]: texto } }))
+            }}
             className="rounded-2xl border-2 border-linha bg-papel px-4 py-2"
           />
         </label>

@@ -4,6 +4,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { alternarFerramenta, type IdFerramenta } from '../logica/bemEstar'
 import type { PlanoFaixas } from '../logica/checkin'
+import type { ConfigSono } from '../logica/sono'
 import type { Atividade } from '../logica/sugestoes'
 import { banco } from './banco'
 
@@ -20,6 +21,9 @@ export type ConfigBemEstar = {
   listaMotivosHobby?: string[]
   /** ideias de atividade; ausente = lista inicial */
   atividades?: Atividade[]
+  sono?: ConfigSono
+  /** passos da rotina de desacelerar já feitos, e de qual noite */
+  rotinaFeita?: { noite: string; ids: string[] }
 }
 
 /** Nome do campo de cada lista de etiquetas editável. */
@@ -37,10 +41,25 @@ export function useBemEstar(): ConfigBemEstar | undefined {
   return useLiveQuery(ler, [])
 }
 
-export async function atualizarBemEstar(mudanca: Partial<ConfigBemEstar>) {
+/**
+ * Muda a configuração a partir do que está guardado agora (não do que a tela mostrou),
+ * numa transação só: duas mudanças rápidas seguidas não apagam uma à outra.
+ */
+export async function mudarBemEstar(mudar: (atual: ConfigBemEstar) => Partial<ConfigBemEstar>) {
   await banco.transaction('rw', banco.configuracoes, async () => {
-    await banco.configuracoes.put({ chave: CHAVE, valor: { ...(await ler()), ...mudanca } })
+    const atual = await ler()
+    await banco.configuracoes.put({ chave: CHAVE, valor: { ...atual, ...mudar(atual) } })
   })
+}
+
+/** Troca campos inteiros. Para mudar uma parte de uma lista ou do sono, use mudarBemEstar. */
+export async function atualizarBemEstar(mudanca: Partial<ConfigBemEstar>) {
+  await mudarBemEstar(() => mudanca)
+}
+
+/** Muda só alguns campos do sono, sem perder os outros. */
+export async function mudarSono(mudanca: Partial<ConfigSono>) {
+  await mudarBemEstar((c) => ({ sono: { ...c.sono, ...mudanca } }))
 }
 
 /** Liga ou desliga uma ferramenta. Devolve true se agora há mais ferramentas que o sugerido. */

@@ -16,7 +16,7 @@ export const FERRAMENTAS: Ferramenta[] = [
   { id: 'sintomas', adesivo: 'interrogacao' },
   { id: 'hobbies', adesivo: 'flor' },
   { id: 'sugestoes', adesivo: 'xicara' },
-  { id: 'sono', adesivo: 'lua', etapa: 'B6' },
+  { id: 'sono', adesivo: 'lua' },
   { id: 'resumo', adesivo: 'prancheta', etapa: 'B7' },
 ]
 

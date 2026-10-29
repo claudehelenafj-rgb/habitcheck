@@ -326,3 +326,13 @@ h3 {
 :root[data-decoracao='neutra'] .rosto:not(.com-rosto .rosto) {
   display: none;
 }
+
+/* Tela "Não consigo dormir": nada se mexe, nem as transições */
+:root[data-tela-noite='sim'] * {
+  animation: none !important;
+  transition: none !important;
+}
+:root[data-tela-noite='sim'],
+:root[data-tela-noite='sim'] body {
+  background: #120e16;
+}
