@@ -93,10 +93,10 @@ export function useSessoesFoco(): SessaoFoco[] | undefined {
   return useLiveQuery(() => banco.sessoesFoco.toArray(), [])
 }
 
-/** O que a pessoa escolheu da última vez (movimento antes, tela cheia, sino), para não repetir a cada sessão. */
-export type EscolhasFoco = { mexer: boolean; telaCheia: boolean; som: boolean }
+/** O que a pessoa escolheu da última vez (movimento antes e quanto tempo, tela cheia, sino), para não repetir a cada sessão. */
+export type EscolhasFoco = { mexer: boolean; mexerMin: number; telaCheia: boolean; som: boolean }
 const CHAVE_ESCOLHAS = 'focoEscolhas'
-const ESCOLHAS_PADRAO: EscolhasFoco = { mexer: false, telaCheia: true, som: true }
+const ESCOLHAS_PADRAO: EscolhasFoco = { mexer: false, mexerMin: 5, telaCheia: true, som: true }
 
 export function useEscolhasFoco(): EscolhasFoco | undefined {
   return useLiveQuery(

@@ -1,5 +1,5 @@
 // Modo foco (guia: sistema de trabalho, tempo visível e saída programada do hiperfoco).
-// Uma sessão passa por fases: movimento (opcional, 5 min antes), foco, pausa de verdade e fim.
+// Uma sessão passa por fases: movimento (opcional, 5 a 20 min antes), foco, pausa de verdade e fim.
 // Tudo é calculado a partir do início da fase atual: recarregar a página não perde o tempo.
 // Quando a fase de foco acaba, o tempo para de contar: o alarme de saída não vira "mais foco".
 
@@ -46,7 +46,8 @@ export type EstadoFoco = {
 }
 
 export const DURACOES_FOCO = [25, 35, 45] as const
-export const MOVIMENTO_MIN = 5
+/** Mexer o corpo antes: de uma volta rápida a uma caminhada de verdade. */
+export const MOVIMENTOS_MIN = [5, 15, 20] as const
 export const EXTRA_MIN = 5
 /** Depois de 2 "mais 5 min" seguidos, o botão some: a saída do hiperfoco é para valer. */
 export const MAX_EXTRAS = 2
@@ -87,13 +88,14 @@ export function minutosDeFoco(e: EstadoFoco, agora: Date): number {
 export type NovoFoco = Pick<EstadoFoco, 'titulo' | 'passo' | 'blocoMin' | 'volta' | 'som'> &
   Partial<Pick<EstadoFoco, 'tarefaId' | 'pronto' | 'estimativaMin'>>
 
-export function novoFoco(dados: NovoFoco, agora: Date, comMovimento: boolean): EstadoFoco {
+/** `movimentoMin` 0 = sem mexer o corpo antes. */
+export function novoFoco(dados: NovoFoco, agora: Date, movimentoMin: number): EstadoFoco {
   const inicio = agora.toISOString()
   return {
     ...dados,
-    fase: comMovimento ? 'movimento' : 'foco',
+    fase: movimentoMin > 0 ? 'movimento' : 'foco',
     faseInicio: inicio,
-    faseMin: comMovimento ? MOVIMENTO_MIN : dados.blocoMin,
+    faseMin: movimentoMin > 0 ? movimentoMin : dados.blocoMin,
     focoMin: 0,
     extras: 0,
     comecouEm: inicio,

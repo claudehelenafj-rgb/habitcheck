@@ -4,8 +4,8 @@
 
 import type { NomeAdesivo } from '../componentes/Adesivo'
 import type { IdArea } from '../design/areas'
-import { diaLocal, type Dia } from './datas'
-import type { Bloco } from './hoje'
+import { diaLocal, somarDias, type Dia } from './datas'
+import { INICIO_BLOCO, type Bloco } from './hoje'
 import { diasDaSemana } from './remedios'
 
 export type NivelHabito = 'completo' | 'minimo'
@@ -29,10 +29,20 @@ export type Habito = {
   bloco?: Bloco
   /** lembrete com o plano escrito ('HH:MM') */
   lembrete?: string
+  /** base de lançamento: o que deixar pronto na véspera (ex.: mochila, garrafa, fone) */
+  base?: string[]
+  /** treino acompanhado: com quem vai */
+  companhia?: string
+  /** aviso na véspera ('HH:MM'): deixar a base pronta e combinar com a companhia */
+  vespera?: string
+  /** o que já ficou pronto para um dia (só vale para aquele dia) */
+  preparo?: Preparo
   objetivoId?: string
   arquivadoEm?: string // ISO
   criadoEm: string // ISO
 }
+
+export type Preparo = { dia: Dia; itens: string[]; combinado?: boolean }
 
 /** Um registro por hábito e por dia. Sem registro = nada a mostrar (neutro). */
 export type RegistroHabito = { id: string; habitoId: string; dia: Dia; nivel: NivelHabito; quando: string }
@@ -92,10 +102,56 @@ export function deveLembrar(h: Habito, registros: RegistroHabito[], agora: Date)
   return passou >= 0 && passou <= 30
 }
 
+// ---------- Base de lançamento e treino acompanhado ----------
+
+/** Tem algo para preparar na véspera? */
+export const temPreparo = (h: Pick<Habito, 'base' | 'companhia'>) => !!(h.base?.length || h.companhia)
+
+/**
+ * Para que dia é o preparo agora: a partir da noite (18h), o próximo dia combinado depois de hoje; antes disso,
+ * hoje (se combinado e ainda não feito) ou o próximo dia combinado.
+ */
+export function diaDoPreparo(h: Habito, registros: RegistroHabito[], agora: Date): Dia | null {
+  const hoje = diaLocal(agora)
+  const contaHoje = agora.getHours() < INICIO_BLOCO.noite && combinadoNoDia(h, hoje) && !registros.some((r) => r.dia === hoje)
+  for (let i = contaHoje ? 0 : 1; i <= 7; i++) {
+    const dia = somarDias(hoje, i)
+    if (combinadoNoDia(h, dia)) return dia
+  }
+  return null
+}
+
+/** O que já está pronto para aquele dia (o preparo de outro dia não vale). */
+export function preparoDoDia(h: Pick<Habito, 'preparo'>, dia: Dia): Preparo {
+  return h.preparo?.dia === dia ? h.preparo : { dia, itens: [] }
+}
+
+export function preparoCompleto(h: Habito, dia: Dia): boolean {
+  const p = preparoDoDia(h, dia)
+  return (h.base ?? []).every((i) => p.itens.includes(i)) && (!h.companhia || !!p.combinado)
+}
+
+/** Liga ou desliga um item do preparo (ou o "combinei") para o dia. */
+export function alternarPreparo(h: Pick<Habito, 'preparo'>, dia: Dia, item: string | { combinado: true }): Preparo {
+  const p = preparoDoDia(h, dia)
+  if (typeof item !== 'string') return { ...p, combinado: !p.combinado }
+  return { ...p, itens: p.itens.includes(item) ? p.itens.filter((x) => x !== item) : [...p.itens, item] }
+}
+
+/** Aviso da véspera: no horário (até 30 min depois), se amanhã é dia combinado e o preparo ainda não está completo. */
+export function deveAvisarVespera(h: Habito, agora: Date): Dia | null {
+  if (!h.vespera || h.arquivadoEm || !temPreparo(h)) return null
+  const amanha = somarDias(diaLocal(agora), 1)
+  if (!combinadoNoDia(h, amanha) || preparoCompleto(h, amanha)) return null
+  const [hh, mm] = h.vespera.split(':').map(Number)
+  const passou = agora.getHours() * 60 + agora.getMinutes() - (hh * 60 + mm)
+  return passou >= 0 && passou <= 30 ? amanha : null
+}
+
 /** Modelos prontos e editáveis (os textos vêm das traduções, pela chave). */
-export type ModeloHabito = { chave: string; meta: number; bloco?: Bloco; adesivo: NomeAdesivo }
+export type ModeloHabito = { chave: string; meta: number; bloco?: Bloco; adesivo: NomeAdesivo; comBase?: boolean }
 export const MODELOS_ACADEMIA: ModeloHabito[] = [
-  { chave: 'academia', meta: 3, bloco: 'tarde', adesivo: 'haltere' },
-  { chave: 'caminhada', meta: 3, bloco: 'tarde', adesivo: 'folha' },
+  { chave: 'academia', meta: 3, bloco: 'tarde', adesivo: 'haltere', comBase: true },
+  { chave: 'caminhada', meta: 3, bloco: 'tarde', adesivo: 'folha', comBase: true },
   { chave: 'alongar', meta: 5, bloco: 'manha', adesivo: 'onda' },
 ]

@@ -1,5 +1,20 @@
 import { describe, expect, it } from 'vitest'
-import { combinadoNoDia, deveLembrar, estadoDoDia, metaFeita, pendenteHoje, proximoNivel, vezesNaSemana, type Habito, type RegistroHabito } from './habitos'
+import {
+  alternarPreparo,
+  combinadoNoDia,
+  deveAvisarVespera,
+  deveLembrar,
+  diaDoPreparo,
+  estadoDoDia,
+  metaFeita,
+  pendenteHoje,
+  preparoCompleto,
+  preparoDoDia,
+  proximoNivel,
+  vezesNaSemana,
+  type Habito,
+  type RegistroHabito,
+} from './habitos'
 
 // 29/10/2026 é quinta-feira; a semana vai de segunda 26/10 a domingo 1/11
 const hoje = '2026-10-29'
@@ -69,5 +84,44 @@ describe('hábitos', () => {
     expect(deveLembrar(h, [reg(hoje)], new Date('2026-10-29T18:10:00'))).toBe(false)
     expect(deveLembrar({ ...h, dias: [5] }, [], new Date('2026-10-29T18:10:00'))).toBe(false)
     expect(deveLembrar({ ...h, lembrete: undefined }, [], new Date('2026-10-29T18:10:00'))).toBe(false)
+  })
+})
+
+describe('base de lançamento e treino acompanhado', () => {
+  // quinta 29/10; combinado terça, quinta e sábado
+  const h = habito({ dias: [2, 4, 6], base: ['mochila', 'garrafa', 'fone'], companhia: 'colega', vespera: '21:00' })
+
+  it('o preparo é para hoje (antes da noite e se ainda não fez) ou para o próximo dia combinado', () => {
+    expect(diaDoPreparo(h, [], new Date('2026-10-29T10:00:00'))).toBe('2026-10-29')
+    expect(diaDoPreparo(h, [reg('2026-10-29')], new Date('2026-10-29T10:00:00'))).toBe('2026-10-31')
+    // a partir das 18h, é a véspera do próximo
+    expect(diaDoPreparo(h, [], new Date('2026-10-29T19:00:00'))).toBe('2026-10-31')
+    expect(diaDoPreparo(h, [], new Date('2026-10-30T21:00:00'))).toBe('2026-10-31')
+    // qualquer dia: amanhã, à noite
+    expect(diaDoPreparo(habito(), [], new Date('2026-10-29T20:00:00'))).toBe('2026-10-30')
+  })
+
+  it('marcar itens e o "combinei"; preparo de outro dia não vale', () => {
+    let p = alternarPreparo(h, '2026-10-31', 'mochila')
+    p = alternarPreparo({ preparo: p }, '2026-10-31', 'garrafa')
+    p = alternarPreparo({ preparo: p }, '2026-10-31', 'fone')
+    expect(preparoCompleto({ ...h, preparo: p }, '2026-10-31')).toBe(false)
+    p = alternarPreparo({ preparo: p }, '2026-10-31', { combinado: true })
+    expect(preparoCompleto({ ...h, preparo: p }, '2026-10-31')).toBe(true)
+    p = alternarPreparo({ preparo: p }, '2026-10-31', 'fone')
+    expect(p.itens).toEqual(['mochila', 'garrafa'])
+    expect(preparoDoDia({ preparo: p }, '2026-11-03')).toEqual({ dia: '2026-11-03', itens: [] })
+    expect(preparoCompleto(habito(), '2026-10-31')).toBe(true)
+  })
+
+  it('aviso da véspera: só se amanhã é combinado e ainda falta preparar', () => {
+    expect(deveAvisarVespera(h, new Date('2026-10-30T21:00:00'))).toBe('2026-10-31')
+    expect(deveAvisarVespera(h, new Date('2026-10-30T21:31:00'))).toBeNull()
+    // quinta à noite: sexta não é combinada
+    expect(deveAvisarVespera(h, new Date('2026-10-29T21:10:00'))).toBeNull()
+    const pronto = { ...h, preparo: { dia: '2026-10-31', itens: ['mochila', 'garrafa', 'fone'], combinado: true } }
+    expect(deveAvisarVespera(pronto, new Date('2026-10-30T21:10:00'))).toBeNull()
+    expect(deveAvisarVespera({ ...h, base: [], companhia: undefined }, new Date('2026-10-30T21:10:00'))).toBeNull()
+    expect(deveAvisarVespera({ ...h, vespera: undefined }, new Date('2026-10-30T21:10:00'))).toBeNull()
   })
 })

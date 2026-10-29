@@ -18,7 +18,7 @@ import type { Consulta } from '../logica/consultas'
 import type { Avaliacao } from '../logica/faculdade'
 import { useAvaliacoes } from '../dados/faculdade'
 import { useHabitosAtivos } from '../dados/habitos'
-import type { Habito, RegistroHabito } from '../logica/habitos'
+import { diaDoPreparo, preparoCompleto, temPreparo, type Habito, type RegistroHabito } from '../logica/habitos'
 import { momento } from '../logica/remedios'
 import { dentroDoEfeito, janelasDeHoje } from '../logica/remedioNoPlano'
 import { atualizarPerfil } from '../dados/perfil'
@@ -31,7 +31,7 @@ import { ocorrencias, type Ocorrencia } from '../logica/calendario'
 import { useAgora } from '../dados/timer'
 import { AREAS } from '../design/areas'
 import { abrirJanelinha } from '../janelinha'
-import { diaLocal } from '../logica/datas'
+import { diaLocal, somarDias } from '../logica/datas'
 import {
   BLOCOS,
   blocoDoHorario,
@@ -85,6 +85,8 @@ function FolhaDoDia({ agora, nome }: { agora: Date; nome?: string }) {
 }
 
 type HabitoDoDia = { habito: Habito; registro?: RegistroHabito }
+/** base de lançamento para amanhã, lembrada no bloco da noite */
+type PreparoDaNoite = { habito: Habito; completo: boolean }
 
 function LinhaDoDia({
   tarefas,
@@ -93,6 +95,7 @@ function LinhaDoDia({
   eventos,
   avaliacoes,
   habitos,
+  preparos,
 }: {
   tarefas: Tarefa[]
   agora: Date
@@ -100,6 +103,7 @@ function LinhaDoDia({
   eventos: Ocorrencia[]
   avaliacoes: Avaliacao[]
   habitos: HabitoDoDia[]
+  preparos: PreparoDaNoite[]
 }) {
   const { t } = useTranslation()
   const atual = blocoDoHorario(agora)
@@ -134,6 +138,7 @@ function LinhaDoDia({
           const consultasDoBloco = consultas.filter((c) => c.hora && blocoDoHorario(momento(c.data!, c.hora)) === bloco)
           const eventosDoBloco = eventos.filter((o) => !o.evento.diaInteiro && blocoDoHorario(o.inicio) === bloco)
           const habitosDoBloco = habitos.filter((x) => x.habito.bloco === bloco)
+          const preparosDoBloco = bloco === 'noite' ? preparos : []
           const passou = blocoJaPassou(bloco, atual)
           const eAgora = bloco === atual
           return (
@@ -163,6 +168,20 @@ function LinhaDoDia({
                   <span className="tabular-nums">{o.inicio.toTimeString().slice(0, 5)}</span> {o.evento.titulo}
                 </p>
               ))}
+              {preparosDoBloco.map(({ habito, completo }) => (
+                <Link
+                  key={habito.id}
+                  to="/academia"
+                  className="flex items-center gap-2 rounded-full border-2 border-dashed border-linha bg-papel py-1 pr-3 pl-1 text-sm font-semibold"
+                >
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 border-linha bg-papel text-xs" aria-hidden="true">
+                    {completo ? '✓' : ''}
+                  </span>
+                  <Adesivo nome={habito.adesivo} tamanho={18} />
+                  {t('academia.baseAmanha', { titulo: habito.titulo })}
+                  {completo && <span className="so-leitor">({t('academia.tudoPronto')})</span>}
+                </Link>
+              ))}
               {doBloco.length || habitosDoBloco.length ? (
                 <ul className="flex flex-col gap-1.5">
                   {doBloco.map((x) => (
@@ -172,7 +191,7 @@ function LinhaDoDia({
                     <ItemHabito key={x.habito.id} {...x} />
                   ))}
                 </ul>
-              ) : consultasDoBloco.length || eventosDoBloco.length ? null : (
+              ) : consultasDoBloco.length || eventosDoBloco.length || preparosDoBloco.length ? null : (
                 <p className="text-sm text-tinta-suave">{t('hoje.livre')}</p>
               )}
             </li>
@@ -289,6 +308,10 @@ export function Hoje() {
   const remediosHoje = { feitos: doses.registros.filter((r) => r.status === 'tomei').length, total: doses.doses.length }
   const habitosHoje = habitosDoDia(habitos.habitos, habitos.registros, hoje)
   const academiaHoje = { feitos: habitosHoje.filter((x) => x.registro).length, total: habitosHoje.length }
+  const amanha = somarDias(hoje, 1)
+  const preparos = habitos.habitos
+    .filter((h) => temPreparo(h) && diaDoPreparo(h, habitos.registros.filter((r) => r.habitoId === h.id), agora) === amanha)
+    .map((h) => ({ habito: h, completo: preparoCompleto(h, amanha) }))
   const tarefasA = doDia.filter((x) => x.prioridade === 'A')
   const bonus = [...grupos.b, ...grupos.c]
 
@@ -398,6 +421,7 @@ export function Hoje() {
         eventos={ocorrencias(eventos, hoje, hoje)}
         avaliacoes={avaliacoes.filter((a) => a.data === hoje && !a.feitaEm)}
         habitos={habitosHoje}
+        preparos={preparos}
       />
 
       {!perfil.planoEscondido && <CartaoPlano dia={dia} />}

@@ -3,7 +3,7 @@
 
 import { useLiveQuery } from 'dexie-react-hooks'
 import type { IdArea } from '../design/areas'
-import { idRegistro, type Habito, type NivelHabito, type RegistroHabito } from '../logica/habitos'
+import { alternarPreparo, idRegistro, type Habito, type NivelHabito, type RegistroHabito } from '../logica/habitos'
 import type { Dia } from '../logica/datas'
 import { banco, novoId } from './banco'
 
@@ -66,4 +66,12 @@ export async function marcarHabito(habitoId: string, dia: Dia, nivel: NivelHabit
   const id = idRegistro(habitoId, dia)
   if (!nivel) await banco.registrosHabito.delete(id)
   else await banco.registrosHabito.put({ id, habitoId, dia, nivel, quando: agora.toISOString() })
+}
+
+/** Marca ou desmarca um item da base de lançamento (ou o "combinei com…") para o dia. */
+export async function marcarPreparo(habitoId: string, dia: Dia, item: string | { combinado: true }) {
+  await banco.transaction('rw', banco.habitos, async () => {
+    const h = await banco.habitos.get(habitoId)
+    if (h) await banco.habitos.update(habitoId, { preparo: alternarPreparo(h, dia, item) })
+  })
 }

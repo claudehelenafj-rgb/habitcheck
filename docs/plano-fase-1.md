@@ -103,7 +103,7 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | 9 | Faculdade: semestre, provas e entregas, planejamento de trás para frente (parte 1) | Pronta |
 | 9 | Modo foco, saída do hiperfoco, estudo acompanhado (parte 2) | Pronta |
 | 10 | Academia: hábitos com plano se-então, versão mínima e "X de 7 dias" (parte 1) | Pronta |
-| 10 | Base de lançamento e treino acompanhado (parte 2) | |
+| 10 | Base de lançamento, treino acompanhado e movimento antes do foco (parte 2) | Pronta |
 | 11 | Quarto | |
 | 12 | Alimentação | |
 | 13 | **Dinheiro**: contas a pagar, potes da semana, pausa antes de comprar, cofrinho | |
@@ -152,6 +152,14 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 - Lembrete opcional no horário escolhido, com o plano escrito ("Ir à academia: Se…, então…"), uma vez por dia e só se
   ainda não fez (respeita os avisos discretos).
 - Arquivar sem culpa (não apaga, dá para trazer de volta); apagar com desfazer. Na caixa de entrada, "Virar hábito".
+- Base de lançamento: o que deixar pronto na véspera (os modelos já trazem mochila, garrafa, fone), marcado item a
+  item para o próximo dia do hábito (hoje, se ainda não fez e é de dia; a partir das 18h, o próximo dia combinado).
+  Preparo de outro dia não vale. No bloco da noite da tela Hoje, "Base para amanhã" leva à Academia.
+- Treino acompanhado: "com quem" no cartão e "Combinei com…" no preparo.
+- Aviso na véspera (opcional, no horário escolhido): "Amanhã: Ir à academia — Deixar pronto: mochila, garrafa, fone.
+  Combinar com…". Só se amanhã é dia combinado e ainda falta algo; uma vez por dia.
+- Modo foco: mexer o corpo antes por 5, 15 ou 20 min (escolha lembrada); durante o movimento, "Conta para a
+  Academia?" marca como feito um hábito da Academia que ainda falta hoje.
 - A grade da semana agora fala português e inglês; nos remédios, dia sem dose aparece como "não estava combinado"
   e o meio-termo como "só parte das doses".
 

@@ -1,16 +1,88 @@
 // Cartão de um hábito: o plano se-então à vista, "Fiz" e "Fiz a versão mínima" para hoje,
 // a semana em adesivos (tocar num dia marca o que esqueceu de registrar) e a meta sem cobrança.
 
+import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
-import { arquivarHabito, marcarHabito } from '../dados/habitos'
+import { arquivarHabito, marcarHabito, marcarPreparo } from '../dados/habitos'
 import { AREAS } from '../design/areas'
-import type { Dia } from '../logica/datas'
-import { combinadoNoDia, estadoDoDia, metaFeita, proximoNivel, vezesNaSemana, type Habito, type NivelHabito, type RegistroHabito } from '../logica/habitos'
+import { diaLocal, somarDias, type Dia } from '../logica/datas'
+import {
+  combinadoNoDia,
+  diaDoPreparo,
+  estadoDoDia,
+  metaFeita,
+  preparoCompleto,
+  preparoDoDia,
+  proximoNivel,
+  temPreparo,
+  vezesNaSemana,
+  type Habito,
+  type NivelHabito,
+  type RegistroHabito,
+} from '../logica/habitos'
 import { diasDaSemana } from '../logica/remedios'
 import { Adesivo } from './Adesivo'
 import { mostrarAviso } from './Avisos'
 import { Botao } from './Botao'
 import { GradeSemanal, type Dia as DiaGrade } from './GradeSemanal'
+
+/** Título e texto do aviso da véspera (também usados pela moldura). */
+export function textosVespera(t: TFunction, h: Pick<Habito, 'titulo' | 'base' | 'companhia'>): [string, string] {
+  const partes = [
+    h.base?.length ? t('academia.vesperaBase', { itens: h.base.join(', ') }) : '',
+    h.companhia ? t('academia.vesperaCombinar', { quem: h.companhia }) : '',
+  ]
+  return [t('academia.vesperaTitulo', { titulo: h.titulo }), partes.filter(Boolean).join(' ')]
+}
+
+/** Base de lançamento: o que deixar pronto (e o "combinei com…") para o próximo dia do hábito. */
+function BaseDeLancamento({ habito, registros }: { habito: Habito; registros: RegistroHabito[] }) {
+  const { t, i18n } = useTranslation()
+  const agora = new Date()
+  const dia = diaDoPreparo(habito, registros, agora)
+  if (!dia || !temPreparo(habito)) return null
+  const hoje = diaLocal(agora)
+  const preparo = preparoDoDia(habito, dia)
+  const quando =
+    dia === hoje
+      ? t('academia.paraHoje')
+      : dia === somarDias(hoje, 1)
+        ? t('academia.paraAmanha')
+        : t('academia.paraDia', { dia: new Date(`${dia}T12:00:00`).toLocaleDateString(i18n.language, { weekday: 'short', day: 'numeric', month: 'short' }).replace(/\./g, '') })
+  const chip = (marcado: boolean) =>
+    `flex min-h-11 items-center gap-1.5 rounded-full border-2 border-linha px-4 text-sm font-bold ${marcado ? 'bg-menta' : 'bg-papel'}`
+  return (
+    <section aria-label={`${t('academia.baseTitulo')} · ${quando}`} className="flex flex-col gap-2 rounded-2xl border-2 border-dashed border-linha/60 bg-papel/60 p-4">
+      <h4 className="font-bold">
+        {t('academia.baseTitulo')} · {quando}
+      </h4>
+      <ul className="flex flex-wrap gap-2">
+        {(habito.base ?? []).map((item) => {
+          const marcado = preparo.itens.includes(item)
+          return (
+            <li key={item}>
+              <button type="button" aria-pressed={marcado} onClick={() => marcarPreparo(habito.id, dia, item)} className={chip(marcado)}>
+                <span aria-hidden="true">{marcado ? '✓' : '○'}</span>
+                {item}
+              </button>
+            </li>
+          )
+        })}
+        {habito.companhia && (
+          <li>
+            <button type="button" aria-pressed={!!preparo.combinado} onClick={() => marcarPreparo(habito.id, dia, { combinado: true })} className={chip(!!preparo.combinado)}>
+              <span aria-hidden="true">{preparo.combinado ? '✓' : '○'}</span>
+              {t('academia.combinei', { quem: habito.companhia })}
+            </button>
+          </li>
+        )}
+      </ul>
+      <p className="text-sm" role="status">
+        {preparoCompleto(habito, dia) ? `✓ ${t('academia.tudoPronto')}` : t('academia.baseDica')}
+      </p>
+    </section>
+  )
+}
 
 /** "Se eu chegar da faculdade, então troco de roupa antes de sentar." */
 export function PlanoSeEntao({ habito, className = '' }: { habito: Pick<Habito, 'se' | 'entao'>; className?: string }) {
@@ -99,6 +171,7 @@ export function CartaoHabito({ habito, registros, hoje, editar }: { habito: Habi
               </span>
               {habito.bloco && <span className="rounded-full border-2 border-linha/40 bg-papel px-2">{t(`hoje.blocos.${habito.bloco}`)}</span>}
               {habito.lembrete && <span className="rounded-full border-2 border-linha/40 bg-papel px-2 tabular-nums">{t('academia.lembreteAs', { hora: habito.lembrete })}</span>}
+              {habito.companhia && <span className="rounded-full border-2 border-linha/40 bg-papel px-2">{t('academia.com', { quem: habito.companhia })}</span>}
             </p>
           </div>
           <button type="button" onClick={editar} className="text-sm font-bold underline decoration-2 underline-offset-4">
@@ -108,6 +181,7 @@ export function CartaoHabito({ habito, registros, hoje, editar }: { habito: Habi
         <PlanoSeEntao habito={habito} className="rounded-2xl bg-papel px-4 py-3 text-lg" />
         {!registroHoje && habito.dias.length > 0 && !combinadoNoDia(habito, hoje) && <p className="text-sm">{t('academia.naoCombinadoHoje')}</p>}
         <BotoesHabito habito={habito} registro={registroHoje} hoje={hoje} />
+        <BaseDeLancamento habito={habito} registros={doHabito} />
       </div>
       <GradeSemanal titulo={t('academia.estaSemana')} adesivo={habito.adesivo} tom="bg-papel" dias={dias} />
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-1 text-sm">

@@ -33,6 +33,7 @@ export function Academia() {
       se: t(`academia.modelos.${chave}.se`),
       entao: t(`academia.modelos.${chave}.entao`),
       minima: t(`academia.modelos.${chave}.minima`),
+      ...(m.comBase ? { base: t(`academia.modelos.${chave}.base`).split(',').map((x) => x.trim()) } : {}),
     })
   }
 

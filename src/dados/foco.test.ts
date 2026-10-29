@@ -14,7 +14,7 @@ const base = { titulo: 'Ler o capítulo 3', passo: 'Abrir o livro', blocoMin: 25
 
 describe('modo foco no banco', () => {
   it('o aviso de "acabou" sai uma vez só por fase', async () => {
-    const e = novoFoco(base, t0, false)
+    const e = novoFoco(base, t0, 0)
     await guardarFoco(e)
     const [a, b] = await Promise.all([marcarAvisoFoco(e.faseInicio), marcarAvisoFoco(e.faseInicio)])
     expect([a, b].filter(Boolean)).toHaveLength(1)
@@ -37,7 +37,7 @@ describe('modo foco no banco', () => {
       estimativaMin: 20,
       realMin: 5,
     })
-    await guardarFoco(novoFoco({ ...base, tarefaId: 't1', estimativaMin: 20 }, t0, false))
+    await guardarFoco(novoFoco({ ...base, tarefaId: 't1', estimativaMin: 20 }, t0, 0))
     const sessao = await encerrarFoco({ concluir: false, passoOndeParei: '  Continuar da página 40 ' }, depois(18))
     expect(sessao).toMatchObject({ tarefaId: 't1', minutos: 18, estimativaMin: 20, dia: '2026-10-29' })
     expect(await banco.sessoesFoco.count()).toBe(1)
@@ -50,7 +50,7 @@ describe('modo foco no banco', () => {
 
   it('concluir a tarefa no fim; menos de 1 minuto não vira sessão', async () => {
     await banco.tarefas.put({ id: 't2', titulo: 'x', prioridade: 'B', passos: [], criadaEm: '' })
-    await guardarFoco(novoFoco({ ...base, tarefaId: 't2' }, t0, false))
+    await guardarFoco(novoFoco({ ...base, tarefaId: 't2' }, t0, 0))
     expect(await encerrarFoco({ concluir: true, passoOndeParei: 'não entra' }, depois(0.2))).toBeUndefined()
     const t = await banco.tarefas.get('t2')
     expect(t?.feitaEm).toBeTruthy()

@@ -1,5 +1,5 @@
 // Modo foco em tela cheia: escolher a tarefa, o primeiro passo físico e o "pronto quando"; mexer o corpo
-// 5 min antes (se quiser); bloco de 25 a 45 min com o tempo visível; no fim, a saída do hiperfoco com uma
+// de 5 a 20 min antes (se quiser; pode contar para um hábito da Academia); bloco de 25 a 45 min com o tempo visível; no fim, a saída do hiperfoco com uma
 // atividade-ponte (água, alongar, guardar o material) e a pausa de verdade; por último, "achei × levou".
 // Fica fora da moldura (sem menu), com fundo liso e nada se mexendo além do timer.
 
@@ -23,6 +23,7 @@ import {
   useSessoesFoco,
   type EscolhasFoco,
 } from '../dados/foco'
+import { marcarHabito, useHabitosAtivos } from '../dados/habitos'
 import { useConfigAvisos } from '../dados/remedios'
 import { capturar, reabrirTarefa, useTarefas } from '../dados/tarefas'
 import { useAgora } from '../dados/timer'
@@ -35,6 +36,7 @@ import {
   comecarBloco,
   compararEstimativa,
   DURACOES_FOCO,
+  MOVIMENTOS_MIN,
   estimativaAjustada,
   fatorBate,
   fatorDeEstimativa,
@@ -50,6 +52,7 @@ import {
   type FaseFoco,
   type SessaoFoco,
 } from '../logica/foco'
+import { pendenteHoje } from '../logica/habitos'
 import { formatarDuracao } from '../logica/hoje'
 import { proximoPasso } from '../logica/tarefas'
 import { entrarTelaCheia, podeTelaCheia, prepararSom, sairTelaCheia, useTelaAcesa, useTelaCheia } from '../telaFoco'
@@ -138,6 +141,7 @@ function Preparar({ tarefas, escolhas, inicial, volta }: { tarefas: Tarefa[]; es
   const [estimativa, setEstimativa] = useState<number | undefined>(() => daTarefa(primeira).estimativa)
   const [bloco, setBloco] = useState(() => blocoSugerido(daTarefa(primeira).estimativa))
   const [mexer, setMexer] = useState(escolhas.mexer)
+  const [mexerMin, setMexerMin] = useState(escolhas.mexerMin)
   const [telaCheia, setTelaCheia] = useState(escolhas.telaCheia)
   const [som, setSom] = useState(escolhas.som)
   const tarefa = tarefas.find((x) => x.id === tarefaId)
@@ -157,7 +161,7 @@ function Preparar({ tarefas, escolhas, inicial, volta }: { tarefas: Tarefa[]; es
     // tela cheia e som precisam do clique: vêm antes de qualquer espera
     if (telaCheia && comTelaCheia) void entrarTelaCheia()
     if (som) prepararSom()
-    await guardarEscolhasFoco({ mexer, telaCheia, som })
+    await guardarEscolhasFoco({ mexer, mexerMin, telaCheia, som })
     await guardarFoco(
       novoFoco(
         {
@@ -171,7 +175,7 @@ function Preparar({ tarefas, escolhas, inicial, volta }: { tarefas: Tarefa[]; es
           ...(estimativa ? { estimativaMin: estimativa } : {}),
         },
         new Date(),
-        mexer,
+        mexer ? mexerMin : 0,
       ),
     )
   }
@@ -264,6 +268,23 @@ function Preparar({ tarefas, escolhas, inicial, volta }: { tarefas: Tarefa[]; es
             <span className="block text-sm">{t('foco.mexerDica')}</span>
           </span>
         </label>
+        {mexer && (
+          <fieldset className="ml-8 flex flex-wrap items-center gap-1.5">
+            <legend className="so-leitor">{t('foco.mexerTempo')}</legend>
+            {MOVIMENTOS_MIN.map((m) => (
+              <button
+                key={m}
+                type="button"
+                aria-pressed={mexerMin === m}
+                onClick={() => setMexerMin(m)}
+                className={`min-h-11 rounded-full border-2 border-linha px-4 font-semibold ${mexerMin === m ? 'bg-papel' : 'bg-menta'}`}
+              >
+                {mexerMin === m && '✓ '}
+                {t('faculdade.min', { n: m })}
+              </button>
+            ))}
+          </fieldset>
+        )}
         {comTelaCheia && (
           <label className="flex items-center gap-3">
             <input type="checkbox" checked={telaCheia} onChange={(e) => setTelaCheia(e.target.checked)} className="h-5 w-5 shrink-0 accent-[var(--chocolate)]" />
@@ -345,6 +366,47 @@ function Ponte({ adesivo, texto }: { adesivo: NomeAdesivo; texto: string }) {
   )
 }
 
+/** O movimento antes do foco pode contar para um hábito da Academia que ainda falta hoje. */
+function ContarParaAcademia() {
+  const { t } = useTranslation()
+  const dados = useHabitosAtivos()
+  const [contou, setContou] = useState<string[]>([])
+  if (!dados) return null
+  const hoje = diaLocal()
+  const daAcademia = dados.habitos.filter(
+    (h) => h.area === 'academia' && (contou.includes(h.id) || pendenteHoje(h, dados.registros.filter((r) => r.habitoId === h.id), hoje)),
+  )
+  if (!daAcademia.length) return null
+  return (
+    <div className="flex w-full flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-linha/60 p-4">
+      <p className="font-bold">{t('foco.contarPara')}</p>
+      <div className="flex flex-wrap justify-center gap-2">
+        {daAcademia.map((h) =>
+          contou.includes(h.id) ? (
+            <p key={h.id} role="status" className="flex items-center gap-2 font-semibold">
+              <Adesivo nome={h.adesivo} tamanho={28} />
+              {t('foco.contou', { titulo: h.titulo })}
+            </p>
+          ) : (
+            <Botao
+              key={h.id}
+              variante="secundario"
+              tom="bg-pessego"
+              icone={<Adesivo nome={h.adesivo} tamanho={24} />}
+              onClick={async () => {
+                await marcarHabito(h.id, hoje, 'completo')
+                setContou((c) => [...c, h.id])
+              }}
+            >
+              {t('foco.contarComo', { titulo: h.titulo })}
+            </Botao>
+          ),
+        )}
+      </div>
+    </div>
+  )
+}
+
 function SaidaDoHiperfoco({ e }: { e: EstadoFoco }) {
   const { t } = useTranslation()
   const [ondeParei, setOndeParei] = useState(e.ondeParei ?? '')
@@ -415,6 +477,7 @@ function Correndo({ e, agora }: { e: EstadoFoco; agora: Date }) {
         <Botao grande onClick={() => mudarFoco((x) => comecarBloco(x, new Date()))}>
           {t('foco.jaMexi', { n: e.blocoMin })}
         </Botao>
+        <ContarParaAcademia />
       </div>
     )
   }

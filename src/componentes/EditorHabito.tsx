@@ -4,11 +4,12 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apagarHabito, restaurarHabito, salvarHabito } from '../dados/habitos'
-import type { Habito } from '../logica/habitos'
+import { temPreparo, type Habito } from '../logica/habitos'
 import { BLOCOS } from '../logica/hoje'
 import { Adesivo } from './Adesivo'
 import { mostrarAviso } from './Avisos'
 import { Botao } from './Botao'
+import { textosVespera } from './CartaoHabito'
 
 const campo = 'min-h-12 rounded-2xl border-2 border-linha bg-papel px-4'
 // segunda primeiro (0 = domingo)
@@ -57,7 +58,13 @@ export function EditorHabito({ habito, novo, fechar, aoSalvar }: { habito: Habit
   const ref = useRef<HTMLDialogElement>(null)
   const [h, setH] = useState<Habito>(habito)
   const [erro, setErro] = useState('')
+  const [item, setItem] = useState('')
   const mudar = (m: Partial<Habito>) => setH((x) => ({ ...x, ...m }))
+  const acrescentarItem = () => {
+    const novo = item.trim()
+    if (novo && !(h.base ?? []).includes(novo)) mudar({ base: [...(h.base ?? []), novo] })
+    setItem('')
+  }
   const nomeDia = (d: number, tipo: 'short' | 'long') =>
     new Date(2026, 10, 1 + d).toLocaleDateString(i18n.language, { weekday: tipo }).replace('.', '')
 
@@ -74,6 +81,8 @@ export function EditorHabito({ habito, novo, fechar, aoSalvar }: { habito: Habit
     if (!titulo) return setErro(t('editorHabito.semNome'))
     if (!h.se.trim() || !h.entao.trim()) return setErro(t('editorHabito.semPlano'))
     const dias = [...h.dias].sort()
+    const base = (h.base ?? []).map((x) => x.trim()).filter(Boolean)
+    const companhia = h.companhia?.trim() || undefined
     await salvarHabito({
       ...h,
       titulo,
@@ -83,6 +92,9 @@ export function EditorHabito({ habito, novo, fechar, aoSalvar }: { habito: Habit
       dias,
       meta: dias.length || h.meta,
       lembrete: h.lembrete || undefined,
+      base: base.length ? base : undefined,
+      companhia,
+      vespera: (base.length || companhia) && h.vespera ? h.vespera : undefined,
     })
     aoSalvar?.()
     ref.current?.close()
@@ -211,6 +223,81 @@ export function EditorHabito({ habito, novo, fechar, aoSalvar }: { habito: Habit
             </>
           )}
         </Grupo>
+
+        <Grupo titulo={t('editorHabito.base')} dica={t('editorHabito.baseDica')}>
+          {(h.base ?? []).length > 0 && (
+            <ul className="flex flex-wrap gap-2">
+              {(h.base ?? []).map((x) => (
+                <li key={x} className="flex items-center gap-1 rounded-full border-2 border-linha bg-pessego py-1 pr-1 pl-3 text-sm font-semibold">
+                  {x}
+                  <button
+                    type="button"
+                    onClick={() => mudar({ base: (h.base ?? []).filter((y) => y !== x) })}
+                    aria-label={t('editorHabito.tirarItem', { item: x })}
+                    className="grid h-8 w-8 place-items-center rounded-full border-2 border-linha bg-papel font-bold"
+                  >
+                    ×
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <label className="min-w-0 flex-1 basis-40">
+              <span className="so-leitor">{t('editorHabito.novoItem')}</span>
+              <input
+                value={item}
+                onChange={(e) => setItem(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    acrescentarItem()
+                  }
+                }}
+                maxLength={40}
+                placeholder={t('editorHabito.novoItemExemplo')}
+                className={`${campo} w-full`}
+              />
+            </label>
+            <Botao variante="contorno" onClick={acrescentarItem}>
+              + {t('editorHabito.acrescentar')}
+            </Botao>
+          </div>
+        </Grupo>
+
+        <label className="flex flex-col gap-1.5">
+          <span className="font-bold">{t('editorHabito.companhia')}</span>
+          <input value={h.companhia ?? ''} onChange={(e) => mudar({ companhia: e.target.value })} maxLength={40} placeholder={t('editorHabito.companhiaExemplo')} className={campo} />
+          <span className="text-sm">{t('editorHabito.companhiaDica')}</span>
+        </label>
+
+        {temPreparo({ base: h.base, companhia: h.companhia?.trim() }) && (
+          <Grupo titulo={t('editorHabito.vespera')}>
+            <label className="flex items-center gap-2 font-semibold">
+              <input
+                type="checkbox"
+                checked={!!h.vespera}
+                onChange={(e) => mudar({ vespera: e.target.checked ? '21:00' : undefined })}
+                className="h-5 w-5 accent-[var(--chocolate)]"
+              />
+              {t('editorHabito.avisarVespera')}
+            </label>
+            {h.vespera && (
+              <>
+                <label className="flex flex-col gap-1.5 self-start">
+                  <span className="text-sm font-bold">{t('editorHabito.horaLembrete')}</span>
+                  <input type="time" value={h.vespera} onChange={(e) => mudar({ vespera: e.target.value || '21:00' })} className={campo} />
+                </label>
+                <p className="text-sm">
+                  {(() => {
+                    const [titulo, corpo] = textosVespera(t, { ...h, titulo: h.titulo.trim() || t('editorHabito.nomeExemplo'), companhia: h.companhia?.trim() })
+                    return t('editorHabito.vesperaFica', { titulo, corpo })
+                  })()}
+                </p>
+              </>
+            )}
+          </Grupo>
+        )}
 
         <p aria-live="polite" className="min-h-6 font-semibold">
           {erro && <>! {erro}</>}

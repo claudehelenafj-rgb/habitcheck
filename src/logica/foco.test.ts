@@ -22,17 +22,18 @@ const depois = (min: number, de = t0) => new Date(de.getTime() + min * 60_000)
 const dados = { titulo: 'Cálculo: estudar limites', passo: 'Abrir o caderno', blocoMin: 25, volta: '/faculdade', som: true }
 
 describe('fases do modo foco', () => {
-  it('sem movimento, começa direto no foco; com movimento, 5 min antes', () => {
-    expect(novoFoco(dados, t0, false)).toMatchObject({ fase: 'foco', faseMin: 25, focoMin: 0 })
-    const mexer = novoFoco(dados, t0, true)
+  it('sem movimento, começa direto no foco; com movimento, de 5 a 20 min antes', () => {
+    expect(novoFoco(dados, t0, 0)).toMatchObject({ fase: 'foco', faseMin: 25, focoMin: 0 })
+    const mexer = novoFoco(dados, t0, 5)
     expect(mexer).toMatchObject({ fase: 'movimento', faseMin: 5 })
+    expect(novoFoco(dados, t0, 20)).toMatchObject({ fase: 'movimento', faseMin: 20 })
     // o movimento não conta como foco
     const foco = comecarBloco(mexer, depois(5))
     expect(foco).toMatchObject({ fase: 'foco', faseMin: 25, focoMin: 0 })
   })
 
   it('o tempo restante vem do início da fase (recarregar não perde nada)', () => {
-    const e = novoFoco(dados, t0, false)
+    const e = novoFoco(dados, t0, 0)
     expect(segundosDaFase(e, t0)).toBe(25 * 60)
     expect(segundosDaFase(e, depois(10))).toBe(15 * 60)
     expect(segundosDaFase(e, depois(40))).toBe(0)
@@ -43,13 +44,13 @@ describe('fases do modo foco', () => {
   })
 
   it('o tempo do alarme não vira foco: conta só até o combinado', () => {
-    const e = novoFoco(dados, t0, false)
+    const e = novoFoco(dados, t0, 0)
     expect(minutosDeFoco(e, depois(10))).toBe(10)
     expect(minutosDeFoco(e, depois(50))).toBe(25)
   })
 
   it('"mais 5 min" soma o bloco e para depois de 2 vezes seguidas', () => {
-    let e = novoFoco(dados, t0, false)
+    let e = novoFoco(dados, t0, 0)
     e = maisUmPouco(e, depois(26))
     expect(e).toMatchObject({ fase: 'foco', faseMin: 5, extras: 1, focoMin: 25 })
     e = maisUmPouco(e, depois(32))
@@ -63,7 +64,7 @@ describe('fases do modo foco', () => {
     expect(pausaPara(25)).toBe(5)
     expect(pausaPara(35)).toBe(5)
     expect(pausaPara(45)).toBe(10)
-    let e = novoFoco(dados, t0, false)
+    let e = novoFoco(dados, t0, 0)
     e = irParaPausa(e, depois(25))
     expect(e).toMatchObject({ fase: 'pausa', faseMin: 5, focoMin: 25, extras: 0 })
     e = comecarBloco(e, depois(31))
@@ -72,7 +73,7 @@ describe('fases do modo foco', () => {
   })
 
   it('terminar antes guarda só o que passou', () => {
-    const e = terminarFoco(novoFoco(dados, t0, false), depois(12))
+    const e = terminarFoco(novoFoco(dados, t0, 0), depois(12))
     expect(e).toMatchObject({ fase: 'fim', focoMin: 12 })
     expect(minutosDeFoco(e, depois(60))).toBe(12)
     expect(terminarFoco(e, depois(70))).toBe(e)
