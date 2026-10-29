@@ -6,6 +6,8 @@ import Dexie, { type EntityTable } from 'dexie'
 import type { IdArea } from '../design/areas'
 import type { Evento } from '../logica/calendario'
 import type { Checkin } from '../logica/checkin'
+import type { Avaliacao } from '../logica/faculdade'
+import type { SessaoFoco } from '../logica/foco'
 import type { Hobby, VezHobby } from '../logica/hobbies'
 import type { NotaRemedio } from '../logica/remedioNoPlano'
 import type { RegistroSintoma } from '../logica/sintomas'
@@ -37,6 +39,8 @@ export type Tarefa = {
   realMin?: number
   recompensa?: string
   objetivoId?: string
+  /** sessão de estudo gerada pelo planejamento de uma prova */
+  avaliacaoId?: string
   feitaEm?: string // ISO
   /** dia local em que foi feita (o ISO acima é em UTC e pode cair no dia seguinte à noite) */
   feitaNoDia?: string
@@ -70,6 +74,8 @@ export class BancoCaderninho extends Dexie {
   sugestoes!: EntityTable<RegistroSugestao, 'id'>
   sonos!: EntityTable<RegistroSono, 'id'>
   notasRemedio!: EntityTable<NotaRemedio, 'id'>
+  avaliacoes!: EntityTable<Avaliacao, 'id'>
+  sessoesFoco!: EntityTable<SessaoFoco, 'id'>
 
   constructor(nome = 'caderninho') {
     super(nome)
@@ -117,6 +123,12 @@ export class BancoCaderninho extends Dexie {
     // Bem-estar (B7): "como estou com o remédio"
     this.version(10).stores({
       notasRemedio: 'id, dia, remedioId',
+    })
+    // etapa 9: provas e entregas da faculdade, sessões de foco e o vínculo da tarefa com a prova
+    this.version(11).stores({
+      tarefas: 'id, dia, prioridade, area, objetivoId, feitaEm, avaliacaoId',
+      avaliacoes: 'id, data, materia',
+      sessoesFoco: 'id, dia, tarefaId',
     })
   }
 }

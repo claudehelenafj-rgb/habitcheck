@@ -13,6 +13,7 @@ import { Remedios } from './paginas/Remedios'
 import { Consultas } from './paginas/Consultas'
 import { Calendario } from './paginas/Calendario'
 import { BemEstar } from './paginas/BemEstar'
+import { Faculdade } from './paginas/Faculdade'
 import { GuiaDeEstilo } from './paginas/GuiaDeEstilo'
 import { GuiaIndigo } from './paginas/GuiaIndigo'
 import { NaoConsigoDormir } from './paginas/NaoConsigoDormir'
@@ -34,6 +35,7 @@ const roteador = createHashRouter([
       { path: '/consultas', element: <Consultas /> },
       { path: '/calendario', element: <Calendario /> },
       { path: '/bem-estar', element: <BemEstar /> },
+      { path: '/faculdade', element: <Faculdade /> },
       ...TODAS_AS_TELAS.filter((tela) => tela.etapa).map((tela) => ({
         path: tela.caminho,
         element: <EmBreve tela={tela} />,

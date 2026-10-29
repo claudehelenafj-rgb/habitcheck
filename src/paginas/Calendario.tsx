@@ -14,12 +14,14 @@ import { importarCalendario, novoEvento, useEventos } from '../dados/eventos'
 import { useTarefas } from '../dados/tarefas'
 import { doDia, gradeDoMes, mesmoMes, ocorrencias, type Evento, type Ocorrencia } from '../logica/calendario'
 import type { Consulta } from '../logica/consultas'
+import type { Avaliacao } from '../logica/faculdade'
+import { useAvaliacoes } from '../dados/faculdade'
 import { diaLocal, somarDias, type Dia } from '../logica/datas'
 import { diasDaSemana, momento } from '../logica/remedios'
 
 type Item = { chave: string; hora?: string; titulo: string; tom: string; adesivo: NomeAdesivo; legenda: string; abrir?: () => void }
 
-function useItensDoDia(lista: Ocorrencia[], consultas: Consulta[], tarefas: Tarefa[], editar: (e: Evento) => void) {
+function useItensDoDia(lista: Ocorrencia[], consultas: Consulta[], tarefas: Tarefa[], avaliacoes: Avaliacao[], editar: (e: Evento) => void) {
   const { t, i18n } = useTranslation()
   const hhmm = (d: Date) => d.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })
   return (dia: Dia): Item[] => {
@@ -37,10 +39,20 @@ function useItensDoDia(lista: Ocorrencia[], consultas: Consulta[], tarefas: Tare
     const deConsultas: Item[] = consultas
       .filter((c) => c.status === 'marcada' && c.data === dia)
       .map((c) => ({ chave: c.id, hora: c.hora, titulo: c.titulo, tom: 'bg-azul-nevoa', adesivo: 'prancheta', legenda: t('calendario.consulta') }))
+    const deAvaliacoes: Item[] = avaliacoes
+      .filter((a) => a.data === dia && !a.feitaEm)
+      .map((a) => ({
+        chave: a.id,
+        hora: a.hora,
+        titulo: `${a.materia}: ${a.titulo}`,
+        tom: 'bg-lavanda',
+        adesivo: 'livro',
+        legenda: t(`faculdade.tipos.${a.tipo}`),
+      }))
     const deTarefas: Item[] = tarefas
       .filter((x) => x.prioridade === 'A' && x.dia === dia && !x.feitaEm)
       .map((x) => ({ chave: x.id, titulo: x.titulo, tom: 'bg-papel', adesivo: 'lista', legenda: t('calendario.tarefaA') }))
-    const comHora = [...eventos, ...deConsultas].sort((a, b) => (a.hora ?? '').localeCompare(b.hora ?? ''))
+    const comHora = [...eventos, ...deConsultas, ...deAvaliacoes].sort((a, b) => (a.hora ?? '').localeCompare(b.hora ?? ''))
     return [...comHora, ...deTarefas]
   }
 }
@@ -119,6 +131,7 @@ export function Calendario() {
   const { t, i18n } = useTranslation()
   const eventos = useEventos()
   const consultas = useConsultas()
+  const avaliacoes = useAvaliacoes()
   const tarefas = useTarefas()
   const hoje = diaLocal()
   const [visao, setVisao] = useState<'semana' | 'mes'>('semana')
@@ -131,7 +144,7 @@ export function Calendario() {
   const de = visao === 'semana' ? semana[0] : grade[0][0]
   const ate = visao === 'semana' ? semana[6] : grade[5][6]
   const lista = useMemo(() => (eventos ? ocorrencias(eventos, de, ate) : []), [eventos, de, ate])
-  const itensDoDia = useItensDoDia(lista, consultas ?? [], tarefas ?? [], (e) => setEditando({ evento: e, novo: false }))
+  const itensDoDia = useItensDoDia(lista, consultas ?? [], tarefas ?? [], avaliacoes ?? [], (e) => setEditando({ evento: e, novo: false }))
   if (!eventos || !consultas || !tarefas) return null
 
   const mover = (n: number) => {

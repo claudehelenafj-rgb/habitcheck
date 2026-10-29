@@ -266,12 +266,17 @@ function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
       desacelerarCorpo: t('sono.lembreteDesacelerarCorpo'),
       checkinTitulo: t('checkin.lembreteTitulo'),
       checkinCorpo: t('checkin.lembreteCorpo'),
+      avaliacao: (a: { tipo: string; materia: string; titulo: string; data: string }, dias: number) =>
+        [
+          t(dias === 14 ? 'faculdade.avisoTitulo14' : 'faculdade.avisoTitulo3', { tipo: t(`faculdade.tipos.${a.tipo}`) }),
+          t(dias === 14 ? 'faculdade.avisoCorpo14' : 'faculdade.avisoCorpo3', { materia: a.materia, titulo: a.titulo }),
+        ] as [string, string],
       discretoTitulo: t('avisos.discretoTitulo'),
       discretoCorpo: t('avisos.discretoCorpo'),
     }),
     [t],
   )
-  useLembretes(textosLembretes, perfil.areasAtivas.includes('bemestar'))
+  useLembretes(textosLembretes, { bemEstar: perfil.areasAtivas.includes('bemestar'), faculdade: perfil.areasAtivas.includes('faculdade') })
 
   // Ao trocar de tela, o foco vai para o título da nova tela (bom para leitor de tela e teclado).
   // Telas que leem o banco desenham o título um instante depois: espera por ele até 1 segundo.

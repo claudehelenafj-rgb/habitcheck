@@ -100,7 +100,8 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | B6 | **Bem-estar**: sono (horários, rotina, diário, "Não consigo dormir") | Pronta |
 | B7 | **Bem-estar**: remédio no plano, padrões, "vale conversar com um profissional", resumo para a consulta | Pronta |
 | B8 | **Bem-estar**: PIN, avisos discretos, lembretes de check-in, baixar/apagar só o Bem-estar | Pronta |
-| 9 | Faculdade, modo foco, saída do hiperfoco | |
+| 9 | Faculdade: semestre, provas e entregas, planejamento de trás para frente (parte 1) | Pronta |
+| 9 | Modo foco, saída do hiperfoco, estudo acompanhado (parte 2) | |
 | 10 | Academia | |
 | 11 | Quarto | |
 | 12 | Alimentação | |
@@ -108,6 +109,17 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | 14 | Rituais e revisão semanal (com 5 min de dinheiro) | |
 | 15 | **Meus objetivos** com gráficos | |
 | 16 | Álbum de adesivos, recompensas e conferência final | |
+
+## Faculdade (etapa 9)
+
+- Configuração do semestre: matérias e várias provas/entregas de uma vez (linhas sem matéria ou data ficam de fora).
+- Lembretes automáticos 14 e 3 dias antes, uma vez no dia, a partir das 9h, só com a área Faculdade ligada
+  (respeitam os avisos discretos). Provas e entregas aparecem no calendário e, no dia, na linha do dia da tela Hoje.
+- Planejamento de trás para frente: o conteúdo (um assunto por linha) vira sessões de 25, 35 ou 45 min espalhadas
+  do início até a véspera; a véspera fica para a revisão geral (se houver pelo menos 2 dias); com mais assuntos do
+  que vagas, junta assuntos na mesma sessão. Cada sessão vira uma tarefa da Faculdade no dia, com o primeiro passo
+  ("Abrir o material de…") e o "pronto quando"; entra como A se couber no limite de 3 do dia, senão como B.
+  Apagar a prova leva junto as sessões ainda não feitas (com desfazer).
 
 ## Lógica com testes automáticos
 

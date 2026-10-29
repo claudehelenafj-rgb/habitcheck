@@ -15,6 +15,8 @@ import { AnelProgresso } from '../componentes/Enfeites'
 import type { ContextoMoldura } from '../componentes/Moldura'
 import type { Tarefa } from '../dados/banco'
 import type { Consulta } from '../logica/consultas'
+import type { Avaliacao } from '../logica/faculdade'
+import { useAvaliacoes } from '../dados/faculdade'
 import { momento } from '../logica/remedios'
 import { dentroDoEfeito, janelasDeHoje } from '../logica/remedioNoPlano'
 import { atualizarPerfil } from '../dados/perfil'
@@ -79,7 +81,7 @@ function FolhaDoDia({ agora, nome }: { agora: Date; nome?: string }) {
   )
 }
 
-function LinhaDoDia({ tarefas, agora, consultas, eventos }: { tarefas: Tarefa[]; agora: Date; consultas: Consulta[]; eventos: Ocorrencia[] }) {
+function LinhaDoDia({ tarefas, agora, consultas, eventos, avaliacoes }: { tarefas: Tarefa[]; agora: Date; consultas: Consulta[]; eventos: Ocorrencia[]; avaliacoes: Avaliacao[] }) {
   const { t } = useTranslation()
   const atual = blocoDoHorario(agora)
   const semBloco = tarefas.filter((x) => !x.bloco)
@@ -89,8 +91,15 @@ function LinhaDoDia({ tarefas, agora, consultas, eventos }: { tarefas: Tarefa[];
       <h2 id="titulo-linha" className="text-2xl font-semibold">
         {t('hoje.linhaDia')}
       </h2>
-      {diaTodo.length > 0 && (
+      {(diaTodo.length > 0 || avaliacoes.length > 0) && (
         <ul className="flex flex-wrap gap-2">
+          {avaliacoes.map((a) => (
+            <li key={a.id} className="flex items-center gap-2 rounded-full border-2 border-linha bg-lavanda py-1 pr-3 pl-1 text-sm font-semibold">
+              <Adesivo nome="livro" tamanho={22} />
+              {t(`faculdade.tipos.${a.tipo}`)} · {a.materia}: {a.titulo}
+              {a.hora && <span className="tabular-nums"> · {a.hora}</span>}
+            </li>
+          ))}
           {diaTodo.map((o) => (
             <li key={o.evento.id} className="flex items-center gap-2 rounded-full border-2 border-linha bg-manteiga py-1 pr-3 pl-1 text-sm font-semibold">
               <Adesivo nome="calendario" tamanho={22} />
@@ -220,6 +229,7 @@ export function Hoje() {
   const tarefas = useTarefas()
   const doses = useDosesDoDia(diaLocal(agora))
   const consultas = useConsultas()
+  const avaliacoes = useAvaliacoes()
   const eventos = useEventos()
   const { candidato } = useCandidatoAgora(agora)
   const hoje = diaLocal(agora)
@@ -229,7 +239,7 @@ export function Hoje() {
   const diaAlcancado = visitaAnterior ? diaDoPlano(perfil.inicioPlano, visitaAnterior) : dia
   const podeContinuar = acolher && visitaAnterior && diaAlcancado < DURACAO_PLANO
 
-  if (!tarefas || !doses || !consultas || !eventos) return null
+  if (!tarefas || !doses || !consultas || !eventos || !avaliacoes) return null
   const doDia = tarefasDoDia(tarefas, hoje)
   const grupos = agruparTarefas(tarefas, hoje)
   const remediosHoje = { feitos: doses.registros.filter((r) => r.status === 'tomei').length, total: doses.doses.length }
@@ -335,7 +345,7 @@ export function Hoje() {
         </div>
       </div>
 
-      <LinhaDoDia tarefas={doDia} agora={agora} consultas={consultas.filter((c) => c.status === 'marcada' && c.data === hoje)} eventos={ocorrencias(eventos, hoje, hoje)} />
+      <LinhaDoDia tarefas={doDia} agora={agora} consultas={consultas.filter((c) => c.status === 'marcada' && c.data === hoje)} eventos={ocorrencias(eventos, hoje, hoje)} avaliacoes={avaliacoes.filter((a) => a.data === hoje && !a.feitaEm)} />
 
       {!perfil.planoEscondido && <CartaoPlano dia={dia} />}
 

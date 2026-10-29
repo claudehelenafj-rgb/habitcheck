@@ -5,6 +5,8 @@
 import { useEffect, useRef } from 'react'
 import { useBemEstar } from './dados/bemEstar'
 import { useUltimoCheckin } from './dados/checkins'
+import { useAvaliacoes } from './dados/faculdade'
+import { lembreteDeHoje, type Avaliacao } from './logica/faculdade'
 import { jaAvisouTransicao, registrarTransicao, useConsultas } from './dados/consultas'
 import { registrarAviso, useConfigAvisos, useDosesDoDia } from './dados/remedios'
 import { planoReverso } from './logica/consultas'
@@ -51,6 +53,8 @@ export type TextosLembretes = {
   desacelerarCorpo: string
   checkinTitulo: string
   checkinCorpo: string
+  /** prova ou entrega daqui a 14 ou 3 dias: [título, texto] */
+  avaliacao: (a: Avaliacao, dias: number) => [string, string]
   /** "avisos discretos": título e texto que trocam todos os outros */
   discretoTitulo: string
   discretoCorpo: string
@@ -133,8 +137,34 @@ function useAvisosBemEstar(agora: Date, textos: TextosLembretes, ativo: boolean,
   }, [config, ultimoCheckin, agora, textos, ativo, discretos])
 }
 
-/** Usar uma vez, na moldura do app. `bemEstar` = a aba Bem-estar está ligada. */
-export function useLembretes(textos: TextosLembretes, bemEstar = false) {
+/** A partir desta hora, avisa das provas e entregas de daqui a 14 e 3 dias (uma vez no dia). */
+const HORA_AVISO_FACULDADE = 9
+
+function useAvisosFaculdade(agora: Date, textos: TextosLembretes, ativo: boolean, discretos: boolean) {
+  const avaliacoes = useAvaliacoes()
+  const emAndamento = useRef(new Set<string>())
+  useEffect(() => {
+    if (!ativo || !avaliacoes || agora.getHours() < HORA_AVISO_FACULDADE) return
+    const hoje = diaLocal(agora)
+    for (const a of avaliacoes) {
+      const dias = lembreteDeHoje(a, hoje)
+      if (!dias) continue
+      const id = `faculdade|${a.id}|${dias}`
+      if (emAndamento.current.has(id)) continue
+      emAndamento.current.add(id)
+      ;(async () => {
+        if (await jaAvisouTransicao(id)) return
+        await registrarTransicao(id)
+        await mostrarAvisoSistema(...comDiscricao(textos, discretos, ...textos.avaliacao(a, dias)), id)
+      })().finally(() => emAndamento.current.delete(id))
+    }
+  }, [avaliacoes, agora, textos, ativo, discretos])
+}
+
+export type AreasDosLembretes = { bemEstar?: boolean; faculdade?: boolean }
+
+/** Usar uma vez, na moldura do app, com as áreas ligadas. */
+export function useLembretes(textos: TextosLembretes, areas: AreasDosLembretes = {}) {
   const tituloAviso = textos.remedio
   const agora = useAgora(20_000)
   const hoje = diaLocal(agora)
@@ -142,7 +172,8 @@ export function useLembretes(textos: TextosLembretes, bemEstar = false) {
   const { silencio, discretos = false } = useConfigAvisos()
   const emAndamento = useRef(new Set<string>())
   useAvisosTransicao(agora, textos, discretos)
-  useAvisosBemEstar(agora, textos, bemEstar, discretos)
+  useAvisosBemEstar(agora, textos, !!areas.bemEstar, discretos)
+  useAvisosFaculdade(agora, textos, !!areas.faculdade, discretos)
 
   useEffect(() => {
     if (!dados) return
