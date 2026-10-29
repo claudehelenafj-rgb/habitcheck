@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
 import { usePadroes, TextoPadrao } from '../componentes/Padroes'
+import { ProtecaoBemEstar } from '../componentes/ProtecaoBemEstar'
 import { PARTES_RESUMO, type ParteResumo } from '../componentes/ResumoConsulta'
 import { useBemEstar } from '../dados/bemEstar'
 import { useCheckinsDesde } from '../dados/checkins'
@@ -64,6 +65,14 @@ function Parte({ titulo, children }: { titulo: string; children: React.ReactNode
 }
 
 export function ResumoImpressao() {
+  return (
+    <ProtecaoBemEstar sozinha>
+      <ConteudoResumo />
+    </ProtecaoBemEstar>
+  )
+}
+
+function ConteudoResumo() {
   const { t, i18n } = useTranslation()
   const [params] = useSearchParams()
   const titulo = useRef<HTMLHeadingElement>(null)

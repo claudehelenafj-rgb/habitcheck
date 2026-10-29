@@ -7,8 +7,6 @@ export type IdFerramenta = 'checkin' | 'sintomas' | 'hobbies' | 'sugestoes' | 's
 export type Ferramenta = {
   id: IdFerramenta
   adesivo: NomeAdesivo
-  /** etapa do adicional em que a ferramenta fica pronta; ausente = já pronta */
-  etapa?: string
 }
 
 export const FERRAMENTAS: Ferramenta[] = [

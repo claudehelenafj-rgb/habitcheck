@@ -4,6 +4,7 @@
 
 import { useEffect, useRef } from 'react'
 import { useBemEstar } from './dados/bemEstar'
+import { useUltimoCheckin } from './dados/checkins'
 import { jaAvisouTransicao, registrarTransicao, useConsultas } from './dados/consultas'
 import { registrarAviso, useConfigAvisos, useDosesDoDia } from './dados/remedios'
 import { planoReverso } from './logica/consultas'
@@ -48,10 +49,23 @@ export type TextosLembretes = {
   acordarCorpo: string
   desacelerarTitulo: string
   desacelerarCorpo: string
+  checkinTitulo: string
+  checkinCorpo: string
+  /** "avisos discretos": título e texto que trocam todos os outros */
+  discretoTitulo: string
+  discretoCorpo: string
 }
 
+/** Com avisos discretos, todo aviso vira "Caderninho · lembrete" (nada de remédio ou assunto na tela de bloqueio). */
+function comDiscricao(textos: TextosLembretes, discretos: boolean, titulo: string, corpo: string): [string, string] {
+  return discretos ? [textos.discretoTitulo, textos.discretoCorpo] : [titulo, corpo]
+}
+
+/** Não lembra do check-in se a pessoa fez um há menos de 1 hora. */
+const MINUTOS_SEM_REPETIR_CHECKIN = 60
+
 /** Avisos de transição das consultas: "começar a se arrumar" e "sair de casa" (uma vez cada, até 30 min depois). */
-function useAvisosTransicao(agora: Date, textos: TextosLembretes) {
+function useAvisosTransicao(agora: Date, textos: TextosLembretes, discretos: boolean) {
   const consultas = useConsultas()
   const emAndamento = useRef(new Set<string>())
   useEffect(() => {
@@ -71,30 +85,41 @@ function useAvisosTransicao(agora: Date, textos: TextosLembretes) {
           if (await jaAvisouTransicao(id)) return
           await registrarTransicao(id)
           const hora = quando.toTimeString().slice(0, 5)
-          await mostrarAvisoSistema(textos.transicao, `${hora} · ${texto}`, id)
+          await mostrarAvisoSistema(...comDiscricao(textos, discretos, textos.transicao, `${hora} · ${texto}`), id)
         })().finally(() => emAndamento.current.delete(id))
       }
     }
-  }, [consultas, agora, textos])
+  }, [consultas, agora, textos, discretos])
 }
 
 /**
- * Sono (Bem-estar): "hora de levantar" no horário fixo de acordar e "hora de desacelerar" 30 min antes de deitar.
- * Uma vez por dia cada, até 30 min depois do horário. Só com a aba Bem-estar e a ferramenta Sono ligadas.
+ * Bem-estar: "hora de levantar" no horário fixo de acordar, "hora de desacelerar" 30 min antes de deitar e
+ * "hora do check-in" nos horários escolhidos (só se não houve check-in na última hora).
+ * Uma vez por dia cada, até 30 min depois do horário. Só com a aba Bem-estar e a ferramenta ligadas.
  */
-function useAvisosSono(agora: Date, textos: TextosLembretes, ativo: boolean) {
+function useAvisosBemEstar(agora: Date, textos: TextosLembretes, ativo: boolean, discretos: boolean) {
   const config = useBemEstar()
+  const ultimoCheckin = useUltimoCheckin()
   const emAndamento = useRef(new Set<string>())
   useEffect(() => {
-    const sono = config?.sono
-    if (!ativo || !sono || !config.ferramentas.includes('sono')) return
+    if (!ativo || !config || ultimoCheckin === undefined) return
     const hoje = diaLocal(agora)
     const avisos: Array<[string, string, string]> = []
-    if (sono.lembreteAcordar && sono.acordarAs && dentroDaJanela(sono.acordarAs, agora)) {
-      avisos.push([`sono|acordar|${hoje}`, textos.acordarTitulo, `${sono.acordarAs} · ${textos.acordarCorpo}`])
+    const sono = config.sono
+    if (sono && config.ferramentas.includes('sono')) {
+      if (sono.lembreteAcordar && sono.acordarAs && dentroDaJanela(sono.acordarAs, agora)) {
+        avisos.push([`sono|acordar|${hoje}`, textos.acordarTitulo, `${sono.acordarAs} · ${textos.acordarCorpo}`])
+      }
+      if (sono.lembreteRotina && sono.deitarAs && dentroDaJanela(horaDeDesacelerar(sono.deitarAs), agora)) {
+        avisos.push([`sono|desacelerar|${noiteDaRotina(agora, hoje)}`, textos.desacelerarTitulo, textos.desacelerarCorpo])
+      }
     }
-    if (sono.lembreteRotina && sono.deitarAs && dentroDaJanela(horaDeDesacelerar(sono.deitarAs), agora)) {
-      avisos.push([`sono|desacelerar|${noiteDaRotina(agora, hoje)}`, textos.desacelerarTitulo, textos.desacelerarCorpo])
+    const lembrar = config.checkinLembretes
+    const fezHaPouco = ultimoCheckin && agora.getTime() - new Date(ultimoCheckin.quando).getTime() < MINUTOS_SEM_REPETIR_CHECKIN * 60_000
+    if (lembrar?.ativo && config.ferramentas.includes('checkin') && !fezHaPouco) {
+      for (const h of lembrar.horarios) {
+        if (dentroDaJanela(h, agora)) avisos.push([`checkin|${hoje}|${h}`, textos.checkinTitulo, `${h} · ${textos.checkinCorpo}`])
+      }
     }
     for (const [id, titulo, corpo] of avisos) {
       if (emAndamento.current.has(id)) continue
@@ -102,10 +127,10 @@ function useAvisosSono(agora: Date, textos: TextosLembretes, ativo: boolean) {
       ;(async () => {
         if (await jaAvisouTransicao(id)) return
         await registrarTransicao(id)
-        await mostrarAvisoSistema(titulo, corpo, id)
+        await mostrarAvisoSistema(...comDiscricao(textos, discretos, titulo, corpo), id)
       })().finally(() => emAndamento.current.delete(id))
     }
-  }, [config, agora, textos, ativo])
+  }, [config, ultimoCheckin, agora, textos, ativo, discretos])
 }
 
 /** Usar uma vez, na moldura do app. `bemEstar` = a aba Bem-estar está ligada. */
@@ -114,10 +139,10 @@ export function useLembretes(textos: TextosLembretes, bemEstar = false) {
   const agora = useAgora(20_000)
   const hoje = diaLocal(agora)
   const dados = useDosesDoDia(hoje)
-  const { silencio } = useConfigAvisos()
+  const { silencio, discretos = false } = useConfigAvisos()
   const emAndamento = useRef(new Set<string>())
-  useAvisosTransicao(agora, textos)
-  useAvisosSono(agora, textos, bemEstar)
+  useAvisosTransicao(agora, textos, discretos)
+  useAvisosBemEstar(agora, textos, bemEstar, discretos)
 
   useEffect(() => {
     if (!dados) return
@@ -125,12 +150,14 @@ export function useLembretes(textos: TextosLembretes, bemEstar = false) {
       const registro = dados.registros.find((r) => r.id === dose.id)
       if (!deveAvisar(dose, registro, agora, silencio) || emAndamento.current.has(dose.id)) continue
       emAndamento.current.add(dose.id)
-      avisar(dose, tituloAviso).finally(() => emAndamento.current.delete(dose.id))
+      avisar(dose, comDiscricao(textos, discretos, tituloAviso, `${dose.horario} · ${textoDoLembrete(dose.remedio)}`)).finally(() =>
+        emAndamento.current.delete(dose.id),
+      )
     }
-  }, [dados, agora, silencio, tituloAviso])
+  }, [dados, agora, silencio, tituloAviso, textos, discretos])
 }
 
-async function avisar(dose: DosePrevista, titulo: string) {
+async function avisar(dose: DosePrevista, [titulo, corpo]: [string, string]) {
   await registrarAviso(dose)
-  await mostrarAvisoSistema(titulo, `${dose.horario} · ${textoDoLembrete(dose.remedio)}`, dose.id)
+  await mostrarAvisoSistema(titulo, corpo, dose.id)
 }

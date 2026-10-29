@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useOutletContext } from 'react-router'
 import { ComoEstouRemedio } from '../componentes/ComoEstouRemedio'
+import { ProtecaoBemEstar } from '../componentes/ProtecaoBemEstar'
 import type { ContextoMoldura } from '../componentes/Moldura'
 import { Adesivo } from '../componentes/Adesivo'
 import { Botao } from '../componentes/Botao'
@@ -211,7 +212,11 @@ export function Remedios() {
       )}
 
       {/* parte do Bem-estar: só com a aba ligada */}
-      {perfil.areasAtivas.includes('bemestar') && remedios.length > 0 && <ComoEstouRemedio remedios={remedios} />}
+      {perfil.areasAtivas.includes('bemestar') && remedios.length > 0 && (
+        <ProtecaoBemEstar compacto>
+          <ComoEstouRemedio remedios={remedios} />
+        </ProtecaoBemEstar>
+      )}
 
       <AvisosSistema />
 

@@ -7,12 +7,16 @@ import { Adesivo, type NomeAdesivo } from '../componentes/Adesivo'
 import { Botao } from '../componentes/Botao'
 import { Opcoes, PainelAparencia } from '../componentes/PainelAparencia'
 import { banco } from '../dados/banco'
-import { apagarTudo, BackupInvalido, exportarTudo, importarTudo, lerBackup, nomeArquivoBackup } from '../dados/backup'
+import { apagarTudo, BackupInvalido, exportarTudo, importarTudo, lerBackup, nomeArquivoBackup, type Escopo } from '../dados/backup'
+import { temPin } from '../dados/pin'
+import { FormularioPin } from '../componentes/ProtecaoBemEstar'
+import { useDesbloqueado } from '../trava'
 import { IDIOMAS } from '../i18n'
 import { estaInstalado, instalar, usePodeInstalar } from '../instalacao'
 import { usePreferencias } from '../preferencias'
 import { baixarArquivo } from '../baixar'
-import { salvarConfigAvisos, useConfigAvisos } from '../dados/remedios'
+import { AvisosDiscretos } from '../componentes/AvisosDiscretos'
+import { mudarConfigAvisos, useConfigAvisos } from '../dados/remedios'
 import { atualizarPerfil, usePerfil } from '../dados/perfil'
 import { AREAS_PRINCIPAIS } from '../design/areas'
 import { diaLocal } from '../logica/datas'
@@ -30,7 +34,7 @@ function Bloco({ id, titulo, adesivo, children }: { id: string; titulo: string; 
   )
 }
 
-type Confirmando = 'importar' | 'apagar' | null
+type Confirmando = 'importar' | 'apagar' | 'exportar' | null
 type Mensagem = { tipo: 'ok' | 'erro'; texto: string } | null
 
 function SeusDados() {
@@ -39,20 +43,29 @@ function SeusDados() {
   const [mensagem, setMensagem] = useState<Mensagem>(null)
   const [arquivoEscolhido, setArquivoEscolhido] = useState<string | null>(null)
   const seletor = useRef<HTMLInputElement>(null)
+  const desbloqueado = useDesbloqueado()
 
   const erro = (e: unknown) =>
     setMensagem({ tipo: 'erro', texto: t('ajustes.erro', { mensagem: e instanceof Error ? e.message : String(e) }) })
 
-  async function baixar() {
+  async function baixar(escopo: Escopo = 'tudo') {
     try {
-      const backup = await exportarTudo(banco)
-      const arquivo = nomeArquivoBackup()
+      // Bem-estar protegido por PIN: o backup completo só sai com o PIN (ou sem os dados dele)
+      if (escopo === 'tudo' && !desbloqueado && (await temPin())) return setConfirmando('exportar')
+      const backup = await exportarTudo(banco, new Date(), escopo)
+      const arquivo = nomeArquivoBackup(new Date(), escopo)
       baixarArquivo(arquivo, JSON.stringify(backup, null, 2), 'application/json')
       setMensagem({ tipo: 'ok', texto: t('ajustes.exportado', { arquivo }) })
+      setConfirmando(null)
     } catch (e) {
       erro(e)
     }
   }
+
+  // o PIN certo no pedido do backup: exporta tudo
+  useEffect(() => {
+    if (confirmando === 'exportar' && desbloqueado) baixar()
+  }, [desbloqueado])
 
   async function aoEscolherArquivo(arquivo: File | undefined) {
     if (!arquivo) return
@@ -90,7 +103,7 @@ function SeusDados() {
     <div className="cartao flex flex-col gap-4 bg-papel p-5">
       <p className="max-w-prose">{t('ajustes.dadosTexto')}</p>
       <div className="flex flex-wrap gap-2">
-        <Botao onClick={baixar} icone={<span aria-hidden="true">↓</span>}>
+        <Botao onClick={() => baixar()} icone={<span aria-hidden="true">↓</span>}>
           {t('ajustes.exportar')}
         </Botao>
         <Botao variante="secundario" tom="bg-azul-nevoa" onClick={() => seletor.current?.click()}>
@@ -111,10 +124,33 @@ function SeusDados() {
         </Botao>
       </div>
 
-      {confirmando && (
+      {confirmando === 'exportar' && (
+        <div role="alertdialog" aria-labelledby="texto-exportar-pin" className="cartao flex flex-col gap-3 bg-lilas p-4">
+          <p id="texto-exportar-pin" className="font-semibold">
+            {t('ajustes.exportarPin')}
+          </p>
+          <FormularioPin />
+          <div className="flex flex-wrap gap-2">
+            <Botao variante="secundario" tom="bg-papel" onClick={() => baixar('semBemEstar')}>
+              {t('ajustes.exportarSemBemEstar')}
+            </Botao>
+            <Botao variante="contorno" onClick={() => setConfirmando(null)}>
+              {t('ajustes.cancelar')}
+            </Botao>
+          </div>
+        </div>
+      )}
+
+      {(confirmando === 'apagar' || confirmando === 'importar') && (
         <div role="alertdialog" aria-labelledby="texto-confirmacao" className="cartao flex flex-col gap-3 bg-morango-claro p-4">
           <p id="texto-confirmacao" className="font-semibold">
-            {confirmando === 'apagar' ? t('ajustes.apagarAviso') : t('ajustes.importarAviso')}
+            {confirmando === 'apagar'
+              ? t('ajustes.apagarAviso')
+              : t(
+                  { bemEstar: 'ajustes.importarAvisoBemEstar', semBemEstar: 'ajustes.importarAvisoSemBemEstar', tudo: 'ajustes.importarAviso' }[
+                    (arquivoEscolhido && lerBackup(arquivoEscolhido).escopo) || 'tudo'
+                  ],
+                )}
           </p>
           <div className="flex flex-wrap gap-2">
             <Botao onClick={confirmar} autoFocus>
@@ -204,7 +240,7 @@ function Silencio() {
   const { t } = useTranslation()
   const config = useConfigAvisos()
   const s = config.silencio
-  const mudar = (m: Partial<typeof s>) => salvarConfigAvisos({ ...config, silencio: { ...s, ...m } })
+  const mudar = (m: Partial<typeof s>) => mudarConfigAvisos((c) => ({ silencio: { ...c.silencio, ...m } }))
   return (
     <div className="cartao flex flex-col gap-3 bg-papel p-5">
       <label className="flex items-center gap-2 font-bold">
@@ -222,6 +258,7 @@ function Silencio() {
         </label>
       </div>
       <p className="text-sm">{t('ajustes.silencioDica')}</p>
+      <AvisosDiscretos />
     </div>
   )
 }

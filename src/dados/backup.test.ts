@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { BancoCaderninho } from './banco'
-import { apagarTudo, BackupInvalido, exportarTudo, importarTudo, lerBackup, nomeArquivoBackup } from './backup'
+import { apagarBemEstar, apagarTudo, BackupInvalido, exportarTudo, importarTudo, lerBackup, nomeArquivoBackup } from './backup'
 
 let db: BancoCaderninho
 let contador = 0
@@ -77,5 +77,51 @@ describe('backup', () => {
 
   it('dá ao arquivo um nome com a data', () => {
     expect(nomeArquivoBackup(new Date(2026, 9, 3))).toBe('caderninho-backup-2026-10-03.json')
+  })
+})
+
+describe('backup do Bem-estar separado', () => {
+  beforeEach(async () => {
+    await db.checkins.add({ id: 'k1', quando: '2026-10-28T10:00:00.000Z', dia: '2026-10-28', ansiedade: 7, irritacao: 1, energia: 3 })
+    await db.configuracoes.put({ chave: 'bemEstar', valor: { ferramentas: ['checkin'] } })
+    await db.configuracoes.put({ chave: 'bemEstarPin', valor: { sal: 'x', hash: 'y' } })
+  })
+
+  it('"só o Bem-estar" leva as tabelas e a configuração dele, sem o PIN e sem o resto', async () => {
+    const b = await exportarTudo(db, new Date(), 'bemEstar')
+    expect(b.escopo).toBe('bemEstar')
+    expect(b.tabelas.checkins).toHaveLength(1)
+    expect(b.tabelas.tarefas).toBeUndefined()
+    expect(b.tabelas.configuracoes).toEqual([{ chave: 'bemEstar', valor: { ferramentas: ['checkin'] } }])
+    expect(nomeArquivoBackup(new Date(2026, 9, 29), 'bemEstar')).toBe('caderninho-backup-bem-estar-2026-10-29.json')
+  })
+
+  it('restaurar "só o Bem-estar" troca só ele: tarefas, caixa e PIN ficam', async () => {
+    const b = await exportarTudo(db, new Date(), 'bemEstar')
+    await apagarBemEstar(db)
+    expect(await db.checkins.count()).toBe(0)
+    expect(await db.configuracoes.get('bemEstar')).toBeUndefined()
+    expect(await db.configuracoes.get('bemEstarPin')).toBeDefined()
+    expect(await db.tarefas.count()).toBe(1)
+    await importarTudo(db, lerBackup(JSON.stringify(b)))
+    expect(await db.checkins.count()).toBe(1)
+    expect(await db.tarefas.count()).toBe(1)
+    expect(await db.caixaEntrada.count()).toBe(1)
+    expect(await db.configuracoes.get('idioma')).toBeDefined()
+  })
+
+  it('"tudo menos o Bem-estar" não leva nem apaga os dados dele ao restaurar', async () => {
+    const b = await exportarTudo(db, new Date(), 'semBemEstar')
+    expect(b.tabelas.checkins).toBeUndefined()
+    expect((b.tabelas.configuracoes as Array<{ chave: string }>).map((c) => c.chave)).toEqual(['idioma'])
+    await db.tarefas.clear()
+    await importarTudo(db, b)
+    expect(await db.tarefas.count()).toBe(1)
+    expect(await db.checkins.count()).toBe(1)
+    expect(await db.configuracoes.get('bemEstarPin')).toBeDefined()
+  })
+
+  it('recusa alcance desconhecido', () => {
+    expect(() => lerBackup('{"formato":"caderninho-backup","escopo":"outro","tabelas":{}}')).toThrow(BackupInvalido)
   })
 })

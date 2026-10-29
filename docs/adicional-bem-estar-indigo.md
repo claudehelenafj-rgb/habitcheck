@@ -52,6 +52,17 @@ Autismo" (lido). Plano aprovado em 28/10/2026.
 - Resumo para a consulta (B7): 2, 4 ou 8 semanas; escolhe as partes; perguntas guardadas; página branca para
   imprimir ou salvar em PDF pelo navegador, gerada no aparelho; tabelas largas rolam dentro delas no celular.
   Consultas marcadas têm o atalho "Resumo para levar" quando a aba Bem-estar está ligada.
+- Privacidade (B8): PIN opcional de 4 a 6 números, guardado só como resumo PBKDF2 com sal (100 mil
+  iterações); a trava fica na memória (recarregar ou passar mais de 1 min em segundo plano tranca de novo);
+  5 erros pedem 30 s de pausa; "Esqueci o PIN" explica que não há recuperação e oferece apagar só o Bem-estar.
+  Ficam atrás do PIN: a aba, o resumo para imprimir e o "Como estou com o remédio"; "Não consigo dormir" não
+  (é para a madrugada e não mostra dados). O app diz com honestidade que o PIN protege de olhares curiosos e
+  não embaralha os dados. O backup completo nos Ajustes pede o PIN ou sai "sem o Bem-estar".
+- Avisos discretos (B8): uma escolha só, nos Ajustes e na Privacidade; todo aviso do sistema vira "Caderninho:
+  você tem um lembrete" (remédios, consultas, sono e check-in). Lembretes de check-in: até 3 horários, que não
+  tocam se houve check-in na última hora.
+- Backup com alcance (B8): "tudo", "só o Bem-estar" ou "tudo menos o Bem-estar"; restaurar troca só o que está
+  no alcance do arquivo, e o arquivo "só o Bem-estar" não leva o PIN. Apagar só o Bem-estar tem "Desfazer".
 - Ordem: **I1** tema Índigo (guia de estilo para aprovar, depois aplicar) e **B1–B8** Bem-estar,
   antes da etapa 9.
   - B1 base da aba (ativar nos Ajustes, cores, adesivos, ferramentas que se ligam uma ou duas por vez);

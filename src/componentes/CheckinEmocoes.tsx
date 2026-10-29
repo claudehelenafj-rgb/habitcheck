@@ -160,6 +160,50 @@ function UltimoCheckin({ checkin, abrirPlano }: { checkin: Checkin; abrirPlano: 
   )
 }
 
+const HORARIOS_LEMBRETE = ['10:00', '15:00', '20:00']
+
+/** Até 3 horários para lembrar do check-in. O aviso não toca se já houve check-in na última hora. */
+function LembretesCheckin() {
+  const { t } = useTranslation()
+  const config = useBemEstar()
+  if (!config) return null
+  const atual = config.checkinLembretes ?? { ativo: false, horarios: HORARIOS_LEMBRETE }
+  const mudar = (m: Partial<typeof atual>) =>
+    mudarBemEstar((c) => ({ checkinLembretes: { ...(c.checkinLembretes ?? { ativo: false, horarios: HORARIOS_LEMBRETE }), ...m } }))
+  return (
+    <details className="rounded-2xl border-2 border-linha/40 p-3">
+      <summary className="cursor-pointer font-bold">
+        {atual.ativo ? t('checkin.lembretesResumo', { horarios: atual.horarios.join(', ') }) : t('checkin.lembretes')}
+      </summary>
+      <div className="mt-3 flex flex-col gap-3">
+        <label className="flex min-h-10 items-center gap-2">
+          <input type="checkbox" checked={atual.ativo} onChange={(e) => mudar({ ativo: e.target.checked })} className="h-5 w-5 accent-[var(--forte-ameixa)]" />
+          {t('checkin.lembretesLigar')}
+        </label>
+        <div className="flex flex-wrap gap-3">
+          {[0, 1, 2].map((i) => (
+            <label key={i} className="flex flex-col gap-1">
+              <span className="text-sm font-bold">{t('checkin.lembreteN', { n: i + 1 })}</span>
+              <input
+                type="time"
+                value={atual.horarios[i] ?? ''}
+                disabled={!atual.ativo}
+                onChange={(e) => {
+                  const novos = [...atual.horarios]
+                  novos[i] = e.target.value
+                  mudar({ horarios: novos.filter(Boolean).sort() })
+                }}
+                className="min-h-11 rounded-full border-2 border-linha bg-papel px-4"
+              />
+            </label>
+          ))}
+        </div>
+        <p className="text-sm text-tinta-suave">{t('checkin.lembretesDica')}</p>
+      </div>
+    </details>
+  )
+}
+
 export function CheckinEmocoes() {
   const { t, i18n } = useTranslation()
   const hoje = diaLocal()
@@ -239,6 +283,8 @@ export function CheckinEmocoes() {
           )}
         </div>
       </form>
+
+      <LembretesCheckin />
 
       {doDia && doDia.length > 0 && (
         <section aria-labelledby="titulo-hoje-checkins" className="flex flex-col gap-2">

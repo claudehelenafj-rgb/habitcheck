@@ -82,7 +82,8 @@ export async function compreiMais(remedioId: string, unidades: number) {
 
 // ---------- Configuração dos avisos ----------
 
-export type ConfigAvisos = { silencio: Silencio }
+/** discretos: o aviso só diz "Caderninho · lembrete", sem nome de remédio nem assunto (bom para a tela de bloqueio) */
+export type ConfigAvisos = { silencio: Silencio; discretos?: boolean }
 export const AVISOS_PADRAO: ConfigAvisos = { silencio: { ativo: true, inicio: '22:00', fim: '07:00' } }
 
 export function useConfigAvisos(): ConfigAvisos {
@@ -92,6 +93,14 @@ export function useConfigAvisos(): ConfigAvisos {
 
 export async function salvarConfigAvisos(c: ConfigAvisos) {
   await banco.configuracoes.put({ chave: 'avisos', valor: c })
+}
+
+/** Muda a partir do que está guardado agora, numa transação (mudanças rápidas não se apagam). */
+export async function mudarConfigAvisos(mudar: (atual: ConfigAvisos) => Partial<ConfigAvisos>) {
+  await banco.transaction('rw', banco.configuracoes, async () => {
+    const atual = ((await banco.configuracoes.get('avisos'))?.valor as ConfigAvisos | undefined) ?? AVISOS_PADRAO
+    await banco.configuracoes.put({ chave: 'avisos', valor: { ...atual, ...mudar(atual) } })
+  })
 }
 
 /** Doses de hoje já com os registros, para a tela Hoje, o Agora e os lembretes. */

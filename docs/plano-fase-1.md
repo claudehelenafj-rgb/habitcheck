@@ -99,7 +99,7 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | B5 | **Bem-estar**: sugestões de atividade e "ajudou?" | Pronta |
 | B6 | **Bem-estar**: sono (horários, rotina, diário, "Não consigo dormir") | Pronta |
 | B7 | **Bem-estar**: remédio no plano, padrões, "vale conversar com um profissional", resumo para a consulta | Pronta |
-| B8 | **Bem-estar**: PIN, avisos neutros, exportar/apagar só o Bem-estar | |
+| B8 | **Bem-estar**: PIN, avisos discretos, lembretes de check-in, baixar/apagar só o Bem-estar | Pronta |
 | 9 | Faculdade, modo foco, saída do hiperfoco | |
 | 10 | Academia | |
 | 11 | Quarto | |

@@ -26,6 +26,8 @@ export type ConfigBemEstar = {
   ajudaDispensadaEm?: string
   /** perguntas que a pessoa quer levar para a consulta */
   perguntasConsulta?: string
+  /** lembretes de check-in: até 3 horários */
+  checkinLembretes?: { ativo: boolean; horarios: string[] }
   /** passos da rotina de desacelerar já feitos, e de qual noite */
   rotinaFeita?: { noite: string; ids: string[] }
 }

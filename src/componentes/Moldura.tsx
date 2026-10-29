@@ -264,19 +264,32 @@ function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
       acordarCorpo: t('sono.lembreteAcordarCorpo'),
       desacelerarTitulo: t('sono.lembreteDesacelerarTitulo'),
       desacelerarCorpo: t('sono.lembreteDesacelerarCorpo'),
+      checkinTitulo: t('checkin.lembreteTitulo'),
+      checkinCorpo: t('checkin.lembreteCorpo'),
+      discretoTitulo: t('avisos.discretoTitulo'),
+      discretoCorpo: t('avisos.discretoCorpo'),
     }),
     [t],
   )
   useLembretes(textosLembretes, perfil.areasAtivas.includes('bemestar'))
 
   // Ao trocar de tela, o foco vai para o título da nova tela (bom para leitor de tela e teclado).
+  // Telas que leem o banco desenham o título um instante depois: espera por ele até 1 segundo.
   const primeiraVez = useRef(true)
   useEffect(() => {
     if (primeiraVez.current) {
       primeiraVez.current = false
       return
     }
-    principal.current?.querySelector<HTMLElement>('h1')?.focus({ preventScroll: !!local.hash })
+    let tentativas = 0
+    let espera: ReturnType<typeof setTimeout>
+    const focar = () => {
+      const titulo = principal.current?.querySelector<HTMLElement>('h1')
+      if (titulo) titulo.focus({ preventScroll: !!local.hash })
+      else if (tentativas++ < 20) espera = setTimeout(focar, 50)
+    }
+    focar()
+    return () => clearTimeout(espera)
   }, [local.pathname, local.hash])
 
   return (

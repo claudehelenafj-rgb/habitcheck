@@ -1,5 +1,5 @@
 // Aba Bem-estar: opcional, calma, com ferramentas que a pessoa liga uma ou duas de cada vez.
-// Cada ferramenta ligada aparece em "Ligadas agora"; as que ainda não estão prontas dizem em que etapa chegam.
+// Cada ferramenta ligada aparece em "Ligadas agora". Com PIN, a aba toda fica atrás do pedido de PIN.
 
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -7,31 +7,29 @@ import { Adesivo } from '../componentes/Adesivo'
 import { CheckinEmocoes } from '../componentes/CheckinEmocoes'
 import { CartaoAjuda } from '../componentes/CartaoAjuda'
 import { Hobbies } from '../componentes/Hobbies'
+import { PrivacidadeBemEstar } from '../componentes/PrivacidadeBemEstar'
+import { ProtecaoBemEstar } from '../componentes/ProtecaoBemEstar'
 import { ResumoConsulta } from '../componentes/ResumoConsulta'
 import { RegistroSintomas } from '../componentes/RegistroSintomas'
 import { Sono } from '../componentes/Sono'
 import { Sugestoes } from '../componentes/Sugestoes'
 import { alternar, useBemEstar } from '../dados/bemEstar'
-import { FERRAMENTAS, type Ferramenta } from '../logica/bemEstar'
+import { usePinConfigurado } from '../dados/pin'
+import { FERRAMENTAS } from '../logica/bemEstar'
+import { bloquear } from '../trava'
 
-function CartaoLigada({ ferramenta }: { ferramenta: Ferramenta }) {
-  const { t } = useTranslation()
+export function BemEstar() {
   return (
-    <li className="cartao flex items-center gap-3 bg-papel p-4">
-      <Adesivo nome={ferramenta.adesivo} tamanho={44} />
-      <span className="flex-1">
-        <span className="block text-lg font-bold">{t(`bemEstar.ferramentas.${ferramenta.id}.nome`)}</span>
-        {ferramenta.etapa && (
-          <span className="block text-sm text-tinta-suave">{t('bemEstar.emBreve', { etapa: ferramenta.etapa })}</span>
-        )}
-      </span>
-    </li>
+    <ProtecaoBemEstar>
+      <ConteudoBemEstar />
+    </ProtecaoBemEstar>
   )
 }
 
-export function BemEstar() {
+function ConteudoBemEstar() {
   const { t } = useTranslation()
   const config = useBemEstar()
+  const temPin = usePinConfigurado()
   const [muitas, setMuitas] = useState(false)
   if (!config) return null
   const ligadas = FERRAMENTAS.filter((f) => config.ferramentas.includes(f.id))
@@ -39,10 +37,17 @@ export function BemEstar() {
   return (
     <section className="flex flex-col gap-6">
       <header className="cartao flex flex-col gap-3 bg-lilas p-6">
-        <h1 tabIndex={-1} className="flex items-center gap-3 text-3xl font-semibold outline-none sm:text-5xl">
-          <Adesivo nome="cerebro" tamanho={60} />
-          {t('nav.bemestar')}
-        </h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 tabIndex={-1} className="flex flex-1 items-center gap-3 text-3xl font-semibold outline-none sm:text-5xl">
+            <Adesivo nome="cerebro" tamanho={60} />
+            {t('nav.bemestar')}
+          </h1>
+          {temPin && (
+            <button type="button" onClick={bloquear} className="min-h-11 rounded-full border-2 border-linha bg-papel px-4 font-bold">
+              {t('pin.bloquear')}
+            </button>
+          )}
+        </div>
         <p className="max-w-prose text-lg">{t('bemEstar.intro')}</p>
         <p className="max-w-prose text-sm">
           {t('bemEstar.cuidado')} {t('bemEstar.privacidade')}
@@ -62,15 +67,6 @@ export function BemEstar() {
         {ligadas.some((f) => f.id === 'hobbies') && <Hobbies />}
         {ligadas.some((f) => f.id === 'sono') && <Sono />}
         {ligadas.some((f) => f.id === 'resumo') && <ResumoConsulta />}
-        {ligadas.some((f) => f.etapa) && (
-          <ul className="grid gap-3 sm:grid-cols-2">
-            {ligadas
-              .filter((f) => f.etapa)
-              .map((f) => (
-                <CartaoLigada key={f.id} ferramenta={f} />
-              ))}
-          </ul>
-        )}
         {ligadas.length === 0 && <p className="cartao bg-papel p-4">{t('bemEstar.nenhumaLigada')}</p>}
       </section>
 
@@ -116,6 +112,8 @@ export function BemEstar() {
           {muitas && config.ferramentas.length > 2 ? t('bemEstar.muitas') : ''}
         </p>
       </section>
+
+      <PrivacidadeBemEstar />
     </section>
   )
 }
