@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
   alternarItem,
+  buscarLugares,
+  jaTemCoisa,
+  tamanhoReduzido,
   diasSemReset,
   estadoDiaReset,
   maisCincoMinutos,
@@ -86,5 +89,31 @@ describe('reset de 10 minutos', () => {
     const x = alternarItem(alternarItem(e, 'papéis'), 'copos')
     expect(x.feitos).toEqual(['papéis', 'copos'])
     expect(alternarItem(x, 'papéis').feitos).toEqual(['copos'])
+  })
+})
+
+describe('um lugar para cada coisa', () => {
+  const l = (coisa: string, onde: string) => ({ id: coisa, coisa, onde, criadoEm: '' })
+  const lista = [l('Chave', 'gancho ao lado da porta'), l('carregador', 'gaveta da mesa'), l('Óculos', 'caixinha na mesa de cabeceira')]
+
+  it('procura pela coisa ou pelo lugar, sem acento nem maiúscula, em ordem alfabética', () => {
+    expect(buscarLugares(lista, '').map((x) => x.coisa)).toEqual(['carregador', 'Chave', 'Óculos'])
+    expect(buscarLugares(lista, 'oculos').map((x) => x.coisa)).toEqual(['Óculos'])
+    expect(buscarLugares(lista, 'MESA').map((x) => x.coisa)).toEqual(['carregador', 'Óculos'])
+    expect(buscarLugares(lista, 'porta ').map((x) => x.coisa)).toEqual(['Chave'])
+    expect(buscarLugares(lista, 'guarda-chuva')).toEqual([])
+  })
+
+  it('não repete a mesma coisa', () => {
+    expect(jaTemCoisa(lista, ' chave ')).toBe(true)
+    expect(jaTemCoisa(lista, 'oculos')).toBe(true)
+    expect(jaTemCoisa(lista, 'Chave', 'Chave')).toBe(false)
+    expect(jaTemCoisa(lista, 'fone')).toBe(false)
+  })
+
+  it('foto reduzida: lado maior até 1024, sem aumentar foto pequena', () => {
+    expect(tamanhoReduzido(4032, 3024)).toEqual({ largura: 1024, altura: 768 })
+    expect(tamanhoReduzido(3024, 4032)).toEqual({ largura: 768, altura: 1024 })
+    expect(tamanhoReduzido(800, 600)).toEqual({ largura: 800, altura: 600 })
   })
 })

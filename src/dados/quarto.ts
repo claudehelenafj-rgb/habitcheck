@@ -1,9 +1,10 @@
-// Quarto no banco local: zonas (com a lista do que fazer em cada uma), resets feitos e o reset em andamento
-// (na tabela configuracoes, chave "resetQuarto", para continuar certo depois de recarregar).
+// Quarto no banco local: zonas (com a lista do que fazer em cada uma), resets feitos, o reset em andamento
+// (na tabela configuracoes, chave "resetQuarto", para continuar certo depois de recarregar), "um lugar para
+// cada coisa" e as fotos de antes e depois (só no aparelho).
 
 import { useLiveQuery } from 'dexie-react-hooks'
 import { diaLocal } from '../logica/datas'
-import { minutosDoReset, terminarReset, type EstadoReset, type ResetQuarto, type Zona } from '../logica/quarto'
+import { minutosDoReset, terminarReset, type EstadoReset, type Foto, type Lugar, type ResetQuarto, type Zona } from '../logica/quarto'
 import { banco, novoId } from './banco'
 
 const CHAVE_RESET = 'resetQuarto'
@@ -86,7 +87,7 @@ export async function marcarAvisoReset(inicioComMinutos: string): Promise<boolea
 }
 
 /** Guarda o reset feito e encerra. */
-export async function encerrarReset(extra: { fotoDepois?: string } = {}, agora = new Date()): Promise<ResetQuarto | undefined> {
+export async function encerrarReset(agora = new Date()): Promise<ResetQuarto | undefined> {
   return banco.transaction('rw', banco.configuracoes, banco.resets, banco.zonas, async () => {
     const atual = await lerReset()
     if (!atual) return undefined
@@ -103,7 +104,7 @@ export async function encerrarReset(extra: { fotoDepois?: string } = {}, agora =
       feitos: e.feitos,
       total: zona?.itens.length ?? e.feitos.length,
       ...(e.fotoAntes ? { fotoAntes: e.fotoAntes } : {}),
-      ...(extra.fotoDepois ? { fotoDepois: extra.fotoDepois } : {}),
+      ...(e.fotoDepois ? { fotoDepois: e.fotoDepois } : {}),
     }
     await banco.resets.add(reset)
     await banco.configuracoes.delete(CHAVE_RESET)
@@ -111,11 +112,13 @@ export async function encerrarReset(extra: { fotoDepois?: string } = {}, agora =
   })
 }
 
-/** Sai do reset sem guardar. Devolve a foto do antes, se tinha (para quem chamou apagar). */
-export async function descartarReset(): Promise<string | undefined> {
-  const atual = await lerReset()
-  await banco.configuracoes.delete(CHAVE_RESET)
-  return atual?.fotoAntes
+/** Sai do reset sem guardar (as fotos tiradas nele vão junto). */
+export async function descartarReset() {
+  await banco.transaction('rw', banco.configuracoes, banco.fotos, async () => {
+    const atual = await lerReset()
+    await banco.fotos.bulkDelete([atual?.fotoAntes, atual?.fotoDepois].filter((x): x is string => !!x))
+    await banco.configuracoes.delete(CHAVE_RESET)
+  })
 }
 
 export async function apagarResetFeito(id: string): Promise<ResetQuarto | undefined> {
@@ -126,4 +129,69 @@ export async function apagarResetFeito(id: string): Promise<ResetQuarto | undefi
 
 export async function restaurarResetFeito(r: ResetQuarto) {
   await banco.resets.put(r)
+}
+
+// ---------- um lugar para cada coisa ----------
+
+export function useLugares(): Lugar[] | undefined {
+  return useLiveQuery(() => banco.lugares.toArray(), [])
+}
+
+export async function salvarLugar(l: Pick<Lugar, 'coisa' | 'onde'> & { id?: string }) {
+  const atual = l.id ? await banco.lugares.get(l.id) : undefined
+  await banco.lugares.put({ id: l.id ?? novoId(), coisa: l.coisa.trim(), onde: l.onde.trim(), criadoEm: atual?.criadoEm ?? new Date().toISOString() })
+}
+
+export async function apagarLugar(id: string): Promise<Lugar | undefined> {
+  const l = await banco.lugares.get(id)
+  await banco.lugares.delete(id)
+  return l
+}
+
+export async function restaurarLugar(l: Lugar) {
+  await banco.lugares.put(l)
+}
+
+// ---------- fotos de antes e depois ----------
+
+export function useFoto(id: string | undefined): Foto | null | undefined {
+  return useLiveQuery(async () => (id ? ((await banco.fotos.get(id)) ?? null) : null), [id])
+}
+
+export async function salvarFoto(dataUrl: string): Promise<string> {
+  const id = novoId()
+  await banco.fotos.add({ id, dataUrl, criadaEm: new Date().toISOString() })
+  return id
+}
+
+/** Põe (ou troca) a foto de antes ou de depois do reset em andamento; a anterior é apagada. */
+export async function trocarFotoDoReset(qual: 'fotoAntes' | 'fotoDepois', dataUrl: string) {
+  const id = await salvarFoto(dataUrl)
+  await banco.transaction('rw', banco.configuracoes, banco.fotos, async () => {
+    const atual = await lerReset()
+    if (!atual) return void (await banco.fotos.delete(id))
+    const anterior = atual[qual]
+    if (anterior) await banco.fotos.delete(anterior)
+    await banco.configuracoes.put({ chave: CHAVE_RESET, valor: { ...atual, [qual]: id } })
+  })
+}
+
+/** Apaga as fotos de um reset (o reset continua). Devolve tudo, para o "Desfazer". */
+export async function apagarFotosDoReset(resetId: string): Promise<{ reset?: ResetQuarto; fotos: Foto[] }> {
+  return banco.transaction('rw', banco.resets, banco.fotos, async () => {
+    const reset = await banco.resets.get(resetId)
+    if (!reset) return { fotos: [] }
+    const ids = [reset.fotoAntes, reset.fotoDepois].filter((x): x is string => !!x)
+    const fotos = (await banco.fotos.bulkGet(ids)).filter((f): f is Foto => !!f)
+    await banco.fotos.bulkDelete(ids)
+    await banco.resets.update(resetId, { fotoAntes: undefined, fotoDepois: undefined })
+    return { reset, fotos }
+  })
+}
+
+export async function restaurarFotosDoReset({ reset, fotos }: { reset?: ResetQuarto; fotos: Foto[] }) {
+  await banco.transaction('rw', banco.resets, banco.fotos, async () => {
+    await banco.fotos.bulkPut(fotos)
+    if (reset) await banco.resets.put(reset)
+  })
 }

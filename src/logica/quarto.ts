@@ -34,6 +34,7 @@ export type EstadoReset = {
   fase: 'correndo' | 'fim'
   fimEm?: string
   fotoAntes?: string
+  fotoDepois?: string
   /** início que já ganhou o aviso de "acabou o tempo" */
   avisadoEm?: string
 }
@@ -115,3 +116,25 @@ export type Lugar = { id: string; coisa: string; onde: string; criadoEm: string 
 
 /** Foto de antes ou depois, reduzida e guardada só no aparelho (como texto, para entrar no backup). */
 export type Foto = { id: string; dataUrl: string; criadaEm: string }
+
+const semAcento = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
+
+/** Procura pela coisa ou pelo lugar, sem ligar para acento nem maiúscula; em ordem alfabética. */
+export function buscarLugares(lugares: Lugar[], termo: string, idioma = 'pt-BR'): Lugar[] {
+  const t = semAcento(termo)
+  return lugares
+    .filter((l) => !t || semAcento(l.coisa).includes(t) || semAcento(l.onde).includes(t))
+    .sort((a, b) => a.coisa.localeCompare(b.coisa, idioma, { sensitivity: 'base' }))
+}
+
+/** Já tem essa coisa na lista? (para não repetir) */
+export function jaTemCoisa(lugares: Lugar[], coisa: string, excetoId?: string): boolean {
+  const t = semAcento(coisa)
+  return lugares.some((l) => l.id !== excetoId && semAcento(l.coisa) === t)
+}
+
+/** Tamanho da foto reduzida: o lado maior vira no máximo `max`, sem aumentar foto pequena. */
+export function tamanhoReduzido(largura: number, altura: number, max = 1024): { largura: number; altura: number } {
+  const escala = Math.min(1, max / Math.max(largura, altura))
+  return { largura: Math.round(largura * escala), altura: Math.round(altura * escala) }
+}

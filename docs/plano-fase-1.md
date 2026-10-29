@@ -105,7 +105,7 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | 10 | Academia: hábitos com plano se-então, versão mínima e "X de 7 dias" (parte 1) | Pronta |
 | 10 | Base de lançamento, treino acompanhado e movimento antes do foco (parte 2) | Pronta |
 | 11 | Quarto: zonas, reset de 10 minutos e o reset como hábito (parte 1) | Pronta |
-| 11 | Um lugar para cada coisa e fotos de antes e depois (parte 2) | |
+| 11 | Um lugar para cada coisa e fotos de antes e depois (parte 2) | Pronta |
 | 12 | Alimentação | |
 | 13 | **Dinheiro**: contas a pagar, potes da semana, pausa antes de comprar, cofrinho | |
 | 14 | Rituais e revisão semanal (com 5 min de dinheiro) | |
@@ -178,6 +178,13 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 - O reset como hábito (modelo: "Se eu chegar em casa à noite, então faço o reset de uma zona do quarto", mínima
   "guardar 5 coisas", à noite). Guardar um reset marca como feito o hábito do quarto que ainda falta hoje. No cartão
   "Agora", o hábito do quarto tem o link "Fazer o reset agora".
+- Um lugar para cada coisa: "coisa → onde fica", com busca sem acento nem maiúscula (pela coisa ou pelo lugar), em
+  ordem alfabética; não repete a mesma coisa; ideias prontas (chave, carteira, carregador…) que somem quando já estão
+  na lista; editar e apagar com desfazer.
+- Fotos de antes e depois (opcionais): tiradas na tela do reset (câmera no iPad e no celular, arquivo no computador),
+  reduzidas no próprio aparelho (lado maior até 1024 px, JPEG) e guardadas só nele, como texto (entram no backup).
+  Trocar a foto apaga a anterior; sair sem guardar apaga as fotos daquele reset. Em "Antes e depois", as fotos coladas
+  com fita, com zona e data, e "Apagar estas fotos" com desfazer.
 - Hábitos agora servem a mais de uma área: anel de cada área na tela Hoje, aviso que abre a tela da área, arquivados
   em cada tela, e "Virar hábito" na caixa de entrada pergunta a área quando há mais de uma ligada.
 

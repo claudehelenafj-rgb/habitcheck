@@ -1,5 +1,6 @@
 // Quarto: reset de 10 minutos numa zona por vez (com sugestão da zona há mais tempo sem), a semana de resets,
-// o reset como hábito (plano se-então) e as zonas com a lista do que fazer em cada uma, todas editáveis.
+// o reset como hábito (plano se-então), as zonas com a lista do que fazer em cada uma (editáveis),
+// "um lugar para cada coisa" e as fotos de antes e depois (opcionais, só no aparelho).
 
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -9,23 +10,41 @@ import { mostrarAviso } from '../componentes/Avisos'
 import { Botao } from '../componentes/Botao'
 import { CartaoHabito, HabitosArquivados } from '../componentes/CartaoHabito'
 import { EditorHabito } from '../componentes/EditorHabito'
+import { FotoGuardada } from '../componentes/FotosQuarto'
 import { GradeSemanal, type Dia as DiaGrade } from '../componentes/GradeSemanal'
 import { novoHabito, useHabitos, useRegistrosHabito } from '../dados/habitos'
 import {
+  apagarFotosDoReset,
+  apagarLugar,
   apagarZona,
   comecarReset,
   garantirZonasIniciais,
   mudarZona,
   novaZona,
+  restaurarFotosDoReset,
+  restaurarLugar,
   restaurarZona,
+  salvarLugar,
   useEstadoReset,
+  useLugares,
   useResets,
   useZonas,
 } from '../dados/quarto'
 import { useAgora } from '../dados/timer'
 import { diaLocal } from '../logica/datas'
 import { MODELO_HABITO_QUARTO, type Habito } from '../logica/habitos'
-import { DURACOES_RESET, MODELOS_ZONAS, diasSemReset, estadoDiaReset, zonaSugerida, type ResetQuarto, type Zona } from '../logica/quarto'
+import {
+  buscarLugares,
+  DURACOES_RESET,
+  diasSemReset,
+  estadoDiaReset,
+  jaTemCoisa,
+  MODELOS_ZONAS,
+  zonaSugerida,
+  type Lugar,
+  type ResetQuarto,
+  type Zona,
+} from '../logica/quarto'
 import { diasDaSemana } from '../logica/remedios'
 
 const campo = 'min-h-11 rounded-full border-2 border-linha bg-papel px-4'
@@ -248,10 +267,192 @@ function Zonas({ zonas }: { zonas: Zona[] }) {
   )
 }
 
+function LinhaLugar({ lugar, lugares }: { lugar: Lugar; lugares: Lugar[] }) {
+  const { t } = useTranslation()
+  const [editando, setEditando] = useState(false)
+  const [coisa, setCoisa] = useState(lugar.coisa)
+  const [onde, setOnde] = useState(lugar.onde)
+  const repetida = jaTemCoisa(lugares, coisa, lugar.id)
+  if (editando) {
+    return (
+      <li>
+        <form
+          className="flex flex-wrap items-end gap-2 rounded-2xl border-2 border-linha bg-papel p-3"
+          onSubmit={async (e) => {
+            e.preventDefault()
+            if (!coisa.trim() || !onde.trim() || repetida) return
+            await salvarLugar({ id: lugar.id, coisa, onde })
+            setEditando(false)
+          }}
+        >
+          <label className="flex min-w-0 flex-1 basis-36 flex-col gap-1">
+            <span className="text-xs font-bold">{t('quarto.coisa')}</span>
+            <input autoFocus value={coisa} onChange={(e) => setCoisa(e.target.value)} maxLength={40} className={campo} />
+          </label>
+          <label className="flex min-w-0 flex-[2] basis-48 flex-col gap-1">
+            <span className="text-xs font-bold">{t('quarto.onde')}</span>
+            <input value={onde} onChange={(e) => setOnde(e.target.value)} maxLength={80} className={campo} />
+          </label>
+          <Botao type="submit" disabled={!coisa.trim() || !onde.trim() || repetida}>
+            {t('editorHabito.salvar')}
+          </Botao>
+          <Botao
+            variante="contorno"
+            onClick={() => {
+              setCoisa(lugar.coisa)
+              setOnde(lugar.onde)
+              setEditando(false)
+            }}
+          >
+            {t('editorHabito.cancelar')}
+          </Botao>
+          {repetida && <p className="w-full text-sm font-semibold">{t('quarto.jaTem')}</p>}
+        </form>
+      </li>
+    )
+  }
+  return (
+    <li className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl border-2 border-linha/30 px-4 py-2">
+      <span className="min-w-0 flex-1 basis-56 break-words">
+        <span className="font-bold">{lugar.coisa}</span>
+        <span aria-hidden="true"> → </span>
+        <span className="so-leitor">: </span>
+        {lugar.onde}
+      </span>
+      <button type="button" onClick={() => setEditando(true)} aria-label={t('quarto.editarLugar', { coisa: lugar.coisa })} className="text-sm font-bold underline decoration-2 underline-offset-4">
+        {t('academia.editar')}
+      </button>
+      <button
+        type="button"
+        onClick={async () => {
+          const apagado = await apagarLugar(lugar.id)
+          if (apagado) mostrarAviso(t('quarto.lugarApagado', { coisa: lugar.coisa }), () => restaurarLugar(apagado))
+        }}
+        aria-label={t('quarto.apagarLugar', { coisa: lugar.coisa })}
+        className="text-sm font-bold underline decoration-2 underline-offset-4"
+      >
+        {t('editorHabito.apagar')}
+      </button>
+    </li>
+  )
+}
+
+function UmLugarParaCadaCoisa({ lugares }: { lugares: Lugar[] }) {
+  const { t, i18n } = useTranslation()
+  const [busca, setBusca] = useState('')
+  const [coisa, setCoisa] = useState('')
+  const [onde, setOnde] = useState('')
+  const achados = buscarLugares(lugares, busca, i18n.language)
+  const ideias = t('quarto.ideias')
+    .split('|')
+    .filter((x) => !jaTemCoisa(lugares, x))
+  const repetida = jaTemCoisa(lugares, coisa)
+
+  return (
+    <section aria-labelledby="titulo-lugares" className="cartao flex flex-col gap-4 bg-papel p-5">
+      <h2 id="titulo-lugares" className="text-2xl font-semibold">
+        {t('quarto.lugaresTitulo')}
+      </h2>
+      <p className="max-w-prose">{t('quarto.lugaresTexto')}</p>
+      {lugares.length > 0 && (
+        <>
+          <label className="flex flex-col gap-1">
+            <span className="font-bold">{t('quarto.ondeFica')}</span>
+            <input type="search" value={busca} onChange={(e) => setBusca(e.target.value)} placeholder={t('quarto.ondeFicaExemplo')} className={`${campo} max-w-md`} />
+          </label>
+          {achados.length ? (
+            <ul className="flex flex-col gap-2" aria-live="polite">
+              {achados.map((l) => (
+                <LinhaLugar key={l.id} lugar={l} lugares={lugares} />
+              ))}
+            </ul>
+          ) : (
+            <p role="status">{t('quarto.naoAchou', { busca: busca.trim() })}</p>
+          )}
+        </>
+      )}
+      <form
+        className="flex flex-col gap-2 rounded-2xl border-2 border-dashed border-linha/50 p-3"
+        onSubmit={async (e) => {
+          e.preventDefault()
+          if (!coisa.trim() || !onde.trim() || repetida) return
+          await salvarLugar({ coisa, onde })
+          setCoisa('')
+          setOnde('')
+        }}
+      >
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="flex min-w-0 flex-1 basis-36 flex-col gap-1">
+            <span className="text-sm font-bold">{t('quarto.coisa')}</span>
+            <input value={coisa} onChange={(e) => setCoisa(e.target.value)} maxLength={40} placeholder={t('quarto.coisaExemplo')} className={campo} />
+          </label>
+          <label className="flex min-w-0 flex-[2] basis-48 flex-col gap-1">
+            <span className="text-sm font-bold">{t('quarto.onde')}</span>
+            <input value={onde} onChange={(e) => setOnde(e.target.value)} maxLength={80} placeholder={t('quarto.ondeExemplo')} className={campo} />
+          </label>
+          <Botao type="submit" variante="contorno" disabled={!coisa.trim() || !onde.trim() || repetida}>
+            + {t('quarto.anotarLugar')}
+          </Botao>
+        </div>
+        {repetida && <p className="text-sm font-semibold">{t('quarto.jaTem')}</p>}
+        {ideias.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 text-sm">
+            <span className="font-semibold">{t('quarto.ideiasRotulo')}</span>
+            {ideias.map((x) => (
+              <button key={x} type="button" onClick={() => setCoisa(x)} className="min-h-9 rounded-full border-2 border-linha/50 bg-manteiga px-3 font-semibold">
+                {x}
+              </button>
+            ))}
+          </div>
+        )}
+      </form>
+    </section>
+  )
+}
+
+function AntesEDepois({ resets }: { resets: ResetQuarto[] }) {
+  const { t, i18n } = useTranslation()
+  const comFotos = resets.filter((r) => r.fotoAntes || r.fotoDepois).sort((a, b) => b.fim.localeCompare(a.fim))
+  if (!comFotos.length) return null
+  const data = (dia: string) => new Date(`${dia}T12:00:00`).toLocaleDateString(i18n.language, { weekday: 'short', day: 'numeric', month: 'short' }).replace(/\./g, '')
+  return (
+    <section aria-labelledby="titulo-fotos" className="flex flex-col gap-3">
+      <h2 id="titulo-fotos" className="text-2xl font-semibold">
+        {t('quarto.fotosTitulo')}
+      </h2>
+      <p className="max-w-prose text-sm">{t('quarto.fotosPrivacidade')}</p>
+      <ul className="grid gap-6 lg:grid-cols-2">
+        {comFotos.map((r) => (
+          <li key={r.id} className="cartao flex flex-col gap-4 bg-papel p-5">
+            <p className="font-bold">
+              {r.zonaNome} · {data(r.dia)}
+            </p>
+            <div className="flex flex-wrap justify-center gap-8 py-2">
+              {r.fotoAntes && <FotoGuardada id={r.fotoAntes} etiqueta={t('quarto.antes')} descricao={t('quarto.fotoAntesDe', { zona: r.zonaNome })} inclinacao={-4} />}
+              {r.fotoDepois && <FotoGuardada id={r.fotoDepois} etiqueta={t('quarto.depois')} descricao={t('quarto.fotoDepoisDe', { zona: r.zonaNome })} inclinacao={3} />}
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                const apagado = await apagarFotosDoReset(r.id)
+                mostrarAviso(t('quarto.fotosApagadas'), () => restaurarFotosDoReset(apagado))
+              }}
+              className="self-start text-sm font-bold underline decoration-2 underline-offset-4"
+            >
+              {t('quarto.apagarFotos')}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
 export function Quarto() {
   const { t } = useTranslation()
   const zonas = useZonas()
   const resets = useResets()
+  const lugares = useLugares()
   const reset = useEstadoReset()
   const habitos = useHabitos('quarto')
   const registros = useRegistrosHabito()
@@ -268,7 +469,7 @@ export function Quarto() {
     )
   }, [t])
 
-  if (!zonas || !resets || reset === undefined || !habitos || !registros) return null
+  if (!zonas || !resets || !lugares || reset === undefined || !habitos || !registros) return null
   const ativos = habitos.filter((h) => !h.arquivadoEm)
   const zonaDoReset = reset && zonas.find((z) => z.id === reset.zonaId)
   const habitoModelo = () =>
@@ -327,6 +528,10 @@ export function Quarto() {
         )}
         <HabitosArquivados habitos={habitos.filter((h) => h.arquivadoEm)} />
       </section>
+
+      <UmLugarParaCadaCoisa lugares={lugares} />
+
+      <AntesEDepois resets={resets} />
 
       <Zonas zonas={zonas} />
 

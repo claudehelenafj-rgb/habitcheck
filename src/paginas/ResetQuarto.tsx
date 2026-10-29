@@ -8,9 +8,10 @@ import { Adesivo } from '../componentes/Adesivo'
 import { mostrarAviso } from '../componentes/Avisos'
 import { Botao } from '../componentes/Botao'
 import { TimerVisual } from '../componentes/Enfeites'
+import { EscolherFoto, FotoGuardada } from '../componentes/FotosQuarto'
 import { useEscolhasFoco } from '../dados/foco'
 import { marcarHabito, useHabitosAtivos } from '../dados/habitos'
-import { descartarReset, encerrarReset, marcarAvisoReset, mudarReset, useEstadoReset, useZonas } from '../dados/quarto'
+import { descartarReset, encerrarReset, marcarAvisoReset, mudarReset, trocarFotoDoReset, useEstadoReset, useZonas } from '../dados/quarto'
 import { useConfigAvisos } from '../dados/remedios'
 import { useAgora } from '../dados/timer'
 import { mostrarAvisoSistema } from '../lembretes'
@@ -130,6 +131,13 @@ function Correndo({ zona, e }: { zona: Zona; e: EstadoReset }) {
         )}
       </div>
       <Itens zona={zona} e={e} />
+      <div className="flex flex-wrap items-center justify-center gap-6 pt-2">
+        {e.fotoAntes && <FotoGuardada id={e.fotoAntes} etiqueta={t('quarto.antes')} descricao={t('quarto.fotoAntesDe', { zona: zona.nome })} inclinacao={-4} />}
+        <div className="flex flex-col items-center gap-1">
+          <EscolherFoto rotulo={e.fotoAntes ? t('quarto.trocarFotoAntes') : t('quarto.fotoAntes')} aoEscolher={(foto) => trocarFotoDoReset('fotoAntes', foto)} />
+          <p className="max-w-60 text-sm text-tinta-suave">{t('quarto.fotoDica')}</p>
+        </div>
+      </div>
     </div>
   )
 }
@@ -163,6 +171,13 @@ function Fim({ zona, e }: { zona: Zona; e: EstadoReset }) {
       </p>
       {zona.itens.length > 0 && <p className="text-lg">{t('quarto.itensFeitos', { feitos: e.feitos.length, total: zona.itens.length })}</p>}
       <p>{t('quarto.feitoTexto')}</p>
+      {(e.fotoAntes || e.fotoDepois) && (
+        <div className="flex flex-wrap justify-center gap-8 py-2">
+          {e.fotoAntes && <FotoGuardada id={e.fotoAntes} etiqueta={t('quarto.antes')} descricao={t('quarto.fotoAntesDe', { zona: zona.nome })} inclinacao={-4} />}
+          {e.fotoDepois && <FotoGuardada id={e.fotoDepois} etiqueta={t('quarto.depois')} descricao={t('quarto.fotoDepoisDe', { zona: zona.nome })} inclinacao={3} />}
+        </div>
+      )}
+      <EscolherFoto rotulo={e.fotoDepois ? t('quarto.trocarFotoDepois') : t('quarto.fotoDepois')} aoEscolher={(foto) => trocarFotoDoReset('fotoDepois', foto)} />
       <Botao grande onClick={guardar}>
         {t('quarto.guardar')}
       </Botao>
