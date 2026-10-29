@@ -43,3 +43,24 @@ describe('potes e gastos no banco', () => {
     ])
   })
 })
+
+describe('desejos e cofrinhos no banco', () => {
+  it('decidir e desfazer a decisão; apagar o cofrinho leva o que foi guardado, com desfazer', async () => {
+    const { anotarDesejo, decidirDesejo, novoCofrinho, moverNoCofrinho, apagarCofrinho, restaurarCofrinho } = await import('./dinheiro')
+    await anotarDesejo('Fone', 25000, new Date('2026-10-29T10:00:00Z'))
+    const [d] = await banco.desejos.toArray()
+    await decidirDesejo(d.id, 'desisti', new Date('2026-10-31T11:00:00Z'))
+    expect(await banco.desejos.get(d.id)).toMatchObject({ decisao: 'desisti', decididoEm: '2026-10-31T11:00:00.000Z' })
+    await decidirDesejo(d.id, undefined)
+    expect((await banco.desejos.get(d.id))!.decisao).toBeUndefined()
+
+    await novoCofrinho('Viagem', 100000)
+    const [c] = await banco.cofrinhos.toArray()
+    await moverNoCofrinho(c.id, 20000)
+    await moverNoCofrinho(c.id, -5000)
+    const apagado = await apagarCofrinho(c.id)
+    expect(await banco.depositos.count()).toBe(0)
+    await restaurarCofrinho(apagado)
+    expect((await banco.depositos.toArray()).reduce((s, x) => s + x.valor, 0)).toBe(15000)
+  })
+})

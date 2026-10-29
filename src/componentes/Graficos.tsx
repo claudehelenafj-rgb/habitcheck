@@ -3,6 +3,7 @@
 // e sempre uma tabela com os mesmos números. Dia sem registro é neutro, nunca "erro".
 
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export function CartaoNumero({
   rotulo,
@@ -24,15 +25,26 @@ export function CartaoNumero({
   )
 }
 
-function TabelaDados({ titulo, linhas, unidade }: { titulo: string; linhas: Array<[string, number]>; unidade: string }) {
+function TabelaDados({
+  titulo,
+  linhas,
+  unidade,
+  formatar = String,
+}: {
+  titulo: string
+  linhas: Array<[string, number]>
+  unidade: string
+  formatar?: (v: number) => string
+}) {
+  const { t } = useTranslation()
   return (
     <details className="mt-3 text-sm">
-      <summary className="cursor-pointer font-semibold underline decoration-2 underline-offset-4">Ver como tabela</summary>
+      <summary className="cursor-pointer font-semibold underline decoration-2 underline-offset-4">{t('graficos.verTabela')}</summary>
       <table className="mt-2 w-full max-w-sm border-collapse tabular-nums">
         <caption className="so-leitor">{titulo}</caption>
         <thead>
           <tr className="border-b-2 border-linha text-left">
-            <th className="py-1 pr-4">Período</th>
+            <th className="py-1 pr-4">{t('graficos.periodo')}</th>
             <th className="py-1">{unidade}</th>
           </tr>
         </thead>
@@ -40,7 +52,7 @@ function TabelaDados({ titulo, linhas, unidade }: { titulo: string; linhas: Arra
           {linhas.map(([rotulo, valor]) => (
             <tr key={rotulo} className="border-b border-linha/20">
               <td className="py-1 pr-4">{rotulo}</td>
-              <td className="py-1">{valor}</td>
+              <td className="py-1">{formatar(valor)}</td>
             </tr>
           ))}
         </tbody>
@@ -59,6 +71,7 @@ export function ColunasSemanais({
   maximo,
   unidade,
   cor = 'var(--forte-rosa)',
+  formatar,
 }: {
   titulo: string
   subtitulo: string
@@ -66,7 +79,10 @@ export function ColunasSemanais({
   maximo: number
   unidade: string
   cor?: string
+  /** valor já com a unidade (ex.: reais); sem isto, mostra "número unidade" */
+  formatar?: (v: number) => string
 }) {
+  const comUnidade = (v: number) => (formatar ? formatar(v) : `${v} ${unidade}`)
   const [ativo, setAtivo] = useState<number | null>(null)
   const altura = 140
   const marcas = [0, Math.round(maximo / 2), maximo]
@@ -96,7 +112,7 @@ export function ColunasSemanais({
               className="relative flex flex-1 flex-col items-center justify-end rounded-lg outline-none focus-visible:outline-3 focus-visible:outline-offset-2"
               style={{ paddingBottom: 24 }}
               tabIndex={0}
-              aria-label={`${d.descricao}: ${d.valor} ${unidade}`}
+              aria-label={`${d.descricao}: ${comUnidade(d.valor)}`}
               onPointerEnter={() => setAtivo(i)}
               onPointerLeave={() => setAtivo(null)}
               onFocus={() => setAtivo(i)}
@@ -109,8 +125,8 @@ export function ColunasSemanais({
                   }`}
                   style={{ bottom: 24 + h + 4 }}
                 >
-                  {d.valor}
-                  {ativo === i && <span className="ml-1 font-normal">{unidade} · {d.descricao}</span>}
+                  {formatar ? formatar(d.valor) : d.valor}
+                  {ativo === i && <span className="ml-1 font-normal">{formatar ? '' : `${unidade} `}· {d.descricao}</span>}
                 </span>
               )}
               <div
@@ -123,7 +139,7 @@ export function ColunasSemanais({
         })}
         <div className="pointer-events-none absolute right-0 left-6 border-t-2 border-linha" style={{ bottom: 24 }} />
       </div>
-      <TabelaDados titulo={titulo} unidade={unidade} linhas={dados.map((d) => [d.descricao, d.valor])} />
+      <TabelaDados titulo={titulo} unidade={unidade} formatar={formatar} linhas={dados.map((d) => [d.descricao, d.valor])} />
     </figure>
   )
 }

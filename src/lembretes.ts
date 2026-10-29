@@ -6,13 +6,13 @@ import { useEffect, useRef } from 'react'
 import { useBemEstar } from './dados/bemEstar'
 import { useUltimoCheckin } from './dados/checkins'
 import { useAlimentacaoDeHoje } from './dados/alimentacao'
-import { useContasAtivas } from './dados/dinheiro'
+import { useContasAtivas, useDesejosAtivos } from './dados/dinheiro'
 import { useAvaliacoes, useConfigFaculdade } from './dados/faculdade'
 import { marcarAvisoFoco, useEstadoFoco } from './dados/foco'
 import { useHabitosAtivos } from './dados/habitos'
 import { avisoAcompanhado, lembreteDeHoje, type Avaliacao } from './logica/faculdade'
 import { deveLembrarRefeicao, type Refeicao } from './logica/alimentacao'
-import { avisoDeConta, type Conta, type Vencimento } from './logica/dinheiro'
+import { avisoDeConta, fimDaEspera, prontoParaDecidir, type Conta, type Desejo, type Vencimento } from './logica/dinheiro'
 import { acabouFase, type EstadoFoco, type FaseFoco } from './logica/foco'
 import { deveAvisarVespera, deveLembrar, type Habito } from './logica/habitos'
 import { TELAS_AREAS } from './rotas'
@@ -73,6 +73,8 @@ export type TextosLembretes = {
   vespera: (h: Habito) => [string, string]
   /** conta a pagar, alguns dias antes ou no dia: [título, texto] */
   conta: (c: Conta, aviso: { tipo: 'antes' | 'dia'; vencimento: Vencimento }) => [string, string]
+  /** a espera de 48 h da lista de desejos acabou: [título, texto] */
+  desejo: (d: Desejo) => [string, string]
   /** hora de comer: [título, texto] */
   refeicao: (r: Refeicao) => [string, string]
   /** fim de uma fase do modo foco: [título, texto] */
@@ -289,6 +291,30 @@ function useAvisosContas(agora: Date, textos: TextosLembretes, discretos: boolea
   }, [contas, agora, textos, discretos])
 }
 
+/**
+ * Lista de desejos: quando a espera de 48 h acaba, um "ainda quer?" (uma vez, das 9h às 21h, até 3 dias depois).
+ * Só com a área ligada.
+ */
+function useAvisosDesejos(agora: Date, textos: TextosLembretes, discretos: boolean) {
+  const desejos = useDesejosAtivos()
+  const emAndamento = useRef(new Set<string>())
+  useEffect(() => {
+    const hora = agora.getHours()
+    if (!desejos || hora < HORA_AVISO_CONTAS || hora >= 21) return
+    for (const d of desejos) {
+      if (!prontoParaDecidir(d, agora) || agora.getTime() - fimDaEspera(d).getTime() > 3 * 24 * 3_600_000) continue
+      const id = `desejo|${d.id}`
+      if (emAndamento.current.has(id)) continue
+      emAndamento.current.add(id)
+      ;(async () => {
+        if (await jaAvisouTransicao(id)) return
+        await registrarTransicao(id)
+        await mostrarAvisoSistema(...comDiscricao(textos, discretos, ...textos.desejo(d)), id, '#/dinheiro')
+      })().finally(() => emAndamento.current.delete(id))
+    }
+  }, [desejos, agora, textos, discretos])
+}
+
 /** Com a pessoa em outra tela do app, o fim da fase de foco também avisa (a cada 20 s). */
 function useAvisosFoco(agora: Date, textos: TextosLembretes, discretos: boolean) {
   const foco = useEstadoFoco()
@@ -314,6 +340,7 @@ export function useLembretes(textos: TextosLembretes, areas: AreasDosLembretes =
   useAvisosHabitos(agora, textos, discretos)
   useAvisosAlimentacao(agora, textos, discretos)
   useAvisosContas(agora, textos, discretos)
+  useAvisosDesejos(agora, textos, discretos)
 
   useEffect(() => {
     if (!dados) return

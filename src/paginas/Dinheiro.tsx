@@ -1,5 +1,5 @@
-// Dinheiro: contas a pagar com lembrete antes e no dia, o resumo neutro do mês e os potes da semana
-// (com gasto rápido pelo ⌘K).
+// Dinheiro: contas a pagar com lembrete antes e no dia, o resumo neutro do mês, os potes da semana
+// (com gasto rápido pelo ⌘K), a pausa de 48 h antes de comprar e os cofrinhos.
 // Tudo fica no aparelho; nada se conecta ao banco; sem conselho de investimento.
 
 import { useState } from 'react'
@@ -8,8 +8,9 @@ import { Adesivo } from '../componentes/Adesivo'
 import { mostrarAviso } from '../componentes/Avisos'
 import { Botao } from '../componentes/Botao'
 import { EditorConta } from '../componentes/EditorConta'
+import { Cofrinhos, PausaAntesDeComprar } from '../componentes/DesejosECofrinho'
 import { PotesDaSemana } from '../componentes/Potes'
-import { despagarConta, novaConta, pagarConta, useContas, useGastos, usePotes } from '../dados/dinheiro'
+import { despagarConta, novaConta, pagarConta, useCofrinhos, useContas, useDepositos, useDesejos, useGastos, usePotes } from '../dados/dinheiro'
 import { diasDaSemana } from '../logica/remedios'
 import { useAgora } from '../dados/timer'
 import { diaLocal } from '../logica/datas'
@@ -165,11 +166,15 @@ function ContasAPagar({ contas, hoje }: { contas: Conta[]; hoje: string }) {
 
 export function Dinheiro() {
   const { t } = useTranslation()
-  const hoje = diaLocal(useAgora(60_000))
+  const agora = useAgora(60_000)
+  const hoje = diaLocal(agora)
   const contas = useContas()
   const potes = usePotes()
   const gastos = useGastos()
-  if (!contas || !potes || !gastos) return null
+  const desejos = useDesejos()
+  const cofrinhos = useCofrinhos()
+  const depositos = useDepositos()
+  if (!contas || !potes || !gastos || !desejos || !cofrinhos || !depositos) return null
   return (
     <div className="flex flex-col gap-8">
       <h1 tabIndex={-1} className="flex items-center gap-3 text-4xl font-semibold outline-none sm:text-5xl">
@@ -179,6 +184,8 @@ export function Dinheiro() {
       <p className="max-w-prose">{t('dinheiro.intro')}</p>
       <ContasAPagar contas={contas} hoje={hoje} />
       <PotesDaSemana potes={potes} gastos={gastos} semana={diasDaSemana(hoje)} />
+      <PausaAntesDeComprar desejos={desejos} agora={agora} />
+      <Cofrinhos cofrinhos={cofrinhos} depositos={depositos} hoje={hoje} />
     </div>
   )
 }

@@ -283,6 +283,7 @@ function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
       habito: (h: { titulo: string; se: string; entao: string }) => [h.titulo, t('academia.seEntao', { se: h.se, entao: h.entao })] as [string, string],
       vespera: (h: { titulo: string; base?: string[]; companhia?: string }) => textosVespera(t, h),
       conta: (c: Conta, aviso: { tipo: 'antes' | 'dia'; vencimento: Vencimento }) => textosAvisoConta(t, i18n.language, c, aviso),
+      desejo: (d: { nome: string }) => [t('dinheiro.avisoDesejoTitulo', { nome: d.nome }), t('dinheiro.avisoDesejoCorpo')] as [string, string],
       refeicao: (r: Refeicao) => [t('alimentacao.avisoTitulo', { refeicao: nomeRefeicao(t, r) }), t('alimentacao.avisoCorpo')] as [string, string],
       fimFoco: textosFimFoco(t),
       discretoTitulo: t('avisos.discretoTitulo'),

@@ -238,3 +238,43 @@ export type Cofrinho = { id: string; nome: string; meta: Centavos; objetivoId?: 
 
 /** Dinheiro guardado (positivo) ou tirado (negativo) de um cofrinho. */
 export type Deposito = { id: string; cofrinhoId: string; valor: Centavos; dia: Dia; quando: string }
+
+/** A compra por impulso espera 48 horas antes do "ainda quero?". */
+export const ESPERA_DESEJO_H = 48
+
+export function fimDaEspera(d: Pick<Desejo, 'criadoEm'>): Date {
+  return new Date(new Date(d.criadoEm).getTime() + ESPERA_DESEJO_H * 3_600_000)
+}
+
+/** Horas que faltam para decidir (0 = já pode; nunca mais de 48, mesmo com o relógio da tela um pouco atrás). */
+export function horasParaDecidir(d: Pick<Desejo, 'criadoEm'>, agora: Date): number {
+  return Math.min(ESPERA_DESEJO_H, Math.max(0, Math.ceil((fimDaEspera(d).getTime() - agora.getTime()) / 3_600_000)))
+}
+
+export function prontoParaDecidir(d: Desejo, agora: Date): boolean {
+  return !d.decisao && agora >= fimDaEspera(d)
+}
+
+/** O que ficou com a pessoa no mês: desejos que ela decidiu não comprar. */
+export function desistenciasDoMes(desejos: Desejo[], mes: Mes): { quantos: number; valor: Centavos } {
+  const lista = desejos.filter((d) => d.decisao === 'desisti' && d.decididoEm && mesDe(d.decididoEm.slice(0, 10)) === mes)
+  return { quantos: lista.length, valor: lista.reduce((s, d) => s + (d.valor ?? 0), 0) }
+}
+
+export function guardadoNoCofrinho(depositos: Deposito[], cofrinhoId: string): Centavos {
+  return depositos.filter((d) => d.cofrinhoId === cofrinhoId).reduce((s, d) => s + d.valor, 0)
+}
+
+export function progressoCofrinho(c: Cofrinho, depositos: Deposito[]): { guardado: Centavos; fracao: number; falta: Centavos } {
+  const guardado = guardadoNoCofrinho(depositos, c.id)
+  return { guardado, fracao: c.meta > 0 ? Math.max(0, Math.min(1, guardado / c.meta)) : 0, falta: Math.max(0, c.meta - guardado) }
+}
+
+/** O que foi guardado em cada um dos últimos `n` meses (só o que entrou; o que saiu conta no total, não aqui). */
+export function guardadoPorMes(depositos: Deposito[], cofrinhoId: string, hoje: Dia, n = 6): Array<{ mes: Mes; valor: Centavos }> {
+  const atual = mesDe(hoje)
+  return Array.from({ length: n }, (_, i) => somarMeses(atual, i - n + 1)).map((mes) => ({
+    mes,
+    valor: depositos.filter((d) => d.cofrinhoId === cofrinhoId && d.valor > 0 && mesDe(d.dia) === mes).reduce((s, d) => s + d.valor, 0),
+  }))
+}

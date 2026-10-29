@@ -110,7 +110,7 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | 12 | Comidas fáceis, "não sei o que comer" e lista de compras (parte 2) | Pronta |
 | 13 | **Dinheiro**: contas a pagar (parte 1) | Pronta |
 | 13 | **Dinheiro**: potes da semana e gasto rápido pelo ⌘K (parte 2) | Pronta |
-| 13 | **Dinheiro**: pausa antes de comprar e cofrinho (parte 3) | |
+| 13 | **Dinheiro**: pausa antes de comprar e cofrinho (parte 3) | Pronta |
 | 14 | Rituais e revisão semanal (com 5 min de dinheiro) | |
 | 15 | **Meus objetivos** com gráficos | |
 | 16 | Álbum de adesivos, recompensas e conferência final | |
@@ -232,10 +232,18 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 - Gasto: pelo formulário ou pelo ⌘K, com a área ligada: linha que começa com um valor ("35 ifood", "R$ 12 uber") vira
   gasto; cai no pote pelo nome ou pelas palavras do pote; "Não era gasto" desfaz e manda a linha para a caixa.
   Gastos da semana com o pote de cada um (sem pote: a lista vem aberta para escolher), apagar com desfazer.
+- Pausa antes de comprar: a vontade vai para a lista de desejos (com valor opcional) e espera 48 h ("pode decidir
+  ter, 13 de out, 10:00 · faltam 48 horas"). Depois: "Ainda quer?" (sim, vou comprar / não quero mais), com desfazer;
+  aviso do sistema uma vez quando a espera acaba (das 9h às 21h, até 3 dias depois). "Este mês, R$ 250,00 ficou com
+  você" soma o que a pessoa decidiu não comprar.
+- Cofrinho: nome e meta; guardar e tirar (com desfazer); o total grande, a barra e "faltam R$ X" ou "Meta alcançada!";
+  gráfico de colunas do que entrou por mês nos últimos 6 meses (um tom, valor só na última coluna, dica no hover e no
+  foco, "Ver como tabela" em reais). O campo `objetivoId` fica pronto para ligar o cofrinho a um objetivo (etapa 15).
+- O gráfico de colunas aceita valores formatados (reais) e o "Ver como tabela" fala português e inglês.
 
 ## Lógica com testes automáticos
 
 Horários de lembretes (adiar, repetir, silêncio), recorrências, vencimento de contas (ex.: dia 31 em mês de 30 dias),
 saldo dos potes e virada da semana, espera de 48 h da lista de desejos, progresso do cofrinho, planejamento reverso (prova → sessões; consulta → alarmes),
-avisos do semestre, fases do modo foco e "achei × levou", aviso do estudo acompanhado, hábitos (semana, pendente hoje, véspera), reset do quarto, refeições e água, ideias de comida e lista de compras, estoque de remédio, "X de 7 dias", limite de 3 tarefas A, escolha do cartão "Agora",
+avisos do semestre, fases do modo foco e "achei × levou", aviso do estudo acompanhado, hábitos (semana, pendente hoje, véspera), reset do quarto, refeições e água, ideias de comida e lista de compras, contas, potes e gasto rápido, pausa de 48 h, cofrinho, estoque de remédio, "X de 7 dias", limite de 3 tarefas A, escolha do cartão "Agora",
 importação de .ics sem duplicar, e o contraste de todas as cores usadas.

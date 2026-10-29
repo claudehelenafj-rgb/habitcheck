@@ -1,9 +1,21 @@
-// Dinheiro no banco local: contas a pagar e os pagamentos de cada mês, potes da semana e gastos.
-// Nada sai do aparelho.
+// Dinheiro no banco local: contas a pagar e os pagamentos de cada mês, potes da semana e gastos,
+// lista de desejos (pausa de 48 h) e cofrinhos. Nada sai do aparelho.
 
 import { useLiveQuery } from 'dexie-react-hooks'
 import type { IdArea } from '../design/areas'
-import { desmarcarPaga, marcarPaga, poteDoGasto, type Centavos, type Conta, type Gasto, type Mes, type Pote } from '../logica/dinheiro'
+import {
+  desmarcarPaga,
+  marcarPaga,
+  poteDoGasto,
+  type Centavos,
+  type Cofrinho,
+  type Conta,
+  type Deposito,
+  type Desejo,
+  type Gasto,
+  type Mes,
+  type Pote,
+} from '../logica/dinheiro'
 import { diaLocal } from '../logica/datas'
 import { banco, novoId } from './banco'
 
@@ -120,4 +132,81 @@ export async function restaurarGasto(g: Gasto) {
 export async function dinheiroLigado(): Promise<boolean> {
   const perfil = (await banco.configuracoes.get('perfil'))?.valor as { areasAtivas?: IdArea[] } | undefined
   return !!perfil?.areasAtivas?.includes('dinheiro')
+}
+
+// ---------- pausa antes de comprar ----------
+
+export function useDesejos(): Desejo[] | undefined {
+  return useLiveQuery(() => banco.desejos.orderBy('criadoEm').toArray(), [])
+}
+
+/** Desejos só com a área Dinheiro ligada (para o aviso de "ainda quer?"). */
+export function useDesejosAtivos(): Desejo[] | null | undefined {
+  return useLiveQuery(async () => ((await dinheiroLigado()) ? banco.desejos.toArray() : null), [])
+}
+
+export async function anotarDesejo(nome: string, valor?: Centavos, agora = new Date()) {
+  await banco.desejos.add({ id: novoId(), nome: nome.trim(), ...(valor ? { valor } : {}), criadoEm: agora.toISOString() })
+}
+
+/** "Ainda quero?": comprei, desisti, ou `undefined` para desfazer a decisão. */
+export async function decidirDesejo(id: string, decisao: Desejo['decisao'], agora = new Date()) {
+  await banco.desejos.update(id, { decisao, decididoEm: decisao ? agora.toISOString() : undefined })
+}
+
+export async function apagarDesejo(id: string): Promise<Desejo | undefined> {
+  const d = await banco.desejos.get(id)
+  await banco.desejos.delete(id)
+  return d
+}
+
+export async function restaurarDesejo(d: Desejo) {
+  await banco.desejos.put(d)
+}
+
+// ---------- cofrinho ----------
+
+export function useCofrinhos(): Cofrinho[] | undefined {
+  return useLiveQuery(() => banco.cofrinhos.toArray(), [])
+}
+
+export function useDepositos(): Deposito[] | undefined {
+  return useLiveQuery(() => banco.depositos.toArray(), [])
+}
+
+export async function novoCofrinho(nome: string, meta: Centavos, agora = new Date()) {
+  await banco.cofrinhos.add({ id: novoId(), nome: nome.trim(), meta, criadoEm: agora.toISOString() })
+}
+
+export async function salvarCofrinho(c: Cofrinho) {
+  await banco.cofrinhos.put(c)
+}
+
+/** Guarda (valor positivo) ou tira (negativo) dinheiro do cofrinho. */
+export async function moverNoCofrinho(cofrinhoId: string, valor: Centavos, agora = new Date()): Promise<Deposito> {
+  const d: Deposito = { id: novoId(), cofrinhoId, valor, dia: diaLocal(agora), quando: agora.toISOString() }
+  await banco.depositos.add(d)
+  return d
+}
+
+export async function apagarDeposito(id: string) {
+  await banco.depositos.delete(id)
+}
+
+/** Apaga o cofrinho e o que foi guardado nele. Devolve tudo, para o "Desfazer". */
+export async function apagarCofrinho(id: string): Promise<{ cofrinho?: Cofrinho; depositos: Deposito[] }> {
+  return banco.transaction('rw', banco.cofrinhos, banco.depositos, async () => {
+    const cofrinho = await banco.cofrinhos.get(id)
+    const depositos = await banco.depositos.where('cofrinhoId').equals(id).toArray()
+    await banco.cofrinhos.delete(id)
+    await banco.depositos.bulkDelete(depositos.map((d) => d.id))
+    return { cofrinho, depositos }
+  })
+}
+
+export async function restaurarCofrinho({ cofrinho, depositos }: { cofrinho?: Cofrinho; depositos: Deposito[] }) {
+  await banco.transaction('rw', banco.cofrinhos, banco.depositos, async () => {
+    if (cofrinho) await banco.cofrinhos.put(cofrinho)
+    await banco.depositos.bulkPut(depositos)
+  })
 }

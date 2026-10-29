@@ -15,7 +15,16 @@ import {
   lerGastoRapido,
   poteDoGasto,
   saldoDoPote,
+  desistenciasDoMes,
+  fimDaEspera,
+  guardadoPorMes,
+  horasParaDecidir,
+  prontoParaDecidir,
+  progressoCofrinho,
+  type Cofrinho,
   type Conta,
+  type Deposito,
+  type Desejo,
   type Gasto,
   type Pote,
 } from './dinheiro'
@@ -172,5 +181,52 @@ describe('potes da semana', () => {
     expect(poteDoGasto('uber', [mercado, fora])).toBeUndefined()
     // palavra pela metade não conta
     expect(poteDoGasto('supermercado', [mercado, fora])).toBeUndefined()
+  })
+})
+
+describe('pausa antes de comprar', () => {
+  const desejo = (extra: Partial<Desejo> = {}): Desejo => ({ id: 'd', nome: 'Fone novo', valor: 25000, criadoEm: '2026-10-29T14:30:00.000Z', ...extra })
+
+  it('espera 48 horas antes do "ainda quero?"', () => {
+    expect(fimDaEspera(desejo()).toISOString()).toBe('2026-10-31T14:30:00.000Z')
+    expect(horasParaDecidir(desejo(), new Date('2026-10-30T18:00:00.000Z'))).toBe(21)
+    expect(prontoParaDecidir(desejo(), new Date('2026-10-31T14:29:00.000Z'))).toBe(false)
+    expect(prontoParaDecidir(desejo(), new Date('2026-10-31T14:30:00.000Z'))).toBe(true)
+    expect(horasParaDecidir(desejo(), new Date('2026-11-02T00:00:00.000Z'))).toBe(0)
+    // relógio da tela um pouco antes de anotar: continua 48
+    expect(horasParaDecidir(desejo(), new Date('2026-10-29T14:29:30.000Z'))).toBe(48)
+    expect(prontoParaDecidir(desejo({ decisao: 'desisti' }), new Date('2026-11-02T00:00:00.000Z'))).toBe(false)
+  })
+
+  it('o que ficou com a pessoa no mês', () => {
+    const lista = [
+      desejo({ id: 'a', decisao: 'desisti', decididoEm: '2026-10-31T15:00:00.000Z' }),
+      desejo({ id: 'b', decisao: 'desisti', valor: undefined, decididoEm: '2026-10-20T15:00:00.000Z' }),
+      desejo({ id: 'c', decisao: 'comprei', decididoEm: '2026-10-31T15:00:00.000Z' }),
+      desejo({ id: 'e', decisao: 'desisti', decididoEm: '2026-11-01T15:00:00.000Z' }),
+    ]
+    expect(desistenciasDoMes(lista, '2026-10')).toEqual({ quantos: 2, valor: 25000 })
+  })
+})
+
+describe('cofrinho', () => {
+  const cofrinho: Cofrinho = { id: 'c', nome: 'Viagem', meta: 100000, criadoEm: '' }
+  const dep = (valor: number, dia: string, cofrinhoId = 'c'): Deposito => ({ id: `${valor}${dia}`, cofrinhoId, valor, dia, quando: '' })
+  const depositos = [dep(20000, '2026-08-10'), dep(15000, '2026-10-02'), dep(-5000, '2026-10-15'), dep(5000, '2026-10-20'), dep(99999, '2026-10-20', 'outro')]
+
+  it('progresso: guardado menos o que saiu; nunca passa de 100%', () => {
+    expect(progressoCofrinho(cofrinho, depositos)).toEqual({ guardado: 35000, fracao: 0.35, falta: 65000 })
+    expect(progressoCofrinho({ ...cofrinho, meta: 30000 }, depositos)).toEqual({ guardado: 35000, fracao: 1, falta: 0 })
+  })
+
+  it('guardado por mês: os últimos 6 meses, só o que entrou', () => {
+    expect(guardadoPorMes(depositos, 'c', '2026-10-29')).toEqual([
+      { mes: '2026-05', valor: 0 },
+      { mes: '2026-06', valor: 0 },
+      { mes: '2026-07', valor: 0 },
+      { mes: '2026-08', valor: 20000 },
+      { mes: '2026-09', valor: 0 },
+      { mes: '2026-10', valor: 20000 },
+    ])
   })
 })
