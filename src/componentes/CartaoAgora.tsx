@@ -4,6 +4,7 @@
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
+import { marcarRefeicao } from '../dados/alimentacao'
 import { alternarPasso, concluirTarefa, reabrirTarefa } from '../dados/tarefas'
 import { iniciarTimer, pararTimer, segundosRestantes, useAgora, useTimer } from '../dados/timer'
 import { AREAS } from '../design/areas'
@@ -130,6 +131,31 @@ export function CartaoAgora({ candidato, compacto = false, semNada }: Props) {
         <a href={doCalendario ? '#/calendario' : '#/consultas'} className="self-start font-bold underline decoration-2 underline-offset-4">
           {doCalendario ? t('calendario.titulo') : t('consultas.titulo')} →
         </a>
+      </section>
+    )
+  }
+
+  if (candidato.tipo === 'refeicao') {
+    return (
+      <section aria-labelledby="titulo-agora" className={`cartao flex flex-col gap-3 bg-menta ${compacto ? 'p-4' : 'p-6'}`}>
+        <p className="rotulo flex items-center gap-2">
+          <span id="titulo-agora">{t('hoje.agora')}</span>
+          <span aria-hidden="true">·</span>
+          <Adesivo nome="prato" tamanho={20} />
+          {t('nav.alimentacao')} · {candidato.horario.toTimeString().slice(0, 5)}
+        </p>
+        <p className={`font-titulo leading-tight font-semibold break-words ${compacto ? 'text-2xl' : 'text-3xl sm:text-4xl'}`}>{candidato.titulo}</p>
+        <p className="text-lg">{t('alimentacao.mesmoSemFome')}</p>
+        <div className="flex flex-wrap items-center gap-3">
+          <Botao grande={!compacto} onClick={() => marcarRefeicao(diaLocal(), candidato.refeicao)} icone={<span aria-hidden="true">✓</span>}>
+            {t('alimentacao.comi')}
+          </Botao>
+          {!compacto && (
+            <Link to="/alimentacao" className="font-bold underline decoration-2 underline-offset-4">
+              {t('alimentacao.naoSeiOQue')} →
+            </Link>
+          )}
+        </div>
       </section>
     )
   }

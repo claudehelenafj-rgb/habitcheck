@@ -1,6 +1,7 @@
 // Regras da tela Hoje: blocos do dia, quanto falta e a escolha do cartão "Agora".
 
 import type { Tarefa } from '../dados/banco'
+import type { IdRefeicao } from './alimentacao'
 import type { Ocorrencia } from './calendario'
 import { pendenteHoje, type Habito, type RegistroHabito } from './habitos'
 import { planoReverso, type Consulta } from './consultas'
@@ -61,6 +62,7 @@ export type Candidato =
   | { tipo: 'remedio'; id: string; titulo: string; horario: Date; dose?: DosePrevista }
   | { tipo: 'transicao'; id: string; titulo: string; horario: Date; detalhe?: string }
   | { tipo: 'compromisso'; id: string; titulo: string; inicio: Date; fim?: Date; detalhe?: string; origem?: 'consulta' | 'evento' }
+  | { tipo: 'refeicao'; id: string; titulo: string; horario: Date; refeicao: IdRefeicao }
   | { tipo: 'tarefa'; id: string; titulo: string; tarefa: Tarefa }
   | { tipo: 'habito'; id: string; titulo: string; bloco?: Bloco; habito?: Habito }
 
@@ -70,8 +72,8 @@ export const ANTECEDENCIA_COMPROMISSO_MIN = 15
 /**
  * Escolhe a única coisa do cartão "Agora", nesta ordem:
  * 1. remédio no horário ou atrasado; 2. alarme de transição ("começar a se arrumar");
- * 3. compromisso começando em até 15 min (ou em andamento); 4. tarefa A do bloco atual;
- * 5. tarefa A sem bloco; 6. tarefa A de um bloco que já passou; 7. hábito do bloco atual.
+ * 3. compromisso começando em até 15 min (ou em andamento); 4. refeição na hora (comer mesmo sem fome);
+ * 5. tarefa A do bloco atual; 6. tarefa A sem bloco; 7. tarefa A de um bloco que já passou; 8. hábito do bloco atual.
  * Nada disso: devolve undefined ("Tudo certo por agora").
  */
 export function escolherAgora(candidatos: Candidato[], agora: Date): Candidato | undefined {
@@ -98,6 +100,9 @@ export function escolherAgora(candidatos: Candidato[], agora: Date): Candidato |
     )
     .sort((a, b) => a.inicio.getTime() - b.inicio.getTime())
   if (compromissos[0]) return compromissos[0]
+
+  const refeicao = candidatos.find((c) => c.tipo === 'refeicao' && c.horario.getTime() <= t)
+  if (refeicao) return refeicao
 
   const tarefas = candidatos
     .filter((c): c is Extract<Candidato, { tipo: 'tarefa' }> => c.tipo === 'tarefa' && c.tarefa.prioridade === 'A' && !c.tarefa.feitaEm)

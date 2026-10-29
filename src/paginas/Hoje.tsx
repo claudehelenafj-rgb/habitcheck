@@ -18,6 +18,9 @@ import type { Consulta } from '../logica/consultas'
 import type { Avaliacao } from '../logica/faculdade'
 import { useAvaliacoes } from '../dados/faculdade'
 import { useHabitosAtivos } from '../dados/habitos'
+import { useAlimentacaoDeHoje } from '../dados/alimentacao'
+import { nomeRefeicao } from '../componentes/Refeicoes'
+import { blocoDaRefeicao, progressoDoDia, refeicoesAtivas, type Refeicao } from '../logica/alimentacao'
 import { diaDoPreparo, preparoCompleto, temPreparo, type Habito, type RegistroHabito } from '../logica/habitos'
 import { momento } from '../logica/remedios'
 import { dentroDoEfeito, janelasDeHoje } from '../logica/remedioNoPlano'
@@ -85,6 +88,7 @@ function FolhaDoDia({ agora, nome }: { agora: Date; nome?: string }) {
 }
 
 type HabitoDoDia = { habito: Habito; registro?: RegistroHabito }
+type RefeicaoDoDia = { refeicao: Refeicao; nome: string; feita: boolean }
 /** base de lançamento para amanhã, lembrada no bloco da noite */
 type PreparoDaNoite = { habito: Habito; completo: boolean }
 
@@ -96,6 +100,7 @@ function LinhaDoDia({
   avaliacoes,
   habitos,
   preparos,
+  refeicoes,
 }: {
   tarefas: Tarefa[]
   agora: Date
@@ -104,6 +109,7 @@ function LinhaDoDia({
   avaliacoes: Avaliacao[]
   habitos: HabitoDoDia[]
   preparos: PreparoDaNoite[]
+  refeicoes: RefeicaoDoDia[]
 }) {
   const { t } = useTranslation()
   const atual = blocoDoHorario(agora)
@@ -139,6 +145,7 @@ function LinhaDoDia({
           const eventosDoBloco = eventos.filter((o) => !o.evento.diaInteiro && blocoDoHorario(o.inicio) === bloco)
           const habitosDoBloco = habitos.filter((x) => x.habito.bloco === bloco)
           const preparosDoBloco = bloco === 'noite' ? preparos : []
+          const refeicoesDoBloco = refeicoes.filter((x) => blocoDaRefeicao(x.refeicao) === bloco)
           const passou = blocoJaPassou(bloco, atual)
           const eAgora = bloco === atual
           return (
@@ -168,6 +175,16 @@ function LinhaDoDia({
                   <span className="tabular-nums">{o.inicio.toTimeString().slice(0, 5)}</span> {o.evento.titulo}
                 </p>
               ))}
+              {refeicoesDoBloco.map(({ refeicao, nome, feita }) => (
+                <p key={refeicao.id} className="flex items-center gap-2 rounded-full border-2 border-linha/60 bg-menta py-1 pr-3 pl-1 text-sm font-semibold">
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 border-linha bg-papel text-xs" aria-hidden="true">
+                    {feita ? '✓' : ''}
+                  </span>
+                  <Adesivo nome="prato" tamanho={18} />
+                  {refeicao.hora && <span className="tabular-nums">{refeicao.hora}</span>} {nome}
+                  {feita && <span className="so-leitor">({t('alimentacao.comi')})</span>}
+                </p>
+              ))}
               {preparosDoBloco.map(({ habito, completo }) => (
                 <Link
                   key={habito.id}
@@ -191,7 +208,7 @@ function LinhaDoDia({
                     <ItemHabito key={x.habito.id} {...x} />
                   ))}
                 </ul>
-              ) : consultasDoBloco.length || eventosDoBloco.length || preparosDoBloco.length ? null : (
+              ) : consultasDoBloco.length || eventosDoBloco.length || preparosDoBloco.length || refeicoesDoBloco.length ? null : (
                 <p className="text-sm text-tinta-suave">{t('hoje.livre')}</p>
               )}
             </li>
@@ -294,6 +311,7 @@ export function Hoje() {
   const avaliacoes = useAvaliacoes()
   const eventos = useEventos()
   const habitos = useHabitosAtivos()
+  const comida = useAlimentacaoDeHoje(diaLocal(agora))
   const { candidato } = useCandidatoAgora(agora)
   const hoje = diaLocal(agora)
   const dia = diaDoPlano(perfil.inicioPlano, hoje)
@@ -302,7 +320,7 @@ export function Hoje() {
   const diaAlcancado = visitaAnterior ? diaDoPlano(perfil.inicioPlano, visitaAnterior) : dia
   const podeContinuar = acolher && visitaAnterior && diaAlcancado < DURACAO_PLANO
 
-  if (!tarefas || !doses || !consultas || !eventos || !avaliacoes || !habitos) return null
+  if (!tarefas || !doses || !consultas || !eventos || !avaliacoes || !habitos || comida === undefined) return null
   const doDia = tarefasDoDia(tarefas, hoje)
   const grupos = agruparTarefas(tarefas, hoje)
   const remediosHoje = { feitos: doses.registros.filter((r) => r.status === 'tomei').length, total: doses.doses.length }
@@ -314,6 +332,10 @@ export function Hoje() {
     const atual = extrasHabitos[area] ?? { feitos: 0, total: 0 }
     extrasHabitos[area] = { feitos: atual.feitos + (registro ? 1 : 0), total: atual.total + 1 }
   }
+  const refeicoesHoje = comida
+    ? refeicoesAtivas(comida.config).map((r) => ({ refeicao: r, nome: nomeRefeicao(t, r), feita: !!comida.dia?.refeicoes[r.id] }))
+    : []
+  const comidaHoje = comida ? progressoDoDia(comida.config, comida.dia) : undefined
   const amanha = somarDias(hoje, 1)
   const preparos = habitos.habitos
     .filter((h) => temPreparo(h) && diaDoPreparo(h, habitos.registros.filter((r) => r.habitoId === h.id), agora) === amanha)
@@ -410,7 +432,11 @@ export function Hoje() {
         </section>
 
         <div className="flex flex-col gap-4">
-          <ProgressoAreas tarefas={doDia} areasAtivas={perfil.areasAtivas} extras={{ ...extrasHabitos, remedios: remediosHoje }} />
+          <ProgressoAreas tarefas={doDia} areasAtivas={perfil.areasAtivas} extras={{
+              ...extrasHabitos,
+              remedios: remediosHoje,
+              ...(comidaHoje ? { alimentacao: { feitos: comidaHoje.feitas, total: comidaHoje.total } } : {}),
+            }} />
           <div className="cartao flex flex-col gap-2 bg-papel p-5">
             <Botao variante="secundario" tom="bg-azul-nevoa" className="self-start" onClick={() => abrirJanelinha()} icone={<Adesivo nome="balao" tamanho={24} />}>
               {t('hoje.janelinha')}
@@ -428,6 +454,7 @@ export function Hoje() {
         avaliacoes={avaliacoes.filter((a) => a.data === hoje && !a.feitaEm)}
         habitos={habitosHoje}
         preparos={preparos}
+        refeicoes={refeicoesHoje}
       />
 
       {!perfil.planoEscondido && <CartaoPlano dia={dia} />}

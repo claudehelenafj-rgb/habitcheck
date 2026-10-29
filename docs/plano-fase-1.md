@@ -106,7 +106,8 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | 10 | Base de lançamento, treino acompanhado e movimento antes do foco (parte 2) | Pronta |
 | 11 | Quarto: zonas, reset de 10 minutos e o reset como hábito (parte 1) | Pronta |
 | 11 | Um lugar para cada coisa e fotos de antes e depois (parte 2) | Pronta |
-| 12 | Alimentação | |
+| 12 | Alimentação: bolinhas das refeições e da água, horários e lembretes (parte 1) | Pronta |
+| 12 | Comidas fáceis, "não sei o que comer" e lista de compras (parte 2) | |
 | 13 | **Dinheiro**: contas a pagar, potes da semana, pausa antes de comprar, cofrinho | |
 | 14 | Rituais e revisão semanal (com 5 min de dinheiro) | |
 | 15 | **Meus objetivos** com gráficos | |
@@ -187,6 +188,19 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
   com fita, com zona e data, e "Apagar estas fotos" com desfazer.
 - Hábitos agora servem a mais de uma área: anel de cada área na tela Hoje, aviso que abre a tela da área, arquivados
   em cada tela, e "Virar hábito" na caixa de entrada pergunta a área quando há mais de uma ligada.
+
+## Alimentação (etapa 12)
+
+- Regularidade, não restrição: sem calorias, peso ou comida certa ou errada.
+- Bolinhas das refeições de hoje (café da manhã, almoço, lanche, jantar): tocar marca, tocar de novo desmarca.
+  Copos de água: tocar no copo 3 enche até ele; tocar no último cheio esvazia esse.
+- Horários e lembretes: cada refeição pode ser desligada, renomeada e ter horário; lembrete opcional na hora
+  ("Hora de comer: Almoço — Comer alguma coisa, mesmo sem fome, e marcar no app"), uma vez por dia e só se ainda não
+  marcou (respeita os avisos discretos). Quantos copos acompanhar (3 a 15).
+- Semana: dia com todas as refeições, com algumas ("2/4") ou sem registro (contorno vazio, nunca erro).
+- Tela Hoje: a refeição entra no "Agora" na hora dela (até 1 hora depois, depois sai sem cobrança), antes das tarefas
+  A e depois de remédio, transição e compromisso; "Comi" marca ali mesmo. Refeições na linha do dia, no bloco do
+  horário, e no anel da Alimentação. Só com a área ligada.
 
 ## Lógica com testes automáticos
 

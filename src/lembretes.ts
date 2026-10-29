@@ -5,10 +5,12 @@
 import { useEffect, useRef } from 'react'
 import { useBemEstar } from './dados/bemEstar'
 import { useUltimoCheckin } from './dados/checkins'
+import { useAlimentacaoDeHoje } from './dados/alimentacao'
 import { useAvaliacoes, useConfigFaculdade } from './dados/faculdade'
 import { marcarAvisoFoco, useEstadoFoco } from './dados/foco'
 import { useHabitosAtivos } from './dados/habitos'
 import { avisoAcompanhado, lembreteDeHoje, type Avaliacao } from './logica/faculdade'
+import { deveLembrarRefeicao, type Refeicao } from './logica/alimentacao'
 import { acabouFase, type EstadoFoco, type FaseFoco } from './logica/foco'
 import { deveAvisarVespera, deveLembrar, type Habito } from './logica/habitos'
 import { TELAS_AREAS } from './rotas'
@@ -67,6 +69,8 @@ export type TextosLembretes = {
   habito: (h: Habito) => [string, string]
   /** véspera do hábito: deixar a base pronta e combinar com a companhia: [título, texto] */
   vespera: (h: Habito) => [string, string]
+  /** hora de comer: [título, texto] */
+  refeicao: (r: Refeicao) => [string, string]
   /** fim de uma fase do modo foco: [título, texto] */
   fimFoco: (fase: FaseFoco) => [string, string]
   /** "avisos discretos": título e texto que trocam todos os outros */
@@ -235,6 +239,27 @@ function useAvisosHabitos(agora: Date, textos: TextosLembretes, discretos: boole
   }, [dados, agora, textos, discretos])
 }
 
+/** Refeições com lembrete: na hora (até 30 min depois), uma vez por dia, só se ainda não marcou. Só com a área ligada. */
+function useAvisosAlimentacao(agora: Date, textos: TextosLembretes, discretos: boolean) {
+  const hoje = diaLocal(agora)
+  const comida = useAlimentacaoDeHoje(hoje)
+  const emAndamento = useRef(new Set<string>())
+  useEffect(() => {
+    if (!comida) return
+    for (const r of comida.config.refeicoes) {
+      if (!deveLembrarRefeicao(r, comida.dia, agora)) continue
+      const id = `refeicao|${r.id}|${hoje}`
+      if (emAndamento.current.has(id)) continue
+      emAndamento.current.add(id)
+      ;(async () => {
+        if (await jaAvisouTransicao(id)) return
+        await registrarTransicao(id)
+        await mostrarAvisoSistema(...comDiscricao(textos, discretos, ...textos.refeicao(r)), id, '#/hoje')
+      })().finally(() => emAndamento.current.delete(id))
+    }
+  }, [comida, agora, hoje, textos, discretos])
+}
+
 /** Com a pessoa em outra tela do app, o fim da fase de foco também avisa (a cada 20 s). */
 function useAvisosFoco(agora: Date, textos: TextosLembretes, discretos: boolean) {
   const foco = useEstadoFoco()
@@ -258,6 +283,7 @@ export function useLembretes(textos: TextosLembretes, areas: AreasDosLembretes =
   useAvisosFaculdade(agora, textos, !!areas.faculdade, discretos)
   useAvisosFoco(agora, textos, discretos)
   useAvisosHabitos(agora, textos, discretos)
+  useAvisosAlimentacao(agora, textos, discretos)
 
   useEffect(() => {
     if (!dados) return

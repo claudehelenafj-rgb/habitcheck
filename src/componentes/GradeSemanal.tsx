@@ -12,6 +12,8 @@ export type Dia = {
   hoje?: boolean
   /** com isto, o dia vira um botão (ex.: marcar um dia que esqueceu de registrar) */
   aoTocar?: () => void
+  /** texto curtinho do "meio feito" (padrão: "mín."), ex.: "2/4" */
+  marca?: string
 }
 
 /** Traço de caneta desenhado à mão para circular o dia de hoje. */
@@ -71,7 +73,7 @@ export function GradeSemanal({ titulo, adesivo, dias, tom, textoMinimo }: Props)
                   <span className="relative">
                     <Adesivo nome={adesivo} tamanho={24} />
                     <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-papel px-1 text-[0.6rem] font-bold">
-                      {t('grade.min')}
+                      {dia.marca ?? t('grade.min')}
                     </span>
                   </span>
                 )}

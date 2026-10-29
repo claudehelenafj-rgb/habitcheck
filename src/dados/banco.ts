@@ -10,6 +10,7 @@ import type { Avaliacao } from '../logica/faculdade'
 import type { SessaoFoco } from '../logica/foco'
 import type { Habito, RegistroHabito } from '../logica/habitos'
 import type { Foto, Lugar, ResetQuarto, Zona } from '../logica/quarto'
+import type { Comida, DiaAlimentacao, ItemCompra } from '../logica/alimentacao'
 import type { Hobby, VezHobby } from '../logica/hobbies'
 import type { NotaRemedio } from '../logica/remedioNoPlano'
 import type { RegistroSintoma } from '../logica/sintomas'
@@ -84,6 +85,9 @@ export class BancoCaderninho extends Dexie {
   resets!: EntityTable<ResetQuarto, 'id'>
   lugares!: EntityTable<Lugar, 'id'>
   fotos!: EntityTable<Foto, 'id'>
+  diasAlimentacao!: EntityTable<DiaAlimentacao, 'dia'>
+  comidas!: EntityTable<Comida, 'id'>
+  compras!: EntityTable<ItemCompra, 'id'>
 
   constructor(nome = 'caderninho') {
     super(nome)
@@ -149,6 +153,12 @@ export class BancoCaderninho extends Dexie {
       resets: 'id, zonaId, dia',
       lugares: 'id',
       fotos: 'id',
+    })
+    // etapa 12: alimentação (um registro por dia: refeições e copos de água), comidas fáceis e lista de compras
+    this.version(14).stores({
+      diasAlimentacao: 'dia',
+      comidas: 'id',
+      compras: 'id, compradoEm',
     })
   }
 }
