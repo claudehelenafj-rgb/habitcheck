@@ -11,6 +11,7 @@ import type { SessaoFoco } from '../logica/foco'
 import type { Habito, RegistroHabito } from '../logica/habitos'
 import type { Foto, Lugar, ResetQuarto, Zona } from '../logica/quarto'
 import type { Comida, DiaAlimentacao, ItemCompra } from '../logica/alimentacao'
+import type { Conta } from '../logica/dinheiro'
 import type { Hobby, VezHobby } from '../logica/hobbies'
 import type { NotaRemedio } from '../logica/remedioNoPlano'
 import type { RegistroSintoma } from '../logica/sintomas'
@@ -88,6 +89,7 @@ export class BancoCaderninho extends Dexie {
   diasAlimentacao!: EntityTable<DiaAlimentacao, 'dia'>
   comidas!: EntityTable<Comida, 'id'>
   compras!: EntityTable<ItemCompra, 'id'>
+  contas!: EntityTable<Conta, 'id'>
 
   constructor(nome = 'caderninho') {
     super(nome)
@@ -159,6 +161,10 @@ export class BancoCaderninho extends Dexie {
       diasAlimentacao: 'dia',
       comidas: 'id',
       compras: 'id, compradoEm',
+    })
+    // etapa 13: contas a pagar (com os pagamentos de cada mês)
+    this.version(15).stores({
+      contas: 'id',
     })
   }
 }

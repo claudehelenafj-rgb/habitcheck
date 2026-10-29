@@ -19,6 +19,8 @@ import type { Avaliacao } from '../logica/faculdade'
 import { useAvaliacoes } from '../dados/faculdade'
 import { useHabitosAtivos } from '../dados/habitos'
 import { useAlimentacaoDeHoje } from '../dados/alimentacao'
+import { useContasAtivas } from '../dados/dinheiro'
+import { formatarValor, proximoVencimento, type Conta, type Vencimento } from '../logica/dinheiro'
 import { nomeRefeicao } from '../componentes/Refeicoes'
 import { blocoDaRefeicao, progressoDoDia, refeicoesAtivas, type Refeicao } from '../logica/alimentacao'
 import { diaDoPreparo, preparoCompleto, temPreparo, type Habito, type RegistroHabito } from '../logica/habitos'
@@ -89,6 +91,8 @@ function FolhaDoDia({ agora, nome }: { agora: Date; nome?: string }) {
 
 type HabitoDoDia = { habito: Habito; registro?: RegistroHabito }
 type RefeicaoDoDia = { refeicao: Refeicao; nome: string; feita: boolean }
+/** conta que vence hoje ou que venceu e ainda não foi marcada */
+type ContaDoDia = { conta: Conta; vencimento: Vencimento }
 /** base de lançamento para amanhã, lembrada no bloco da noite */
 type PreparoDaNoite = { habito: Habito; completo: boolean }
 
@@ -101,6 +105,7 @@ function LinhaDoDia({
   habitos,
   preparos,
   refeicoes,
+  contas,
 }: {
   tarefas: Tarefa[]
   agora: Date
@@ -110,8 +115,9 @@ function LinhaDoDia({
   habitos: HabitoDoDia[]
   preparos: PreparoDaNoite[]
   refeicoes: RefeicaoDoDia[]
+  contas: ContaDoDia[]
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const atual = blocoDoHorario(agora)
   const semBloco = tarefas.filter((x) => !x.bloco)
   const habitosSemBloco = habitos.filter((x) => !x.habito.bloco)
@@ -121,8 +127,17 @@ function LinhaDoDia({
       <h2 id="titulo-linha" className="text-2xl font-semibold">
         {t('hoje.linhaDia')}
       </h2>
-      {(diaTodo.length > 0 || avaliacoes.length > 0) && (
+      {(diaTodo.length > 0 || avaliacoes.length > 0 || contas.length > 0) && (
         <ul className="flex flex-wrap gap-2">
+          {contas.map(({ conta, vencimento }) => (
+            <li key={conta.id}>
+              <Link to="/dinheiro" className="flex items-center gap-2 rounded-full border-2 border-linha bg-menta py-1 pr-3 pl-1 text-sm font-semibold">
+                <Adesivo nome="cofrinho" tamanho={22} />
+                {conta.nome} · {vencimento.estado === 'hoje' ? t('dinheiro.venceHoje') : t('dinheiro.ainda')}
+                {conta.valor !== undefined && <span className="tabular-nums"> · {formatarValor(conta.valor, i18n.language)}</span>}
+              </Link>
+            </li>
+          ))}
           {avaliacoes.map((a) => (
             <li key={a.id} className="flex items-center gap-2 rounded-full border-2 border-linha bg-lavanda py-1 pr-3 pl-1 text-sm font-semibold">
               <Adesivo nome="livro" tamanho={22} />
@@ -312,6 +327,7 @@ export function Hoje() {
   const eventos = useEventos()
   const habitos = useHabitosAtivos()
   const comida = useAlimentacaoDeHoje(diaLocal(agora))
+  const contas = useContasAtivas()
   const { candidato } = useCandidatoAgora(agora)
   const hoje = diaLocal(agora)
   const dia = diaDoPlano(perfil.inicioPlano, hoje)
@@ -320,7 +336,7 @@ export function Hoje() {
   const diaAlcancado = visitaAnterior ? diaDoPlano(perfil.inicioPlano, visitaAnterior) : dia
   const podeContinuar = acolher && visitaAnterior && diaAlcancado < DURACAO_PLANO
 
-  if (!tarefas || !doses || !consultas || !eventos || !avaliacoes || !habitos || comida === undefined) return null
+  if (!tarefas || !doses || !consultas || !eventos || !avaliacoes || !habitos || comida === undefined || contas === undefined) return null
   const doDia = tarefasDoDia(tarefas, hoje)
   const grupos = agruparTarefas(tarefas, hoje)
   const remediosHoje = { feitos: doses.registros.filter((r) => r.status === 'tomei').length, total: doses.doses.length }
@@ -336,6 +352,9 @@ export function Hoje() {
     ? refeicoesAtivas(comida.config).map((r) => ({ refeicao: r, nome: nomeRefeicao(t, r), feita: !!comida.dia?.refeicoes[r.id] }))
     : []
   const comidaHoje = comida ? progressoDoDia(comida.config, comida.dia) : undefined
+  const contasHoje = (contas ?? [])
+    .map((conta) => ({ conta, vencimento: proximoVencimento(conta, hoje) }))
+    .filter((x): x is ContaDoDia => !!x.vencimento && (x.vencimento.estado === 'hoje' || x.vencimento.estado === 'atrasada'))
   const amanha = somarDias(hoje, 1)
   const preparos = habitos.habitos
     .filter((h) => temPreparo(h) && diaDoPreparo(h, habitos.registros.filter((r) => r.habitoId === h.id), agora) === amanha)
@@ -455,6 +474,7 @@ export function Hoje() {
         habitos={habitosHoje}
         preparos={preparos}
         refeicoes={refeicoesHoje}
+        contas={contasHoje}
       />
 
       {!perfil.planoEscondido && <CartaoPlano dia={dia} />}

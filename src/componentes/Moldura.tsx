@@ -17,6 +17,8 @@ import { textosFimFoco } from '../paginas/Foco'
 import { textosVespera } from './CartaoHabito'
 import { nomeRefeicao } from './Refeicoes'
 import type { Refeicao } from '../logica/alimentacao'
+import type { Conta, Vencimento } from '../logica/dinheiro'
+import { textosAvisoConta } from './EditorConta'
 import { ATALHO_CAPTURA, Captura } from './Captura'
 import { Micangas } from './Papelaria'
 
@@ -250,7 +252,7 @@ export function Moldura() {
 }
 
 function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [atalhosAbertos, setAtalhosAbertos] = useState(false)
   const online = useOnline()
   const local = useLocation()
@@ -280,12 +282,13 @@ function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
         [t('faculdade.avisoAcompanhadoTitulo', { hora }), t('faculdade.avisoAcompanhadoCorpo', { onde })] as [string, string],
       habito: (h: { titulo: string; se: string; entao: string }) => [h.titulo, t('academia.seEntao', { se: h.se, entao: h.entao })] as [string, string],
       vespera: (h: { titulo: string; base?: string[]; companhia?: string }) => textosVespera(t, h),
+      conta: (c: Conta, aviso: { tipo: 'antes' | 'dia'; vencimento: Vencimento }) => textosAvisoConta(t, i18n.language, c, aviso),
       refeicao: (r: Refeicao) => [t('alimentacao.avisoTitulo', { refeicao: nomeRefeicao(t, r) }), t('alimentacao.avisoCorpo')] as [string, string],
       fimFoco: textosFimFoco(t),
       discretoTitulo: t('avisos.discretoTitulo'),
       discretoCorpo: t('avisos.discretoCorpo'),
     }),
-    [t],
+    [t, i18n.language],
   )
   useLembretes(textosLembretes, { bemEstar: perfil.areasAtivas.includes('bemestar'), faculdade: perfil.areasAtivas.includes('faculdade') })
 

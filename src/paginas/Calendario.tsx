@@ -16,12 +16,23 @@ import { doDia, gradeDoMes, mesmoMes, ocorrencias, type Evento, type Ocorrencia 
 import type { Consulta } from '../logica/consultas'
 import type { Avaliacao } from '../logica/faculdade'
 import { useAvaliacoes } from '../dados/faculdade'
+import { useContasAtivas } from '../dados/dinheiro'
+import { formatarValor, vencimentosEntre } from '../logica/dinheiro'
 import { diaLocal, somarDias, type Dia } from '../logica/datas'
 import { diasDaSemana, momento } from '../logica/remedios'
 
 type Item = { chave: string; hora?: string; titulo: string; tom: string; adesivo: NomeAdesivo; legenda: string; abrir?: () => void }
 
-function useItensDoDia(lista: Ocorrencia[], consultas: Consulta[], tarefas: Tarefa[], avaliacoes: Avaliacao[], editar: (e: Evento) => void) {
+type VencimentoNoCalendario = ReturnType<typeof vencimentosEntre>[number]
+
+function useItensDoDia(
+  lista: Ocorrencia[],
+  consultas: Consulta[],
+  tarefas: Tarefa[],
+  avaliacoes: Avaliacao[],
+  vencimentos: VencimentoNoCalendario[],
+  editar: (e: Evento) => void,
+) {
   const { t, i18n } = useTranslation()
   const hhmm = (d: Date) => d.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })
   return (dia: Dia): Item[] => {
@@ -49,11 +60,21 @@ function useItensDoDia(lista: Ocorrencia[], consultas: Consulta[], tarefas: Tare
         adesivo: 'livro',
         legenda: t(`faculdade.tipos.${a.tipo}`),
       }))
+    // vencimentos de contas: o dia inteiro, sem hora
+    const deContas: Item[] = vencimentos
+      .filter((v) => v.dia === dia)
+      .map((v) => ({
+        chave: `${v.conta.id}|${v.dia}`,
+        titulo: v.conta.nome,
+        tom: 'bg-menta',
+        adesivo: 'cofrinho',
+        legenda: [t('calendario.conta'), v.conta.valor ? formatarValor(v.conta.valor, i18n.language) : '', v.paga ? t('calendario.contaPaga') : ''].filter(Boolean).join(' · '),
+      }))
     const deTarefas: Item[] = tarefas
       .filter((x) => x.prioridade === 'A' && x.dia === dia && !x.feitaEm)
       .map((x) => ({ chave: x.id, titulo: x.titulo, tom: 'bg-papel', adesivo: 'lista', legenda: t('calendario.tarefaA') }))
     const comHora = [...eventos, ...deConsultas, ...deAvaliacoes].sort((a, b) => (a.hora ?? '').localeCompare(b.hora ?? ''))
-    return [...comHora, ...deTarefas]
+    return [...deContas, ...comHora, ...deTarefas]
   }
 }
 
@@ -132,6 +153,7 @@ export function Calendario() {
   const eventos = useEventos()
   const consultas = useConsultas()
   const avaliacoes = useAvaliacoes()
+  const contas = useContasAtivas()
   const tarefas = useTarefas()
   const hoje = diaLocal()
   const [visao, setVisao] = useState<'semana' | 'mes'>('semana')
@@ -144,7 +166,8 @@ export function Calendario() {
   const de = visao === 'semana' ? semana[0] : grade[0][0]
   const ate = visao === 'semana' ? semana[6] : grade[5][6]
   const lista = useMemo(() => (eventos ? ocorrencias(eventos, de, ate) : []), [eventos, de, ate])
-  const itensDoDia = useItensDoDia(lista, consultas ?? [], tarefas ?? [], avaliacoes ?? [], (e) => setEditando({ evento: e, novo: false }))
+  const vencimentos = useMemo(() => (contas ? vencimentosEntre(contas, de, ate) : []), [contas, de, ate])
+  const itensDoDia = useItensDoDia(lista, consultas ?? [], tarefas ?? [], avaliacoes ?? [], vencimentos, (e) => setEditando({ evento: e, novo: false }))
   if (!eventos || !consultas || !tarefas) return null
 
   const mover = (n: number) => {

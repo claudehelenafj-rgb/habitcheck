@@ -108,7 +108,8 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | 11 | Um lugar para cada coisa e fotos de antes e depois (parte 2) | Pronta |
 | 12 | Alimentação: bolinhas das refeições e da água, horários e lembretes (parte 1) | Pronta |
 | 12 | Comidas fáceis, "não sei o que comer" e lista de compras (parte 2) | Pronta |
-| 13 | **Dinheiro**: contas a pagar, potes da semana, pausa antes de comprar, cofrinho | |
+| 13 | **Dinheiro**: contas a pagar (parte 1) | Pronta |
+| 13 | **Dinheiro**: potes da semana, pausa antes de comprar, cofrinho (parte 2) | |
 | 14 | Rituais e revisão semanal (com 5 min de dinheiro) | |
 | 15 | **Meus objetivos** com gráficos | |
 | 16 | Álbum de adesivos, recompensas e conferência final | |
@@ -210,6 +211,19 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 - Lista de compras: vários itens de uma vez (separados por vírgula), sem repetir; tocar marca comprado (vai para o fim,
   riscado); "tirar os comprados" com desfazer.
 - A moldura não tira mais o foco de um título que a própria tela já focou (links para uma seção).
+
+## Dinheiro (etapa 13)
+
+- Contas a pagar: nome, valor (opcional, lido do jeito que a pessoa escrever: "129,9", "1.500", "R$ 35,90"),
+  todo mês (dia 1 a 31; em mês mais curto, vence no último dia) ou uma vez só (com data), avisar 0 a 7 dias antes e
+  a ação escrita do lembrete ("pagar no app do banco e marcar aqui"; sem ação, "Pagar e marcar aqui no app.").
+- Uma conta só vence nos meses em que já existia no dia do vencimento (cadastrar no dia 15 não cobra o dia 10).
+  O mês passado não pago aparece como "venceu · ainda dá para pagar" (só ele, nunca uma fila), sem cor de alerta.
+- Lista da mais urgente para a mais longe, com "Paguei" (desfazer), as pagas do mês recolhidas (desmarcar) e um resumo
+  neutro: "Em outubro: 1 de 3 contas pagas · R$ 129,90 de R$ 2.129,90".
+- Lembrete a partir das 9h, no dia de avisar e no dia do vencimento, só se não foi paga (respeita os avisos discretos).
+- Vencimentos no calendário; na tela Hoje, a conta que vence hoje ou que venceu aparece no topo da linha do dia.
+  Só com a área ligada.
 
 ## Lógica com testes automáticos
 

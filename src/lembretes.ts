@@ -6,11 +6,13 @@ import { useEffect, useRef } from 'react'
 import { useBemEstar } from './dados/bemEstar'
 import { useUltimoCheckin } from './dados/checkins'
 import { useAlimentacaoDeHoje } from './dados/alimentacao'
+import { useContasAtivas } from './dados/dinheiro'
 import { useAvaliacoes, useConfigFaculdade } from './dados/faculdade'
 import { marcarAvisoFoco, useEstadoFoco } from './dados/foco'
 import { useHabitosAtivos } from './dados/habitos'
 import { avisoAcompanhado, lembreteDeHoje, type Avaliacao } from './logica/faculdade'
 import { deveLembrarRefeicao, type Refeicao } from './logica/alimentacao'
+import { avisoDeConta, type Conta, type Vencimento } from './logica/dinheiro'
 import { acabouFase, type EstadoFoco, type FaseFoco } from './logica/foco'
 import { deveAvisarVespera, deveLembrar, type Habito } from './logica/habitos'
 import { TELAS_AREAS } from './rotas'
@@ -69,6 +71,8 @@ export type TextosLembretes = {
   habito: (h: Habito) => [string, string]
   /** véspera do hábito: deixar a base pronta e combinar com a companhia: [título, texto] */
   vespera: (h: Habito) => [string, string]
+  /** conta a pagar, alguns dias antes ou no dia: [título, texto] */
+  conta: (c: Conta, aviso: { tipo: 'antes' | 'dia'; vencimento: Vencimento }) => [string, string]
   /** hora de comer: [título, texto] */
   refeicao: (r: Refeicao) => [string, string]
   /** fim de uma fase do modo foco: [título, texto] */
@@ -260,6 +264,31 @@ function useAvisosAlimentacao(agora: Date, textos: TextosLembretes, discretos: b
   }, [comida, agora, hoje, textos, discretos])
 }
 
+/** A partir desta hora, avisa das contas (alguns dias antes e no dia do vencimento). */
+const HORA_AVISO_CONTAS = 9
+
+/** Contas a pagar: uma vez no dia de avisar e uma vez no vencimento, só se não foi paga. Só com a área ligada. */
+function useAvisosContas(agora: Date, textos: TextosLembretes, discretos: boolean) {
+  const contas = useContasAtivas()
+  const emAndamento = useRef(new Set<string>())
+  useEffect(() => {
+    if (!contas || agora.getHours() < HORA_AVISO_CONTAS) return
+    const hoje = diaLocal(agora)
+    for (const c of contas) {
+      const aviso = avisoDeConta(c, hoje)
+      if (!aviso) continue
+      const id = `conta|${c.id}|${aviso.vencimento.mes}|${aviso.tipo}`
+      if (emAndamento.current.has(id)) continue
+      emAndamento.current.add(id)
+      ;(async () => {
+        if (await jaAvisouTransicao(id)) return
+        await registrarTransicao(id)
+        await mostrarAvisoSistema(...comDiscricao(textos, discretos, ...textos.conta(c, aviso)), id, '#/dinheiro')
+      })().finally(() => emAndamento.current.delete(id))
+    }
+  }, [contas, agora, textos, discretos])
+}
+
 /** Com a pessoa em outra tela do app, o fim da fase de foco também avisa (a cada 20 s). */
 function useAvisosFoco(agora: Date, textos: TextosLembretes, discretos: boolean) {
   const foco = useEstadoFoco()
@@ -284,6 +313,7 @@ export function useLembretes(textos: TextosLembretes, areas: AreasDosLembretes =
   useAvisosFoco(agora, textos, discretos)
   useAvisosHabitos(agora, textos, discretos)
   useAvisosAlimentacao(agora, textos, discretos)
+  useAvisosContas(agora, textos, discretos)
 
   useEffect(() => {
     if (!dados) return
