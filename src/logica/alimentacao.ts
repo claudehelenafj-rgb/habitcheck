@@ -123,3 +123,49 @@ export type Comida = {
 }
 
 export type ItemCompra = { id: string; nome: string; criadoEm: string; compradoEm?: string }
+
+const normalizar = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
+
+/**
+ * "Não sei o que comer": até `n` comidas fáceis que servem para a refeição (sem refeição marcada, serve para
+ * qualquer uma), em ordem alfabética; "outras ideias" passa para as próximas, dando a volta.
+ */
+export function sugerirComidas(comidas: Comida[], refeicao: IdRefeicao, rodada: number, n = 3): Comida[] {
+  const servem = comidas
+    .filter((c) => !c.refeicoes.length || c.refeicoes.includes(refeicao))
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }))
+  if (servem.length <= n) return servem
+  const inicio = (rodada * n) % servem.length
+  return Array.from({ length: n }, (_, i) => servem[(inicio + i) % servem.length])
+}
+
+/** A refeição mais perto de agora (a que está na hora, a próxima do dia, ou a primeira). */
+export function refeicaoMaisPerto(c: ConfigAlimentacao, agora: Date): IdRefeicao | undefined {
+  const ativas = refeicoesAtivas(c)
+  const minutos = agora.getHours() * 60 + agora.getMinutes()
+  const deHora = ativas.filter((r) => r.hora).map((r) => ({ r, m: Number(r.hora!.slice(0, 2)) * 60 + Number(r.hora!.slice(3)) }))
+  const naHora = deHora.find(({ m }) => minutos >= m && minutos < m + JANELA_REFEICAO_MIN)
+  const proxima = deHora.filter(({ m }) => m > minutos).sort((a, b) => a.m - b.m)[0]
+  return (naHora ?? proxima)?.r.id ?? ativas[0]?.id
+}
+
+/** Separa o que foi escrito ("pão, leite\nbanana") em itens, sem repetir o que já está para comprar. */
+export function novosItensDeCompra(texto: string | string[], compras: ItemCompra[]): string[] {
+  const partes = (Array.isArray(texto) ? texto : texto.split(/[,\n;]/)).map((x) => x.trim()).filter(Boolean)
+  const jaTem = new Set(compras.filter((i) => !i.compradoEm).map((i) => normalizar(i.nome)))
+  const novos: string[] = []
+  for (const p of partes) {
+    const chave = normalizar(p)
+    if (jaTem.has(chave)) continue
+    jaTem.add(chave)
+    novos.push(p)
+  }
+  return novos
+}
+
+/** Lista de compras: o que falta comprar primeiro (na ordem em que entrou), depois o que já foi comprado. */
+export function ordenarCompras(compras: ItemCompra[]): ItemCompra[] {
+  const falta = compras.filter((i) => !i.compradoEm).sort((a, b) => a.criadoEm.localeCompare(b.criadoEm))
+  const comprados = compras.filter((i) => i.compradoEm).sort((a, b) => b.compradoEm!.localeCompare(a.compradoEm!))
+  return [...falta, ...comprados]
+}

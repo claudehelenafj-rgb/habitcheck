@@ -7,10 +7,16 @@ import {
   deveLembrarRefeicao,
   diaVazio,
   estadoDiaAlimentacao,
+  novosItensDeCompra,
+  ordenarCompras,
   progressoDoDia,
+  refeicaoMaisPerto,
   refeicaoNaHora,
+  sugerirComidas,
   tocarCopo,
+  type Comida,
   type ConfigAlimentacao,
+  type ItemCompra,
 } from './alimentacao'
 import { escolherAgora, type Candidato } from './hoje'
 
@@ -90,5 +96,37 @@ describe('refeição no cartão "Agora"', () => {
     const remedio: Candidato = { tipo: 'remedio', id: 'r1', titulo: 'Remédio', horario: as('12:30') }
     const c = [...candidatosDeRefeicoes(padrao, undefined, as('12:40'), nome), remedio]
     expect(escolherAgora(c, as('12:40'))?.id).toBe('r1')
+  })
+})
+
+describe('comidas fáceis e lista de compras', () => {
+  const comida = (nome: string, refeicoes: Comida['refeicoes'] = []): Comida => ({ id: nome, nome, jeito: 'preparo', refeicoes, ingredientes: [], criadaEm: '' })
+  const lista = [comida('sopa pronta', ['jantar']), comida('iogurte com fruta', ['cafe', 'lanche']), comida('sanduíche'), comida('macarrão', ['almoco', 'jantar']), comida('ovo mexido', ['cafe', 'almoco', 'jantar'])]
+
+  it('sugere só o que serve para a refeição, em ordem; "outras ideias" dá a volta', () => {
+    expect(sugerirComidas(lista, 'cafe', 0).map((c) => c.nome)).toEqual(['iogurte com fruta', 'ovo mexido', 'sanduíche'])
+    expect(sugerirComidas(lista, 'jantar', 0).map((c) => c.nome)).toEqual(['macarrão', 'ovo mexido', 'sanduíche'])
+    expect(sugerirComidas(lista, 'jantar', 1).map((c) => c.nome)).toEqual(['sopa pronta', 'macarrão', 'ovo mexido'])
+    expect(sugerirComidas([], 'almoco', 0)).toEqual([])
+  })
+
+  it('refeição mais perto: a da hora, senão a próxima, senão a primeira', () => {
+    expect(refeicaoMaisPerto(padrao, as('12:45'))).toBe('almoco')
+    expect(refeicaoMaisPerto(padrao, as('14:00'))).toBe('lanche')
+    expect(refeicaoMaisPerto(padrao, as('23:00'))).toBe('cafe')
+  })
+
+  const item = (nome: string, compradoEm?: string, criadoEm = '2026-10-29T10:00:00Z'): ItemCompra => ({ id: nome, nome, criadoEm, compradoEm })
+
+  it('itens novos da lista: separa por vírgula ou linha, sem repetir o que já falta comprar', () => {
+    expect(novosItensDeCompra('pão, leite\nbanana; Leite', [item('Pão')])).toEqual(['leite', 'banana'])
+    // o que já foi comprado pode entrar de novo
+    expect(novosItensDeCompra(['pão'], [item('pão', '2026-10-28T10:00:00Z')])).toEqual(['pão'])
+    expect(novosItensDeCompra(' , ', [])).toEqual([])
+  })
+
+  it('ordem da lista: o que falta primeiro, depois o comprado mais recente', () => {
+    const l = [item('c', '2026-10-29T09:00:00Z'), item('a', undefined, '2026-10-29T11:00:00Z'), item('b', undefined, '2026-10-29T10:00:00Z'), item('d', '2026-10-29T12:00:00Z')]
+    expect(ordenarCompras(l).map((i) => i.nome)).toEqual(['b', 'a', 'd', 'c'])
   })
 })

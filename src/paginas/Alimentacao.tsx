@@ -1,11 +1,15 @@
 // Alimentação: regularidade, não restrição. Bolinhas das refeições e copos de água de hoje, a semana,
-// e os horários de cada refeição com lembrete para comer mesmo sem fome. Sem calorias, peso ou julgamento.
+// "não sei o que comer", comidas fáceis, lista de compras e os horários de cada refeição com lembrete para
+// comer mesmo sem fome. Sem calorias, peso ou julgamento.
 
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useLocation } from 'react-router'
 import { Adesivo } from '../componentes/Adesivo'
+import { ComidasFaceis, ListaDeCompras, NaoSeiOQueComer } from '../componentes/ComidasECompras'
 import { GradeSemanal, type Dia as DiaGrade } from '../componentes/GradeSemanal'
 import { BolinhasRefeicoes, CoposDeAgua, nomeRefeicao } from '../componentes/Refeicoes'
-import { mudarConfigAlimentacao, useConfigAlimentacao, useDiasAlimentacao } from '../dados/alimentacao'
+import { mudarConfigAlimentacao, useComidas, useCompras, useConfigAlimentacao, useDiasAlimentacao } from '../dados/alimentacao'
 import { useAgora } from '../dados/timer'
 import { estadoDiaAlimentacao, progressoDoDia, type ConfigAlimentacao, type IdRefeicao, type Refeicao } from '../logica/alimentacao'
 import { diaLocal } from '../logica/datas'
@@ -89,7 +93,20 @@ export function Alimentacao() {
   const semana = diasDaSemana(hoje)
   const config = useConfigAlimentacao()
   const dias = useDiasAlimentacao(semana)
-  if (!config || !dias) return null
+  const comidas = useComidas()
+  const compras = useCompras()
+  const { hash } = useLocation()
+  const pronto = !!(config && dias && comidas && compras)
+
+  // vindo do "Não sei o que comer" do cartão Agora: vai direto para as ideias
+  useEffect(() => {
+    if (!pronto || hash !== '#nao-sei') return
+    const secao = document.getElementById('nao-sei')
+    secao?.scrollIntoView({ block: 'start' })
+    secao?.querySelector<HTMLElement>('h2')?.focus({ preventScroll: true })
+  }, [pronto, hash])
+
+  if (!config || !dias || !comidas || !compras) return null
   const doDia = (dia: string) => dias.find((d) => d.dia === dia)
 
   const grade: DiaGrade[] = semana.map((dia) => {
@@ -128,6 +145,13 @@ export function Alimentacao() {
       </section>
 
       <GradeSemanal titulo={t('alimentacao.semana')} adesivo="prato" tom="bg-papel" dias={grade} textoMinimo={t('alimentacao.algumas')} />
+
+      <NaoSeiOQueComer config={config} comidas={comidas} />
+
+      <div className="grid items-start gap-6 lg:grid-cols-2">
+        <ComidasFaceis config={config} comidas={comidas} />
+        <ListaDeCompras compras={compras} />
+      </div>
 
       <Horarios config={config} />
     </div>

@@ -30,3 +30,28 @@ describe('alimentação no banco', () => {
     ])
   })
 })
+
+describe('comidas e compras no banco', () => {
+  it('lista de compras: sem repetir, marcar comprado, tirar comprados e desfazer', async () => {
+    const { acrescentarCompras, alternarComprado, tirarComprados, restaurarCompras } = await import('./alimentacao')
+    expect(await acrescentarCompras('pão, leite, banana')).toBe(3)
+    expect(await acrescentarCompras(['Leite', 'ovos'])).toBe(1)
+    const itens = await banco.compras.toArray()
+    const pao = itens.find((i) => i.nome === 'pão')!
+    await alternarComprado(pao.id)
+    expect((await banco.compras.get(pao.id))!.compradoEm).toBeTruthy()
+    const tirados = await tirarComprados()
+    expect(tirados.map((i) => i.nome)).toEqual(['pão'])
+    expect(await banco.compras.count()).toBe(3)
+    await restaurarCompras(tirados)
+    expect(await banco.compras.count()).toBe(4)
+  })
+
+  it('ideias de comidas só com a lista vazia', async () => {
+    const { criarComidasExemplo } = await import('./alimentacao')
+    const ex = [{ nome: 'sanduíche', jeito: 'preparo' as const, refeicoes: [], ingredientes: ['pão'] }]
+    await criarComidasExemplo(ex)
+    await criarComidasExemplo(ex)
+    expect(await banco.comidas.count()).toBe(1)
+  })
+})

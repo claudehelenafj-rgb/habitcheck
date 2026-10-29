@@ -300,6 +300,8 @@ function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
     let tentativas = 0
     let espera: ReturnType<typeof setTimeout>
     const focar = () => {
+      // a tela já pôs o foco num título dela (ex.: link para uma seção): fica lá
+      if (document.activeElement?.matches('main h1, main h2')) return
       const titulo = principal.current?.querySelector<HTMLElement>('h1')
       if (titulo) titulo.focus({ preventScroll: !!local.hash })
       else if (tentativas++ < 20) espera = setTimeout(focar, 50)

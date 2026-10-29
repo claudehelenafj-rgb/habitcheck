@@ -107,7 +107,7 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | 11 | Quarto: zonas, reset de 10 minutos e o reset como hábito (parte 1) | Pronta |
 | 11 | Um lugar para cada coisa e fotos de antes e depois (parte 2) | Pronta |
 | 12 | Alimentação: bolinhas das refeições e da água, horários e lembretes (parte 1) | Pronta |
-| 12 | Comidas fáceis, "não sei o que comer" e lista de compras (parte 2) | |
+| 12 | Comidas fáceis, "não sei o que comer" e lista de compras (parte 2) | Pronta |
 | 13 | **Dinheiro**: contas a pagar, potes da semana, pausa antes de comprar, cofrinho | |
 | 14 | Rituais e revisão semanal (com 5 min de dinheiro) | |
 | 15 | **Meus objetivos** com gráficos | |
@@ -201,10 +201,19 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 - Tela Hoje: a refeição entra no "Agora" na hora dela (até 1 hora depois, depois sai sem cobrança), antes das tarefas
   A e depois de remédio, transição e compromisso; "Comi" marca ali mesmo. Refeições na linha do dia, no bloco do
   horário, e no anel da Alimentação. Só com a área ligada.
+- "Não sei o que comer" (também pelo link do cartão "Agora", que abre direto nas ideias com o foco no título): a
+  refeição mais perto de agora já vem escolhida; até 3 ideias da lista de comidas fáceis que servem para ela, em ordem
+  alfabética, e "outras ideias" passa para as próximas.
+- Comidas fáceis: o que a pessoa já sabe preparar ou compra pronto, para quais refeições serve e os ingredientes.
+  "Começar com algumas ideias" (editáveis), editar, apagar com desfazer e "pôr os ingredientes na lista de compras"
+  (sem repetir o que já está nela).
+- Lista de compras: vários itens de uma vez (separados por vírgula), sem repetir; tocar marca comprado (vai para o fim,
+  riscado); "tirar os comprados" com desfazer.
+- A moldura não tira mais o foco de um título que a própria tela já focou (links para uma seção).
 
 ## Lógica com testes automáticos
 
 Horários de lembretes (adiar, repetir, silêncio), recorrências, vencimento de contas (ex.: dia 31 em mês de 30 dias),
 saldo dos potes e virada da semana, espera de 48 h da lista de desejos, progresso do cofrinho, planejamento reverso (prova → sessões; consulta → alarmes),
-avisos do semestre, fases do modo foco e "achei × levou", aviso do estudo acompanhado, estoque de remédio, "X de 7 dias", limite de 3 tarefas A, escolha do cartão "Agora",
+avisos do semestre, fases do modo foco e "achei × levou", aviso do estudo acompanhado, hábitos (semana, pendente hoje, véspera), reset do quarto, refeições e água, ideias de comida e lista de compras, estoque de remédio, "X de 7 dias", limite de 3 tarefas A, escolha do cartão "Agora",
 importação de .ics sem duplicar, e o contraste de todas as cores usadas.

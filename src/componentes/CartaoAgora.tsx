@@ -151,7 +151,7 @@ export function CartaoAgora({ candidato, compacto = false, semNada }: Props) {
             {t('alimentacao.comi')}
           </Botao>
           {!compacto && (
-            <Link to="/alimentacao" className="font-bold underline decoration-2 underline-offset-4">
+            <Link to="/alimentacao#nao-sei" className="font-bold underline decoration-2 underline-offset-4">
               {t('alimentacao.naoSeiOQue')} →
             </Link>
           )}
