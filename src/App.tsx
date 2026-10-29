@@ -16,6 +16,7 @@ import { BemEstar } from './paginas/BemEstar'
 import { GuiaDeEstilo } from './paginas/GuiaDeEstilo'
 import { GuiaIndigo } from './paginas/GuiaIndigo'
 import { NaoConsigoDormir } from './paginas/NaoConsigoDormir'
+import { ResumoImpressao } from './paginas/ResumoImpressao'
 import { useAplicarPreferencias } from './preferencias'
 import { TELA_AJUSTES, TODAS_AS_TELAS } from './rotas'
 
@@ -46,6 +47,7 @@ const roteador = createHashRouter([
   { path: '/estilo', element: <GuiaDeEstilo /> },
   { path: '/estilo/indigo', element: <GuiaIndigo /> },
   { path: '/nao-consigo-dormir', element: <NaoConsigoDormir /> },
+  { path: '/resumo-consulta', element: <ResumoImpressao /> },
 ])
 
 export function App() {

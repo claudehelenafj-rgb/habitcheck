@@ -101,3 +101,8 @@ export function useDosesDoDia(dia: Dia): { doses: DosePrevista[]; registros: Reg
   if (!remedios || !registros) return undefined
   return { doses: dosesDoDia(remedios, dia), registros }
 }
+
+/** Registros de dose a partir de um dia (para o resumo e os padrões). */
+export function useRegistrosDesde(dia: Dia): RegistroDose[] | undefined {
+  return useLiveQuery(() => banco.doses.where('dia').aboveOrEqual(dia).toArray(), [dia])
+}

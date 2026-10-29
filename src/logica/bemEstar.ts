@@ -17,7 +17,7 @@ export const FERRAMENTAS: Ferramenta[] = [
   { id: 'hobbies', adesivo: 'flor' },
   { id: 'sugestoes', adesivo: 'xicara' },
   { id: 'sono', adesivo: 'lua' },
-  { id: 'resumo', adesivo: 'prancheta', etapa: 'B7' },
+  { id: 'resumo', adesivo: 'prancheta' },
 ]
 
 /** Acima disso o app só comenta, com gentileza; não bloqueia. */

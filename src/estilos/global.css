@@ -336,3 +336,20 @@ h3 {
 :root[data-tela-noite='sim'] body {
   background: #120e16;
 }
+
+/* Resumo para a consulta: só o conteúdo na impressão, em fundo branco */
+@media print {
+  .nao-imprimir {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  .resumo-impressao {
+    padding: 0;
+  }
+  @page {
+    margin: 16mm;
+  }
+}

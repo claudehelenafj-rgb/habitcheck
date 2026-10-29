@@ -3,6 +3,9 @@
 
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useOutletContext } from 'react-router'
+import { ComoEstouRemedio } from '../componentes/ComoEstouRemedio'
+import type { ContextoMoldura } from '../componentes/Moldura'
 import { Adesivo } from '../componentes/Adesivo'
 import { Botao } from '../componentes/Botao'
 import { BotoesDose } from '../componentes/BotoesDose'
@@ -139,6 +142,7 @@ export function Remedios() {
   const remedios = useRemedios()
   const registros = useRegistros(semana)
   const [editando, setEditando] = useState<{ remedio: Remedio; novo: boolean } | null>(null)
+  const { perfil } = useOutletContext<ContextoMoldura>()
   if (!remedios || !registros) return null
   const doses = dosesDoDia(remedios, hoje)
 
@@ -205,6 +209,9 @@ export function Remedios() {
           </section>
         </>
       )}
+
+      {/* parte do Bem-estar: só com a aba ligada */}
+      {perfil.areasAtivas.includes('bemestar') && remedios.length > 0 && <ComoEstouRemedio remedios={remedios} />}
 
       <AvisosSistema />
 

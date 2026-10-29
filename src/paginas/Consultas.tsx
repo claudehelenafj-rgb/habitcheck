@@ -3,6 +3,8 @@
 
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link, useOutletContext } from 'react-router'
+import type { ContextoMoldura } from '../componentes/Moldura'
 import { Adesivo } from '../componentes/Adesivo'
 import { mostrarAviso } from '../componentes/Avisos'
 import { Botao } from '../componentes/Botao'
@@ -12,7 +14,7 @@ import { alternarPreparo, desfazerFeita, marcarComoFeita, novaConsulta, useConsu
 import { gerarIcs, nomeArquivoIcs, planoReverso, situacaoMarcar, type Consulta } from '../logica/consultas'
 import { diaLocal } from '../logica/datas'
 
-function CartaoMarcada({ c, editar }: { c: Consulta; editar: () => void }) {
+function CartaoMarcada({ c, editar, resumo }: { c: Consulta; editar: () => void; resumo: boolean }) {
   const { t, i18n } = useTranslation()
   const plano = planoReverso(c)
   const hhmm = (d: Date) => d.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })
@@ -102,6 +104,11 @@ function CartaoMarcada({ c, editar }: { c: Consulta; editar: () => void }) {
         <Botao variante="secundario" tom="bg-menta" onClick={jaFui}>
           ✓ {t('consultas.jaFui')}
         </Botao>
+        {resumo && (
+          <Link to="/resumo-consulta" className="inline-flex min-h-11 items-center rounded-full border-2 border-linha bg-papel px-5 font-bold">
+            {t('resumo.paraLevar')}
+          </Link>
+        )}
       </div>
       <p className="text-xs">{t('consultas.calendarioDica')}</p>
     </article>
@@ -145,6 +152,7 @@ export function Consultas() {
   const { t, i18n } = useTranslation()
   const consultas = useConsultas()
   const [editando, setEditando] = useState<{ consulta: Consulta; nova: boolean } | null>(null)
+  const { perfil } = useOutletContext<ContextoMoldura>()
   if (!consultas) return null
   const hoje = diaLocal()
   const marcadas = consultas
@@ -181,7 +189,9 @@ export function Consultas() {
               {t('consultas.marcadas')}
             </h2>
             {marcadas.length ? (
-              marcadas.map((c) => <CartaoMarcada key={c.id} c={c} editar={() => setEditando({ consulta: c, nova: false })} />)
+              marcadas.map((c) => (
+                <CartaoMarcada key={c.id} c={c} resumo={perfil.areasAtivas.includes('bemestar')} editar={() => setEditando({ consulta: c, nova: false })} />
+              ))
             ) : (
               <p>{t('consultas.vazioMarcadas')}</p>
             )}

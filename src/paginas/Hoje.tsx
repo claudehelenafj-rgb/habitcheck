@@ -16,6 +16,7 @@ import type { ContextoMoldura } from '../componentes/Moldura'
 import type { Tarefa } from '../dados/banco'
 import type { Consulta } from '../logica/consultas'
 import { momento } from '../logica/remedios'
+import { dentroDoEfeito, janelasDeHoje } from '../logica/remedioNoPlano'
 import { atualizarPerfil } from '../dados/perfil'
 import { useDosesDoDia } from '../dados/remedios'
 import { useTarefas } from '../dados/tarefas'
@@ -286,6 +287,16 @@ export function Hoje() {
           <h2 id="titulo-a" className="text-2xl font-semibold">
             {t('hoje.tarefasA')}
           </h2>
+          {janelasDeHoje(doses.doses).map((j) => (
+            <p key={j.nome} className="flex items-start gap-2 text-sm">
+              <Adesivo nome="pilula" tamanho={22} />
+              <span>
+                {dentroDoEfeito(j, agora)
+                  ? t('hoje.efeitoAgora', { nome: j.nome, ate: j.ate })
+                  : t('hoje.efeitoJanela', { nome: j.nome, de: j.de, ate: j.ate })}
+              </span>
+            </p>
+          ))}
           {tarefasA.length ? (
             <ul className="flex flex-col gap-3">
               {tarefasA.map((x) => (

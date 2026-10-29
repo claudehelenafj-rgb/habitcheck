@@ -38,6 +38,20 @@ Autismo" (lido). Plano aprovado em 28/10/2026.
   é uma tela escura fixa (8,4:1 de contraste), sem relógio e sem animação, com a regra dos ~20 minutos, respiração
   4–6 escrita e "tirar da cabeça" que guarda na caixa de entrada. Gráfico das 2 semanas com linha de 7 h; noites
   difíceis listradas (não só por cor). A rotina de desacelerar entra no ritual da noite na etapa 14.
+- Remédio no plano (B7): no editor, a janela opcional "quando você percebe mais efeito"; a tela Hoje sugere encaixar
+  as tarefas A nela (e avisa quando é agora). "Como estou com o remédio" (sono, apetite, ansiedade e humor: melhor,
+  igual, pior; mais nota) fica na tela Remédios, só com a aba Bem-estar ligada.
+- Padrões (B7): nas últimas semanas, até ontem; cada um precisa de pelo menos 3 dias de cada lado e diferença
+  de 1,5 ponto (ou 1 sintoma por dia): noites com menos de 6 h × tensão e energia do dia seguinte; dias com dose
+  sem tomar × sintomas anotados; dia da semana com mais tensão. Sempre com o aviso de que não é causa.
+- "Vale conversar com um profissional" (B7): nos últimos 14 dias, 8 ou mais dias pesados (ansiedade ou irritação
+  de 7 a 10 no check-in, ou ansiedade, tristeza, irritação ou choro de 7 a 10 nos sintomas), ou hobby parado por
+  "sem energia"/"perdi a vontade" junto com 5 ou mais dias de humor baixo (energia até 3, tristeza ou choro de 4
+  para cima). Cita médico, psiquiatra, psicólogo, UBS e CAPS; sem números de emergência (a pessoa pediu sem botão
+  de crise). "Agora não" esconde por 30 dias.
+- Resumo para a consulta (B7): 2, 4 ou 8 semanas; escolhe as partes; perguntas guardadas; página branca para
+  imprimir ou salvar em PDF pelo navegador, gerada no aparelho; tabelas largas rolam dentro delas no celular.
+  Consultas marcadas têm o atalho "Resumo para levar" quando a aba Bem-estar está ligada.
 - Ordem: **I1** tema Índigo (guia de estilo para aprovar, depois aplicar) e **B1–B8** Bem-estar,
   antes da etapa 9.
   - B1 base da aba (ativar nos Ajustes, cores, adesivos, ferramentas que se ligam uma ou duas por vez);

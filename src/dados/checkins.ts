@@ -42,3 +42,8 @@ export function useCheckinsDoDia(dia: Dia): Checkin[] | undefined {
 export function useUltimoCheckin(): Checkin | null | undefined {
   return useLiveQuery(async () => (await banco.checkins.orderBy('quando').last()) ?? null, [])
 }
+
+/** Check-ins a partir de um dia. undefined = carregando. */
+export function useCheckinsDesde(dia: Dia): Checkin[] | undefined {
+  return useLiveQuery(() => banco.checkins.where('dia').aboveOrEqual(dia).toArray(), [dia])
+}

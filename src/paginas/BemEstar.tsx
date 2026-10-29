@@ -5,7 +5,9 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Adesivo } from '../componentes/Adesivo'
 import { CheckinEmocoes } from '../componentes/CheckinEmocoes'
+import { CartaoAjuda } from '../componentes/CartaoAjuda'
 import { Hobbies } from '../componentes/Hobbies'
+import { ResumoConsulta } from '../componentes/ResumoConsulta'
 import { RegistroSintomas } from '../componentes/RegistroSintomas'
 import { Sono } from '../componentes/Sono'
 import { Sugestoes } from '../componentes/Sugestoes'
@@ -47,6 +49,8 @@ export function BemEstar() {
         </p>
       </header>
 
+      <CartaoAjuda />
+
       <section aria-labelledby="titulo-ligadas" className="flex flex-col gap-3">
         <h2 id="titulo-ligadas" className="text-2xl font-semibold">
           {t('bemEstar.ligadasTitulo')}
@@ -57,6 +61,7 @@ export function BemEstar() {
         {ligadas.some((f) => f.id === 'sugestoes') && <Sugestoes />}
         {ligadas.some((f) => f.id === 'hobbies') && <Hobbies />}
         {ligadas.some((f) => f.id === 'sono') && <Sono />}
+        {ligadas.some((f) => f.id === 'resumo') && <ResumoConsulta />}
         {ligadas.some((f) => f.etapa) && (
           <ul className="grid gap-3 sm:grid-cols-2">
             {ligadas

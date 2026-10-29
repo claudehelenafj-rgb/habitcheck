@@ -1,5 +1,5 @@
 // Cadastro de remédio, feito pela própria pessoa: nome, horários, dias, observação,
-// texto do lembrete, estoque (opcional) e repetições. Sem sugestão de dose.
+// texto do lembrete, estoque (opcional), repetições e o horário em que percebe mais efeito. Sem sugestão de dose.
 
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -43,6 +43,8 @@ export function EditorRemedio({ remedio, novo, fechar }: { remedio: Remedio; nov
   const ref = useRef<HTMLDialogElement>(null)
   const [r, setR] = useState<Remedio>(remedio)
   const [erro, setErro] = useState('')
+  const [efeitoDe, setEfeitoDe] = useState(remedio.efeito?.de ?? '')
+  const [efeitoAte, setEfeitoAte] = useState(remedio.efeito?.ate ?? '')
   const mudar = (m: Partial<Remedio>) => setR((x) => ({ ...x, ...m }))
 
   useEffect(() => {
@@ -58,7 +60,9 @@ export function EditorRemedio({ remedio, novo, fechar }: { remedio: Remedio; nov
     const horarios = [...new Set(r.horarios.filter(Boolean))].sort()
     if (!nome) return setErro(t('editorRemedio.nomeVazio'))
     if (!horarios.length) return setErro(t('editorRemedio.semHorario'))
-    await salvarRemedio({ ...r, nome, horarios, observacao: r.observacao?.trim() || undefined, acao: r.acao?.trim() || undefined })
+    // a janela de efeito só vale com começo e fim diferentes; incompleta, fica de fora
+    const efeito = efeitoDe && efeitoAte && efeitoDe !== efeitoAte ? { de: efeitoDe, ate: efeitoAte } : undefined
+    await salvarRemedio({ ...r, nome, horarios, observacao: r.observacao?.trim() || undefined, acao: r.acao?.trim() || undefined, efeito })
     ref.current?.close()
   }
 
@@ -175,6 +179,20 @@ export function EditorRemedio({ remedio, novo, fechar }: { remedio: Remedio; nov
           />
           <span className="text-sm">{t('editorRemedio.acaoDica', { padrao: textoDoLembrete({ ...r, acao: undefined, nome: r.nome || '…' }) })}</span>
         </label>
+
+        <Grupo titulo={t('editorRemedio.efeito')}>
+          <div className="flex flex-wrap items-end gap-3">
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-bold">{t('editorRemedio.efeitoDe')}</span>
+              <input id="efeito-de" type="time" value={efeitoDe} onChange={(e) => setEfeitoDe(e.target.value)} className={campo} />
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-bold">{t('editorRemedio.efeitoAte')}</span>
+              <input id="efeito-ate" type="time" value={efeitoAte} onChange={(e) => setEfeitoAte(e.target.value)} className={campo} />
+            </label>
+          </div>
+          <span className="text-sm">{t('editorRemedio.efeitoDica')}</span>
+        </Grupo>
 
         <Grupo titulo={t('editorRemedio.repetir')}>
           <div className="grid gap-3 sm:grid-cols-2">

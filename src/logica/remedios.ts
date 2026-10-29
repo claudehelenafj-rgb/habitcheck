@@ -18,6 +18,8 @@ export type Remedio = {
   repetir: { vezes: number; intervaloMin: number }
   ativo: boolean
   criadoEm: string
+  /** janela em que a pessoa percebe mais efeito (opcional), para encaixar as tarefas A */
+  efeito?: { de: string; ate: string }
 }
 
 export type StatusDose = 'tomei' | 'pulei' | 'adiada'

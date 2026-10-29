@@ -22,6 +22,10 @@ export type ConfigBemEstar = {
   /** ideias de atividade; ausente = lista inicial */
   atividades?: Atividade[]
   sono?: ConfigSono
+  /** a pessoa fechou o cartão "vale conversar com um profissional" neste dia */
+  ajudaDispensadaEm?: string
+  /** perguntas que a pessoa quer levar para a consulta */
+  perguntasConsulta?: string
   /** passos da rotina de desacelerar já feitos, e de qual noite */
   rotinaFeita?: { noite: string; ids: string[] }
 }
