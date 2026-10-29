@@ -2,11 +2,10 @@
 // estudo acompanhado), guardada na tabela configuracoes, chave "faculdade".
 
 import { useLiveQuery } from 'dexie-react-hooks'
-import type { Avaliacao, TipoAvaliacao } from '../logica/faculdade'
+import type { Avaliacao, Combinado, TipoAvaliacao } from '../logica/faculdade'
 import { banco, novoId, type Tarefa } from './banco'
 
-/** Estudo acompanhado (body doubling): onde, em que dias da semana e a que horas. */
-export type Combinado = { id: string; onde: string; diasSemana: number[]; hora: string }
+export type { Combinado }
 
 export type ConfigFaculdade = { materias: string[]; acompanhado: Combinado[] }
 const VAZIA: ConfigFaculdade = { materias: [], acompanhado: [] }

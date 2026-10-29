@@ -2,7 +2,7 @@
 // de trás para frente (o conteúdo da prova vira sessões curtas, com data, até a véspera).
 
 import type { Tarefa } from '../dados/banco'
-import { diasEntre, somarDias, type Dia } from './datas'
+import { diaLocal, diasEntre, somarDias, type Dia } from './datas'
 import { LIMITE_TAREFAS_A } from './tarefas'
 
 export type TipoAvaliacao = 'prova' | 'entrega'
@@ -129,4 +129,52 @@ export function sessoesParaTarefas(
       criadaEm: agoraIso,
     }
   })
+}
+
+// ---------- Estudo acompanhado (body doubling) ----------
+
+/** Um combinado de estudar junto: onde (chamada, biblioteca…), em que dias da semana (0 = domingo) e a que horas. */
+export type Combinado = { id: string; onde: string; diasSemana: number[]; hora: string }
+
+/** O aviso vem 10 min antes, para dar tempo de entrar na chamada ou sair para a biblioteca. */
+export const ANTECEDENCIA_ACOMPANHADO_MIN = 10
+
+function encontroEm(dia: Date, hora: string): Date {
+  const [h, m] = hora.split(':').map(Number)
+  const d = new Date(dia)
+  d.setHours(h, m, 0, 0)
+  return d
+}
+
+/**
+ * É hora de avisar deste combinado? Devolve o dia do encontro (o aviso é um por encontro) ou null.
+ * Vale até `janelaMin` depois da hora do aviso. Olha também o encontro de amanhã, para um combinado
+ * logo depois da meia-noite.
+ */
+export function avisoAcompanhado(c: Combinado, agora: Date, janelaMin = 30): Dia | null {
+  for (const desloca of [0, 1]) {
+    const dia = new Date(agora)
+    dia.setDate(dia.getDate() + desloca)
+    const encontro = encontroEm(dia, c.hora)
+    if (!c.diasSemana.includes(encontro.getDay())) continue
+    const passou = agora.getTime() - (encontro.getTime() - ANTECEDENCIA_ACOMPANHADO_MIN * 60_000)
+    if (passou >= 0 && passou <= janelaMin * 60_000) return diaLocal(encontro)
+  }
+  return null
+}
+
+/** O próximo encontro (de agora até daqui a uma semana), para mostrar no cartão. */
+export function proximoCombinado(lista: Combinado[], agora: Date): { combinado: Combinado; quando: Date } | null {
+  let melhor: { combinado: Combinado; quando: Date } | null = null
+  for (const c of lista) {
+    for (let i = 0; i <= 7; i++) {
+      const dia = new Date(agora)
+      dia.setDate(dia.getDate() + i)
+      const quando = encontroEm(dia, c.hora)
+      if (quando < agora || !c.diasSemana.includes(quando.getDay())) continue
+      if (!melhor || quando < melhor.quando) melhor = { combinado: c, quando }
+      break
+    }
+  }
+  return melhor
 }

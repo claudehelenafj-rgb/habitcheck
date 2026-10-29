@@ -14,6 +14,7 @@ import { Consultas } from './paginas/Consultas'
 import { Calendario } from './paginas/Calendario'
 import { BemEstar } from './paginas/BemEstar'
 import { Faculdade } from './paginas/Faculdade'
+import { Foco } from './paginas/Foco'
 import { GuiaDeEstilo } from './paginas/GuiaDeEstilo'
 import { GuiaIndigo } from './paginas/GuiaIndigo'
 import { NaoConsigoDormir } from './paginas/NaoConsigoDormir'
@@ -49,6 +50,7 @@ const roteador = createHashRouter([
   { path: '/estilo', element: <GuiaDeEstilo /> },
   { path: '/estilo/indigo', element: <GuiaIndigo /> },
   { path: '/nao-consigo-dormir', element: <NaoConsigoDormir /> },
+  { path: '/foco', element: <Foco /> },
   { path: '/resumo-consulta', element: <ResumoImpressao /> },
 ])
 

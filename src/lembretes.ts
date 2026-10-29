@@ -5,8 +5,11 @@
 import { useEffect, useRef } from 'react'
 import { useBemEstar } from './dados/bemEstar'
 import { useUltimoCheckin } from './dados/checkins'
-import { useAvaliacoes } from './dados/faculdade'
-import { lembreteDeHoje, type Avaliacao } from './logica/faculdade'
+import { useAvaliacoes, useConfigFaculdade } from './dados/faculdade'
+import { marcarAvisoFoco, useEstadoFoco } from './dados/foco'
+import { avisoAcompanhado, lembreteDeHoje, type Avaliacao } from './logica/faculdade'
+import { acabouFase, type EstadoFoco, type FaseFoco } from './logica/foco'
+import { tocarSino } from './telaFoco'
 import { jaAvisouTransicao, registrarTransicao, useConsultas } from './dados/consultas'
 import { registrarAviso, useConfigAvisos, useDosesDoDia } from './dados/remedios'
 import { planoReverso } from './logica/consultas'
@@ -26,13 +29,13 @@ export async function pedirPermissaoAvisos(): Promise<PermissaoAvisos> {
   return Notification.requestPermission()
 }
 
-async function mostrarAvisoSistema(titulo: string, corpo: string, tag: string) {
+export async function mostrarAvisoSistema(titulo: string, corpo: string, tag: string, destino = '#/hoje') {
   if (permissaoAvisos() !== 'granted') return
   try {
     const aviso = new Notification(titulo, { body: corpo, tag, icon: './icone-192.png', requireInteraction: true })
     aviso.onclick = () => {
       window.focus()
-      location.hash = '#/hoje'
+      location.hash = destino
       aviso.close()
     }
   } catch {
@@ -55,13 +58,19 @@ export type TextosLembretes = {
   checkinCorpo: string
   /** prova ou entrega daqui a 14 ou 3 dias: [título, texto] */
   avaliacao: (a: Avaliacao, dias: number) => [string, string]
+  /** estudo acompanhado daqui a 10 min: [título, texto] */
+  acompanhado: (onde: string, hora: string) => [string, string]
+  /** fim de uma fase do modo foco: [título, texto] */
+  fimFoco: (fase: FaseFoco) => [string, string]
   /** "avisos discretos": título e texto que trocam todos os outros */
   discretoTitulo: string
   discretoCorpo: string
 }
 
+type TextosDiscretos = Pick<TextosLembretes, 'discretoTitulo' | 'discretoCorpo'>
+
 /** Com avisos discretos, todo aviso vira "Caderninho · lembrete" (nada de remédio ou assunto na tela de bloqueio). */
-function comDiscricao(textos: TextosLembretes, discretos: boolean, titulo: string, corpo: string): [string, string] {
+function comDiscricao(textos: TextosDiscretos, discretos: boolean, titulo: string, corpo: string): [string, string] {
   return discretos ? [textos.discretoTitulo, textos.discretoCorpo] : [titulo, corpo]
 }
 
@@ -140,25 +149,61 @@ function useAvisosBemEstar(agora: Date, textos: TextosLembretes, ativo: boolean,
 /** A partir desta hora, avisa das provas e entregas de daqui a 14 e 3 dias (uma vez no dia). */
 const HORA_AVISO_FACULDADE = 9
 
+/**
+ * Faculdade: provas e entregas de daqui a 14 e 3 dias (uma vez no dia, a partir das 9h) e o estudo
+ * acompanhado, 10 min antes de cada combinado.
+ */
 function useAvisosFaculdade(agora: Date, textos: TextosLembretes, ativo: boolean, discretos: boolean) {
   const avaliacoes = useAvaliacoes()
+  const config = useConfigFaculdade()
   const emAndamento = useRef(new Set<string>())
   useEffect(() => {
-    if (!ativo || !avaliacoes || agora.getHours() < HORA_AVISO_FACULDADE) return
+    if (!ativo || !avaliacoes || !config) return
     const hoje = diaLocal(agora)
-    for (const a of avaliacoes) {
-      const dias = lembreteDeHoje(a, hoje)
-      if (!dias) continue
-      const id = `faculdade|${a.id}|${dias}`
+    const avisos: Array<[string, [string, string]]> = []
+    if (agora.getHours() >= HORA_AVISO_FACULDADE) {
+      for (const a of avaliacoes) {
+        const dias = lembreteDeHoje(a, hoje)
+        if (dias) avisos.push([`faculdade|${a.id}|${dias}`, textos.avaliacao(a, dias)])
+      }
+    }
+    for (const c of config.acompanhado) {
+      const dia = avisoAcompanhado(c, agora)
+      if (dia) avisos.push([`acompanhado|${c.id}|${dia}`, textos.acompanhado(c.onde, c.hora)])
+    }
+    for (const [id, [titulo, corpo]] of avisos) {
       if (emAndamento.current.has(id)) continue
       emAndamento.current.add(id)
       ;(async () => {
         if (await jaAvisouTransicao(id)) return
         await registrarTransicao(id)
-        await mostrarAvisoSistema(...comDiscricao(textos, discretos, ...textos.avaliacao(a, dias)), id)
+        await mostrarAvisoSistema(...comDiscricao(textos, discretos, titulo, corpo), id, '#/faculdade')
       })().finally(() => emAndamento.current.delete(id))
     }
-  }, [avaliacoes, agora, textos, ativo, discretos])
+  }, [avaliacoes, config, agora, textos, ativo, discretos])
+}
+
+/**
+ * Fim de uma fase do modo foco: sino (se ligado) e, com o app fora da vista, aviso do sistema.
+ * Um por fase, mesmo com a tela de foco e a moldura conferindo ao mesmo tempo.
+ */
+export async function avisarFimDeFase(e: EstadoFoco, textos: TextosDiscretos & Pick<TextosLembretes, 'fimFoco'>, discretos: boolean) {
+  if (!(await marcarAvisoFoco(e.faseInicio))) return
+  if (e.som) {
+    tocarSino()
+    navigator.vibrate?.([120, 80, 120])
+  }
+  if (document.visibilityState !== 'visible') {
+    await mostrarAvisoSistema(...comDiscricao(textos, discretos, ...textos.fimFoco(e.fase)), `foco|${e.faseInicio}`, '#/foco')
+  }
+}
+
+/** Com a pessoa em outra tela do app, o fim da fase de foco também avisa (a cada 20 s). */
+function useAvisosFoco(agora: Date, textos: TextosLembretes, discretos: boolean) {
+  const foco = useEstadoFoco()
+  useEffect(() => {
+    if (foco && foco.avisadoEm !== foco.faseInicio && acabouFase(foco, agora)) void avisarFimDeFase(foco, textos, discretos)
+  }, [foco, agora, textos, discretos])
 }
 
 export type AreasDosLembretes = { bemEstar?: boolean; faculdade?: boolean }
@@ -174,6 +219,7 @@ export function useLembretes(textos: TextosLembretes, areas: AreasDosLembretes =
   useAvisosTransicao(agora, textos, discretos)
   useAvisosBemEstar(agora, textos, !!areas.bemEstar, discretos)
   useAvisosFaculdade(agora, textos, !!areas.faculdade, discretos)
+  useAvisosFoco(agora, textos, discretos)
 
   useEffect(() => {
     if (!dados) return

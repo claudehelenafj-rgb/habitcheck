@@ -101,7 +101,7 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | B7 | **Bem-estar**: remédio no plano, padrões, "vale conversar com um profissional", resumo para a consulta | Pronta |
 | B8 | **Bem-estar**: PIN, avisos discretos, lembretes de check-in, baixar/apagar só o Bem-estar | Pronta |
 | 9 | Faculdade: semestre, provas e entregas, planejamento de trás para frente (parte 1) | Pronta |
-| 9 | Modo foco, saída do hiperfoco, estudo acompanhado (parte 2) | |
+| 9 | Modo foco, saída do hiperfoco, estudo acompanhado (parte 2) | Pronta |
 | 10 | Academia | |
 | 11 | Quarto | |
 | 12 | Alimentação | |
@@ -120,10 +120,25 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
   que vagas, junta assuntos na mesma sessão. Cada sessão vira uma tarefa da Faculdade no dia, com o primeiro passo
   ("Abrir o material de…") e o "pronto quando"; entra como A se couber no limite de 3 do dia, senão como B.
   Apagar a prova leva junto as sessões ainda não feitas (com desfazer).
+- "Estudar agora" no topo da Faculdade: as sessões de hoje (e as que ficaram para trás), cada uma com o modo foco.
+- Modo foco (`#/foco`, fora da moldura, sem menu): escolher a tarefa (ou "outra coisa"), primeiro passo físico,
+  "pronto quando", quanto acha que vai levar e bloco de 25, 35 ou 45 min. Opções lembradas: mexer o corpo 5 min
+  antes (com timer), abrir em tela cheia e sino suave. Durante: o passo grande, o timer visual, "tirar da cabeça"
+  (vai para a caixa de entrada) e a tela fica acesa. O tempo vem do início de cada fase: recarregar ou trocar de tela
+  não perde nada, e uma faixa nas outras telas mostra quanto falta.
+- Saída do hiperfoco: no fim do bloco, sino e (com o app escondido) aviso do sistema, uma vez por fase; atividade-ponte
+  (água, alongar, guardar o material), "onde parei", pausa de verdade (5 min; 10 depois de 45), "mais 5 min" no máximo
+  2 vezes seguidas, ou terminar. O tempo do alarme e das pausas não conta como foco.
+- Fim: "achei × levou" em barras (a de "levou" listrada), sem julgamento; com 3 sessões ou mais, o fator do
+  histórico (mediana das últimas 10) e, na preparação, a sugestão de quanto reservar. A sessão é guardada, os minutos
+  somam na tarefa, dá para concluir a tarefa ali, e o "onde parei" vira o próximo passo dela.
+- Entradas: "Estudar agora", cartão "Agora" da tela Hoje e cada cartão de tarefa (volta para a tela de onde saiu).
+- Estudo acompanhado: combinados com onde, dias da semana e hora, aviso 10 min antes (uma vez por encontro, só com a
+  Faculdade ligada, respeita os avisos discretos), o próximo encontro à vista e o aviso de que a pesquisa ainda é inicial.
 
 ## Lógica com testes automáticos
 
 Horários de lembretes (adiar, repetir, silêncio), recorrências, vencimento de contas (ex.: dia 31 em mês de 30 dias),
 saldo dos potes e virada da semana, espera de 48 h da lista de desejos, progresso do cofrinho, planejamento reverso (prova → sessões; consulta → alarmes),
-avisos do semestre, estoque de remédio, "X de 7 dias", limite de 3 tarefas A, escolha do cartão "Agora",
+avisos do semestre, fases do modo foco e "achei × levou", aviso do estudo acompanhado, estoque de remédio, "X de 7 dias", limite de 3 tarefas A, escolha do cartão "Agora",
 importação de .ics sem duplicar, e o contraste de todas as cores usadas.

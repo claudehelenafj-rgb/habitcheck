@@ -1,8 +1,10 @@
 // Faculdade: provas e entregas do semestre (cadastradas de uma vez), quanto falta para cada uma,
-// e o planejamento de trás para frente, que transforma o conteúdo da prova em sessões curtas com data.
+// o planejamento de trás para frente, que transforma o conteúdo da prova em sessões curtas com data,
+// as sessões de hoje com o modo foco e os combinados de estudo acompanhado.
 
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 import { Adesivo } from '../componentes/Adesivo'
 import { mostrarAviso } from '../componentes/Avisos'
 import { Botao } from '../componentes/Botao'
@@ -23,9 +25,19 @@ import {
 import { useTarefas } from '../dados/tarefas'
 import { novoId } from '../dados/banco'
 import { diaLocal, type Dia } from '../logica/datas'
-import { diasAte, planejarSessoes, proximas, sessoesParaTarefas, type Avaliacao, type TipoAvaliacao } from '../logica/faculdade'
+import {
+  diasAte,
+  planejarSessoes,
+  proximas,
+  proximoCombinado,
+  sessoesParaTarefas,
+  type Avaliacao,
+  type Combinado,
+  type TipoAvaliacao,
+} from '../logica/faculdade'
 
 const campo = 'min-h-11 rounded-full border-2 border-linha bg-papel px-4'
+const linkBotao = 'inline-flex min-h-11 items-center gap-2 rounded-full border-2 px-5 font-bold transition-transform hover:-translate-y-0.5'
 const DURACOES = [25, 35, 45]
 const dataDe = (dia: Dia) => new Date(`${dia}T12:00:00`)
 const linhaVazia = (materia = ''): NovaAvaliacao => ({ materia, tipo: 'prova', titulo: '', data: '' })
@@ -234,6 +246,161 @@ function CartaoAvaliacao({ a, sessoes }: { a: Avaliacao; sessoes: Tarefa[] }) {
   )
 }
 
+function EstudarAgora({ sessoes }: { sessoes: Tarefa[] }) {
+  const { t } = useTranslation()
+  const datas = useDatas()
+  const hoje = diaLocal()
+  return (
+    <section aria-labelledby="titulo-estudar" className="cartao flex flex-col gap-3 bg-papel p-5">
+      <h2 id="titulo-estudar" className="flex items-center gap-2 text-2xl font-semibold">
+        <Adesivo nome="estrela" tamanho={32} />
+        {t('faculdade.estudarAgora')}
+      </h2>
+      {sessoes.length ? (
+        <ul className="flex flex-col gap-2">
+          {sessoes.map((s) => (
+            <li key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border-2 border-linha/30 px-3 py-2">
+              <span className="min-w-0 flex-1 basis-48 font-semibold break-words">
+                {s.titulo}
+                {s.dia && s.dia < hoje && <span className="block text-sm font-normal">{t('faculdade.desde', { dia: datas.curta(s.dia) })}</span>}
+              </span>
+              <Link
+                to={`/foco?tarefa=${s.id}&volta=/faculdade`}
+                aria-label={t('faculdade.focoNaSessao', { titulo: s.titulo })}
+                className={`${linkBotao} border-botao bg-botao text-botao-texto`}
+              >
+                {t('foco.abrir')}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="min-w-0 flex-1 basis-60">{t('faculdade.semSessaoHoje')}</p>
+          <Link to="/foco?volta=/faculdade" className={`${linkBotao} border-linha bg-lavanda`}>
+            {t('faculdade.abrirFoco')}
+          </Link>
+        </div>
+      )}
+    </section>
+  )
+}
+
+/** Domingo a sábado, com os nomes do idioma (1/11/2026 é um domingo). */
+function useDiasDaSemana() {
+  const { i18n } = useTranslation()
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(2026, 10, 1 + i)
+    return {
+      curto: d.toLocaleDateString(i18n.language, { weekday: 'short' }).replace('.', ''),
+      longo: d.toLocaleDateString(i18n.language, { weekday: 'long' }),
+    }
+  })
+}
+
+function EstudoAcompanhado({ combinados }: { combinados: Combinado[] }) {
+  const { t, i18n } = useTranslation()
+  const semana = useDiasDaSemana()
+  const [onde, setOnde] = useState('')
+  const [dias, setDias] = useState<number[]>([])
+  const [hora, setHora] = useState('')
+  const proximo = proximoCombinado(combinados, new Date())
+  const pronto = onde.trim() && dias.length && hora
+
+  return (
+    <section aria-labelledby="titulo-acompanhado" className="cartao flex flex-col gap-4 bg-papel p-5">
+      <h2 id="titulo-acompanhado" className="text-2xl font-semibold">
+        {t('faculdade.acompanhadoTitulo')}
+      </h2>
+      <p className="max-w-prose">{t('faculdade.acompanhadoTexto')}</p>
+      {proximo && (
+        <p className="self-start rounded-full border-2 border-linha bg-lavanda px-4 py-1.5 font-semibold">
+          {t('faculdade.proximoEncontro', {
+            quando: proximo.quando
+              .toLocaleString(i18n.language, { weekday: 'short', hour: '2-digit', minute: '2-digit' })
+              .replace('.', ''),
+            onde: proximo.combinado.onde,
+          })}
+        </p>
+      )}
+      {combinados.length > 0 && (
+        <ul className="flex flex-col gap-2">
+          {combinados.map((c) => (
+            <li key={c.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl border-2 border-linha/30 px-3 py-2">
+              <span className="min-w-0 flex-1 basis-48">
+                <span className="font-semibold break-words">{c.onde}</span>
+                <span className="block text-sm">
+                  {[...c.diasSemana].sort().map((d) => semana[d].curto).join(', ')} · {c.hora}
+                </span>
+              </span>
+              <button
+                type="button"
+                onClick={async () => {
+                  await mudarConfigFaculdade((x) => ({ acompanhado: x.acompanhado.filter((y) => y.id !== c.id) }))
+                  mostrarAviso(t('faculdade.combinadoTirado'), () =>
+                    mudarConfigFaculdade((x) => ({ acompanhado: [...x.acompanhado.filter((y) => y.id !== c.id), c] })),
+                  )
+                }}
+                aria-label={t('faculdade.tirarCombinado', { onde: c.onde })}
+                className="grid h-9 w-9 place-items-center rounded-full border-2 border-linha bg-papel font-bold"
+              >
+                ×
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <form
+        className="flex flex-col gap-3 rounded-2xl border-2 border-linha/30 p-3"
+        onSubmit={async (e) => {
+          e.preventDefault()
+          if (!pronto) return
+          const novo: Combinado = { id: novoId(), onde: onde.trim(), diasSemana: [...dias].sort(), hora }
+          await mudarConfigFaculdade((x) => ({ acompanhado: [...x.acompanhado, novo] }))
+          setOnde('')
+          setDias([])
+          setHora('')
+        }}
+      >
+        <div className="flex flex-wrap items-end gap-3">
+          <label className="flex min-w-0 flex-1 basis-56 flex-col gap-1">
+            <span className="text-sm font-bold">{t('faculdade.onde')}</span>
+            <input value={onde} onChange={(e) => setOnde(e.target.value)} maxLength={60} placeholder={t('faculdade.ondeExemplo')} className={campo} />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-bold">{t('faculdade.horaEncontro')}</span>
+            <input type="time" value={hora} onChange={(e) => setHora(e.target.value)} className={campo} />
+          </label>
+        </div>
+        <fieldset>
+          <legend className="mb-1 text-sm font-bold">{t('faculdade.diasSemana')}</legend>
+          <div className="flex flex-wrap gap-1.5">
+            {semana.map((d, i) => (
+              <button
+                key={i}
+                type="button"
+                aria-pressed={dias.includes(i)}
+                aria-label={d.longo}
+                onClick={() => setDias((ds) => (ds.includes(i) ? ds.filter((x) => x !== i) : [...ds, i]))}
+                className={`min-h-11 min-w-12 rounded-full border-2 border-linha px-3 text-sm font-semibold capitalize ${dias.includes(i) ? 'bg-lavanda' : 'bg-papel'}`}
+              >
+                {dias.includes(i) && '✓ '}
+                {d.curto}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+        <div className="flex flex-wrap items-center gap-3">
+          <Botao type="submit" variante="contorno" disabled={!pronto}>
+            + {t('faculdade.combinar')}
+          </Botao>
+          <p className="text-sm">{t('faculdade.avisoAntes')}</p>
+        </div>
+      </form>
+    </section>
+  )
+}
+
 function ConfigurarSemestre({ materias, aberto }: { materias: string[]; aberto: boolean }) {
   const { t } = useTranslation()
   const [linhas, setLinhas] = useState<NovaAvaliacao[]>([linhaVazia(materias[0]), linhaVazia(materias[0])])
@@ -352,6 +519,10 @@ export function Faculdade() {
   const lista = proximas(avaliacoes, hoje)
   const passadas = avaliacoes.filter((a) => a.feitaEm || a.data < hoje).sort((a, b) => b.data.localeCompare(a.data))
   const sessoesDe = (id: string) => tarefas.filter((x) => x.avaliacaoId === id).sort((x, y) => (x.dia ?? '').localeCompare(y.dia ?? ''))
+  // sessões de estudo de hoje e as que ficaram para trás, ainda não feitas
+  const sessoesHoje = tarefas
+    .filter((x) => x.avaliacaoId && !x.feitaEm && x.dia && x.dia <= hoje)
+    .sort((x, y) => (x.dia ?? '').localeCompare(y.dia ?? ''))
 
   return (
     <div className="flex flex-col gap-8">
@@ -359,6 +530,8 @@ export function Faculdade() {
         <Adesivo nome="livro" tamanho={56} />
         {t('nav.faculdade')}
       </h1>
+
+      <EstudarAgora sessoes={sessoesHoje} />
 
       <section aria-labelledby="titulo-proximas" className="flex flex-col gap-3">
         <h2 id="titulo-proximas" className="text-2xl font-semibold">
@@ -376,6 +549,8 @@ export function Faculdade() {
       </section>
 
       <ConfigurarSemestre materias={config.materias} aberto={!avaliacoes.length} />
+
+      <EstudoAcompanhado combinados={config.acompanhado} />
 
       {passadas.length > 0 && (
         <details className="rounded-[1.5rem] border-2 border-linha/40 p-4">

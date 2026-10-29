@@ -3,6 +3,7 @@
 
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 import { alternarPasso, concluirTarefa, reabrirTarefa } from '../dados/tarefas'
 import { iniciarTimer, pararTimer, segundosRestantes, useAgora, useTimer } from '../dados/timer'
 import { AREAS } from '../design/areas'
@@ -188,6 +189,16 @@ export function CartaoAgora({ candidato, compacto = false, semNada }: Props) {
           <Botao grande onClick={feito} icone={colando ? <span className="colando"><Adesivo nome={area?.adesivo ?? 'estrela'} tamanho={30} /></span> : <span aria-hidden="true">✓</span>}>
             {passo ? t('hoje.feitoPasso') : t('hoje.concluir')}
           </Botao>
+          {!compacto && (
+            <Link
+              to={`/foco?tarefa=${tarefa.id}&volta=/hoje`}
+              aria-label={t('foco.abrirTarefa', { titulo: tarefa.titulo })}
+              className="inline-flex min-h-14 items-center gap-2 rounded-full border-2 border-linha bg-lavanda px-6 text-lg font-bold transition-transform hover:-translate-y-0.5"
+            >
+              <Adesivo nome="estrela" tamanho={26} />
+              {t('foco.abrir')}
+            </Link>
+          )}
         </div>
       </div>
       <div className="flex shrink-0 justify-center">

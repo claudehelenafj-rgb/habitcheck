@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Tarefa } from '../dados/banco'
-import { lembreteDeHoje, planejarSessoes, proximas, sessoesParaTarefas, type Avaliacao } from './faculdade'
+import { avisoAcompanhado, lembreteDeHoje, planejarSessoes, proximas, proximoCombinado, sessoesParaTarefas, type Avaliacao } from './faculdade'
 
 const aval = (id: string, data: string, extra: Partial<Avaliacao> = {}): Avaliacao => ({
   id,
@@ -109,5 +109,37 @@ describe('sessões viram tarefas', () => {
     const existentes = [1, 2].map((i) => ({ id: `e${i}`, titulo: 'x', prioridade: 'A', dia: '2026-10-29', passos: [], criadaEm: '' }) as Tarefa)
     const r = sessoesParaTarefas(a, [{ dia: '2026-10-29', conteudos: ['a'] }, { dia: '2026-10-29', conteudos: ['b'] }], 25, existentes, textos, id, '')
     expect(r.map((t) => t.prioridade)).toEqual(['A', 'B'])
+  })
+})
+
+describe('estudo acompanhado', () => {
+  // 29/10/2026 é uma quinta (4)
+  const c = { id: 'c1', onde: 'Biblioteca', diasSemana: [2, 4], hora: '14:00' }
+
+  it('avisa 10 min antes, nos dias marcados, até 30 min depois do aviso', () => {
+    expect(avisoAcompanhado(c, new Date('2026-10-29T13:49:00'))).toBeNull()
+    expect(avisoAcompanhado(c, new Date('2026-10-29T13:50:00'))).toBe('2026-10-29')
+    expect(avisoAcompanhado(c, new Date('2026-10-29T14:20:00'))).toBe('2026-10-29')
+    expect(avisoAcompanhado(c, new Date('2026-10-29T14:21:00'))).toBeNull()
+    // sexta não está marcada
+    expect(avisoAcompanhado(c, new Date('2026-10-30T13:55:00'))).toBeNull()
+  })
+
+  it('combinado logo depois da meia-noite avisa na véspera', () => {
+    const cedo = { ...c, diasSemana: [5], hora: '00:05' }
+    expect(avisoAcompanhado(cedo, new Date('2026-10-29T23:56:00'))).toBe('2026-10-30')
+    expect(avisoAcompanhado(cedo, new Date('2026-10-30T23:56:00'))).toBeNull()
+  })
+
+  it('próximo encontro da semana', () => {
+    const outro = { id: 'c2', onde: 'Chamada', diasSemana: [5], hora: '09:00' }
+    const p1 = proximoCombinado([c, outro], new Date('2026-10-29T10:00:00'))
+    expect(p1?.combinado.id).toBe('c1')
+    expect(p1?.quando.getHours()).toBe(14)
+    // depois das 14h de quinta, o próximo é a chamada de sexta
+    const p2 = proximoCombinado([c, outro], new Date('2026-10-29T15:00:00'))
+    expect(p2?.combinado.id).toBe('c2')
+    expect(p2?.quando.getDate()).toBe(30)
+    expect(proximoCombinado([{ ...c, diasSemana: [] }], new Date('2026-10-29T10:00:00'))).toBeNull()
   })
 })

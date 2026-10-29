@@ -11,7 +11,9 @@ import { Adesivo } from './Adesivo'
 import { AvisoAtualizacao } from './AvisoAtualizacao'
 import { Avisos } from './Avisos'
 import { BannerLembrete } from './BannerLembrete'
+import { BannerFoco } from './BannerFoco'
 import { useLembretes } from '../lembretes'
+import { textosFimFoco } from '../paginas/Foco'
 import { ATALHO_CAPTURA, Captura } from './Captura'
 import { Micangas } from './Papelaria'
 
@@ -271,6 +273,9 @@ function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
           t(dias === 14 ? 'faculdade.avisoTitulo14' : 'faculdade.avisoTitulo3', { tipo: t(`faculdade.tipos.${a.tipo}`) }),
           t(dias === 14 ? 'faculdade.avisoCorpo14' : 'faculdade.avisoCorpo3', { materia: a.materia, titulo: a.titulo }),
         ] as [string, string],
+      acompanhado: (onde: string, hora: string) =>
+        [t('faculdade.avisoAcompanhadoTitulo', { hora }), t('faculdade.avisoAcompanhadoCorpo', { onde })] as [string, string],
+      fimFoco: textosFimFoco(t),
       discretoTitulo: t('avisos.discretoTitulo'),
       discretoCorpo: t('avisos.discretoCorpo'),
     }),
@@ -320,6 +325,7 @@ function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
         )}
         <AvisoAtualizacao />
         <BannerLembrete />
+        <BannerFoco />
         <main id="conteudo" ref={principal} className="mx-auto w-full max-w-5xl flex-1 px-4 pt-6 pb-32 sm:px-8">
           <Outlet context={{ perfil, visitaAnterior } satisfies ContextoMoldura} />
         </main>

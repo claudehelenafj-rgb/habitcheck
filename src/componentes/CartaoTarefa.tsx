@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link, useLocation } from 'react-router'
 import type { Tarefa } from '../dados/banco'
 import { alternarPasso, concluirTarefa, reabrirTarefa, salvarTarefa } from '../dados/tarefas'
 import { AREAS } from '../design/areas'
@@ -36,6 +37,7 @@ export function CartaoTarefa({ tarefa, editar, podeTrazerParaHoje, deOutroDia }:
   const passo = proximoPasso(tarefa)
   const { feitos, total } = progressoPassos(tarefa)
   const adesivo = area?.adesivo ?? 'estrela'
+  const { pathname } = useLocation()
 
   async function concluir() {
     if (feita) {
@@ -117,11 +119,20 @@ export function CartaoTarefa({ tarefa, editar, podeTrazerParaHoje, deOutroDia }:
 
         {tarefa.recompensa && !feita && <p className="text-sm">{t('tarefas.depois', { recompensa: tarefa.recompensa })}</p>}
 
-        <div className="flex flex-wrap gap-2 pt-1">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1">
           {!feita && (
             <button type="button" onClick={editar} className="text-sm font-bold underline decoration-2 underline-offset-4">
               {t('tarefas.editar')}
             </button>
+          )}
+          {!feita && (
+            <Link
+              to={`/foco?tarefa=${tarefa.id}&volta=${pathname}`}
+              aria-label={t('foco.abrirTarefa', { titulo: tarefa.titulo })}
+              className="text-sm font-bold underline decoration-2 underline-offset-4"
+            >
+              {t('foco.abrir')}
+            </Link>
           )}
           {deOutroDia && (
             <>
