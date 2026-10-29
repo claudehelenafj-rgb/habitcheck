@@ -104,7 +104,8 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | 9 | Modo foco, saída do hiperfoco, estudo acompanhado (parte 2) | Pronta |
 | 10 | Academia: hábitos com plano se-então, versão mínima e "X de 7 dias" (parte 1) | Pronta |
 | 10 | Base de lançamento, treino acompanhado e movimento antes do foco (parte 2) | Pronta |
-| 11 | Quarto | |
+| 11 | Quarto: zonas, reset de 10 minutos e o reset como hábito (parte 1) | Pronta |
+| 11 | Um lugar para cada coisa e fotos de antes e depois (parte 2) | |
 | 12 | Alimentação | |
 | 13 | **Dinheiro**: contas a pagar, potes da semana, pausa antes de comprar, cofrinho | |
 | 14 | Rituais e revisão semanal (com 5 min de dinheiro) | |
@@ -162,6 +163,23 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
   Academia?" marca como feito um hábito da Academia que ainda falta hoje.
 - A grade da semana agora fala português e inglês; nos remédios, dia sem dose aparece como "não estava combinado"
   e o meio-termo como "só parte das doses".
+
+## Quarto (etapa 11)
+
+- Zonas prontas e editáveis (mesa, cama, chão, roupas), cada uma com a lista do que fazer nela. Criadas uma vez só
+  na primeira visita; apagadas, não voltam (apagar tem desfazer). Dá para renomear, acrescentar e tirar itens e criar zonas.
+- Reset de 5, 10 ou 15 minutos numa zona por vez. A zona sugerida é a que nunca teve reset (na ordem) ou a que está
+  há mais tempo sem; cada zona mostra "hoje", "há 3 dias" ou "ainda sem reset".
+- Tela do reset (`#/quarto/reset`, sem menu): timer grande para ver de longe, a lista da zona em botões grandes e a tela
+  acesa. O tempo vem do início (recarregar não perde nada). Quando o tempo acaba: sino (segue a escolha do modo foco),
+  aviso do sistema com o app escondido, "Pode parar aqui: já conta" e até 2 "mais 5 min" (5 minutos inteiros a partir
+  do clique). No fim: "Reset feito!", itens feitos e minutos; guardar ou sair sem guardar.
+- Semana de resets ("X de 7 dias"), sem cor de erro.
+- O reset como hábito (modelo: "Se eu chegar em casa à noite, então faço o reset de uma zona do quarto", mínima
+  "guardar 5 coisas", à noite). Guardar um reset marca como feito o hábito do quarto que ainda falta hoje. No cartão
+  "Agora", o hábito do quarto tem o link "Fazer o reset agora".
+- Hábitos agora servem a mais de uma área: anel de cada área na tela Hoje, aviso que abre a tela da área, arquivados
+  em cada tela, e "Virar hábito" na caixa de entrada pergunta a área quando há mais de uma ligada.
 
 ## Lógica com testes automáticos
 

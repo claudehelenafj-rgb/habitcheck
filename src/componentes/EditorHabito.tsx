@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apagarHabito, restaurarHabito, salvarHabito } from '../dados/habitos'
+import { AREAS, type IdArea } from '../design/areas'
 import { temPreparo, type Habito } from '../logica/habitos'
 import { BLOCOS } from '../logica/hoje'
 import { Adesivo } from './Adesivo'
@@ -53,7 +54,20 @@ function Escolha({
   )
 }
 
-export function EditorHabito({ habito, novo, fechar, aoSalvar }: { habito: Habito; novo: boolean; fechar: () => void; aoSalvar?: () => void }) {
+export function EditorHabito({
+  habito,
+  novo,
+  fechar,
+  aoSalvar,
+  areas = [],
+}: {
+  habito: Habito
+  novo: boolean
+  fechar: () => void
+  aoSalvar?: () => void
+  /** com mais de uma, a pessoa escolhe de que área é o hábito (ex.: na caixa de entrada) */
+  areas?: IdArea[]
+}) {
   const { t, i18n } = useTranslation()
   const ref = useRef<HTMLDialogElement>(null)
   const [h, setH] = useState<Habito>(habito)
@@ -124,6 +138,18 @@ export function EditorHabito({ habito, novo, fechar, aoSalvar }: { habito: Habit
           <Adesivo nome={h.adesivo} tamanho={36} />
           {novo ? t('editorHabito.tituloNovo') : t('editorHabito.tituloEditar')}
         </h2>
+
+        {areas.length > 1 && (
+          <Grupo titulo={t('editorHabito.area')}>
+            <div className="flex flex-wrap gap-2">
+              {areas.map((a) => (
+                <Escolha key={a} marcado={h.area === a} onClick={() => mudar({ area: a, adesivo: AREAS[a].adesivo })}>
+                  {t(`nav.${a}`)}
+                </Escolha>
+              ))}
+            </div>
+          </Grupo>
+        )}
 
         <label className="flex flex-col gap-1.5">
           <span className="font-bold">{t('editorHabito.nome')}</span>

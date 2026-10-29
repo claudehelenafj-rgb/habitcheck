@@ -4,11 +4,10 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Adesivo } from '../componentes/Adesivo'
-import { mostrarAviso } from '../componentes/Avisos'
 import { Botao } from '../componentes/Botao'
-import { CartaoHabito } from '../componentes/CartaoHabito'
+import { CartaoHabito, HabitosArquivados } from '../componentes/CartaoHabito'
 import { EditorHabito } from '../componentes/EditorHabito'
-import { apagarHabito, arquivarHabito, novoHabito, restaurarHabito, useHabitos, useRegistrosHabito } from '../dados/habitos'
+import { novoHabito, useHabitos, useRegistrosHabito } from '../dados/habitos'
 import { useAgora } from '../dados/timer'
 import { diaLocal } from '../logica/datas'
 import { MODELOS_ACADEMIA, type Habito } from '../logica/habitos'
@@ -91,33 +90,7 @@ export function Academia() {
         </section>
       )}
 
-      {arquivados.length > 0 && (
-        <details className="rounded-[1.5rem] border-2 border-linha/40 p-4">
-          <summary className="cursor-pointer font-bold">{t('academia.arquivados', { count: arquivados.length })}</summary>
-          <p className="mt-2 text-sm">{t('academia.arquivadosDica')}</p>
-          <ul className="mt-3 flex flex-col gap-2">
-            {arquivados.map((h) => (
-              <li key={h.id} className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-linha/30 px-3 py-2">
-                <Adesivo nome={h.adesivo} tamanho={28} />
-                <span className="min-w-0 flex-1 font-semibold break-words">{h.titulo}</span>
-                <Botao variante="secundario" tom="bg-pessego" className="min-h-10 px-4 text-sm" onClick={() => arquivarHabito(h.id, false)}>
-                  {t('academia.trazerDeVolta')}
-                </Botao>
-                <Botao
-                  variante="contorno"
-                  className="min-h-10 px-4 text-sm"
-                  onClick={async () => {
-                    const apagado = await apagarHabito(h.id)
-                    mostrarAviso(t('editorHabito.apagado', { titulo: h.titulo }), () => restaurarHabito(apagado))
-                  }}
-                >
-                  {t('editorHabito.apagar')}
-                </Botao>
-              </li>
-            ))}
-          </ul>
-        </details>
-      )}
+      <HabitosArquivados habitos={arquivados} />
 
       {editando && <EditorHabito habito={editando.habito} novo={editando.novo} fechar={() => setEditando(null)} />}
     </div>

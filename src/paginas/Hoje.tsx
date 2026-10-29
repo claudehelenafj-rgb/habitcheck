@@ -307,7 +307,13 @@ export function Hoje() {
   const grupos = agruparTarefas(tarefas, hoje)
   const remediosHoje = { feitos: doses.registros.filter((r) => r.status === 'tomei').length, total: doses.doses.length }
   const habitosHoje = habitosDoDia(habitos.habitos, habitos.registros, hoje)
-  const academiaHoje = { feitos: habitosHoje.filter((x) => x.registro).length, total: habitosHoje.length }
+  // hábitos de hoje contam no anel da área de cada um
+  const extrasHabitos: Partial<Record<string, { feitos: number; total: number }>> = {}
+  for (const { habito, registro } of habitosHoje) {
+    const area = habito.area ?? 'academia'
+    const atual = extrasHabitos[area] ?? { feitos: 0, total: 0 }
+    extrasHabitos[area] = { feitos: atual.feitos + (registro ? 1 : 0), total: atual.total + 1 }
+  }
   const amanha = somarDias(hoje, 1)
   const preparos = habitos.habitos
     .filter((h) => temPreparo(h) && diaDoPreparo(h, habitos.registros.filter((r) => r.habitoId === h.id), agora) === amanha)
@@ -404,7 +410,7 @@ export function Hoje() {
         </section>
 
         <div className="flex flex-col gap-4">
-          <ProgressoAreas tarefas={doDia} areasAtivas={perfil.areasAtivas} extras={{ remedios: remediosHoje, academia: academiaHoje }} />
+          <ProgressoAreas tarefas={doDia} areasAtivas={perfil.areasAtivas} extras={{ ...extrasHabitos, remedios: remediosHoje }} />
           <div className="cartao flex flex-col gap-2 bg-papel p-5">
             <Botao variante="secundario" tom="bg-azul-nevoa" className="self-start" onClick={() => abrirJanelinha()} icone={<Adesivo nome="balao" tamanho={24} />}>
               {t('hoje.janelinha')}

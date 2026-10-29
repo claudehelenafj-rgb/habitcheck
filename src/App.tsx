@@ -15,6 +15,8 @@ import { Calendario } from './paginas/Calendario'
 import { BemEstar } from './paginas/BemEstar'
 import { Faculdade } from './paginas/Faculdade'
 import { Academia } from './paginas/Academia'
+import { Quarto } from './paginas/Quarto'
+import { ResetQuarto } from './paginas/ResetQuarto'
 import { Foco } from './paginas/Foco'
 import { GuiaDeEstilo } from './paginas/GuiaDeEstilo'
 import { GuiaIndigo } from './paginas/GuiaIndigo'
@@ -39,6 +41,7 @@ const roteador = createHashRouter([
       { path: '/bem-estar', element: <BemEstar /> },
       { path: '/faculdade', element: <Faculdade /> },
       { path: '/academia', element: <Academia /> },
+      { path: '/quarto', element: <Quarto /> },
       ...TODAS_AS_TELAS.filter((tela) => tela.etapa).map((tela) => ({
         path: tela.caminho,
         element: <EmBreve tela={tela} />,
@@ -53,6 +56,7 @@ const roteador = createHashRouter([
   { path: '/estilo/indigo', element: <GuiaIndigo /> },
   { path: '/nao-consigo-dormir', element: <NaoConsigoDormir /> },
   { path: '/foco', element: <Foco /> },
+  { path: '/quarto/reset', element: <ResetQuarto /> },
   { path: '/resumo-consulta', element: <ResumoImpressao /> },
 ])
 

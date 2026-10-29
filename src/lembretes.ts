@@ -11,6 +11,7 @@ import { useHabitosAtivos } from './dados/habitos'
 import { avisoAcompanhado, lembreteDeHoje, type Avaliacao } from './logica/faculdade'
 import { acabouFase, type EstadoFoco, type FaseFoco } from './logica/foco'
 import { deveAvisarVespera, deveLembrar, type Habito } from './logica/habitos'
+import { TELAS_AREAS } from './rotas'
 import { tocarSino } from './telaFoco'
 import { jaAvisouTransicao, registrarTransicao, useConsultas } from './dados/consultas'
 import { registrarAviso, useConfigAvisos, useDosesDoDia } from './dados/remedios'
@@ -214,19 +215,21 @@ function useAvisosHabitos(agora: Date, textos: TextosLembretes, discretos: boole
   useEffect(() => {
     if (!dados) return
     const hoje = diaLocal(agora)
-    const avisos: Array<[string, [string, string]]> = []
+    const avisos: Array<[string, [string, string], string]> = []
     for (const h of dados.habitos) {
-      if (deveLembrar(h, dados.registros.filter((r) => r.habitoId === h.id), agora)) avisos.push([`habito|${h.id}|${hoje}`, textos.habito(h)])
+      // o clique no aviso abre a tela da área do hábito
+      const destino = `#${TELAS_AREAS.find((tela) => tela.area === h.area)?.caminho ?? '/hoje'}`
+      if (deveLembrar(h, dados.registros.filter((r) => r.habitoId === h.id), agora)) avisos.push([`habito|${h.id}|${hoje}`, textos.habito(h), destino])
       const amanha = deveAvisarVespera(h, agora)
-      if (amanha) avisos.push([`vespera|${h.id}|${amanha}`, textos.vespera(h)])
+      if (amanha) avisos.push([`vespera|${h.id}|${amanha}`, textos.vespera(h), destino])
     }
-    for (const [id, [titulo, corpo]] of avisos) {
+    for (const [id, [titulo, corpo], destino] of avisos) {
       if (emAndamento.current.has(id)) continue
       emAndamento.current.add(id)
       ;(async () => {
         if (await jaAvisouTransicao(id)) return
         await registrarTransicao(id)
-        await mostrarAvisoSistema(...comDiscricao(textos, discretos, titulo, corpo), id, '#/academia')
+        await mostrarAvisoSistema(...comDiscricao(textos, discretos, titulo, corpo), id, destino)
       })().finally(() => emAndamento.current.delete(id))
     }
   }, [dados, agora, textos, discretos])

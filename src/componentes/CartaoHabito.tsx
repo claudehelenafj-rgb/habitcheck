@@ -3,7 +3,7 @@
 
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
-import { arquivarHabito, marcarHabito, marcarPreparo } from '../dados/habitos'
+import { apagarHabito, arquivarHabito, marcarHabito, marcarPreparo, restaurarHabito } from '../dados/habitos'
 import { AREAS } from '../design/areas'
 import { diaLocal, somarDias, type Dia } from '../logica/datas'
 import {
@@ -201,5 +201,38 @@ export function CartaoHabito({ habito, registros, hoje, editar }: { habito: Habi
         </button>
       </div>
     </article>
+  )
+}
+
+/** Hábitos arquivados (recolhidos): trazer de volta ou apagar, com desfazer. */
+export function HabitosArquivados({ habitos }: { habitos: Habito[] }) {
+  const { t } = useTranslation()
+  if (!habitos.length) return null
+  return (
+    <details className="rounded-[1.5rem] border-2 border-linha/40 p-4">
+      <summary className="cursor-pointer font-bold">{t('academia.arquivados', { count: habitos.length })}</summary>
+      <p className="mt-2 text-sm">{t('academia.arquivadosDica')}</p>
+      <ul className="mt-3 flex flex-col gap-2">
+        {habitos.map((h) => (
+          <li key={h.id} className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-linha/30 px-3 py-2">
+            <Adesivo nome={h.adesivo} tamanho={28} />
+            <span className="min-w-0 flex-1 font-semibold break-words">{h.titulo}</span>
+            <Botao variante="secundario" tom={AREAS[h.area ?? 'academia'].claro} className="min-h-10 px-4 text-sm" onClick={() => arquivarHabito(h.id, false)}>
+              {t('academia.trazerDeVolta')}
+            </Botao>
+            <Botao
+              variante="contorno"
+              className="min-h-10 px-4 text-sm"
+              onClick={async () => {
+                const apagado = await apagarHabito(h.id)
+                mostrarAviso(t('editorHabito.apagado', { titulo: h.titulo }), () => restaurarHabito(apagado))
+              }}
+            >
+              {t('editorHabito.apagar')}
+            </Botao>
+          </li>
+        ))}
+      </ul>
+    </details>
   )
 }

@@ -150,6 +150,11 @@ export function CartaoAgora({ candidato, compacto = false, semNada }: Props) {
           <>
             <PlanoSeEntao habito={habito} className="text-lg" />
             <BotoesHabito habito={habito} hoje={diaLocal()} grande={!compacto} />
+            {habito.area === 'quarto' && !compacto && (
+              <Link to="/quarto" className="self-start font-bold underline decoration-2 underline-offset-4">
+                {t('quarto.fazerReset')} →
+              </Link>
+            )}
           </>
         )}
       </section>

@@ -9,6 +9,7 @@ import type { Checkin } from '../logica/checkin'
 import type { Avaliacao } from '../logica/faculdade'
 import type { SessaoFoco } from '../logica/foco'
 import type { Habito, RegistroHabito } from '../logica/habitos'
+import type { Foto, Lugar, ResetQuarto, Zona } from '../logica/quarto'
 import type { Hobby, VezHobby } from '../logica/hobbies'
 import type { NotaRemedio } from '../logica/remedioNoPlano'
 import type { RegistroSintoma } from '../logica/sintomas'
@@ -79,6 +80,10 @@ export class BancoCaderninho extends Dexie {
   sessoesFoco!: EntityTable<SessaoFoco, 'id'>
   habitos!: EntityTable<Habito, 'id'>
   registrosHabito!: EntityTable<RegistroHabito, 'id'>
+  zonas!: EntityTable<Zona, 'id'>
+  resets!: EntityTable<ResetQuarto, 'id'>
+  lugares!: EntityTable<Lugar, 'id'>
+  fotos!: EntityTable<Foto, 'id'>
 
   constructor(nome = 'caderninho') {
     super(nome)
@@ -137,6 +142,13 @@ export class BancoCaderninho extends Dexie {
     this.version(12).stores({
       habitos: 'id, area, arquivadoEm',
       registrosHabito: 'id, habitoId, dia',
+    })
+    // etapa 11: quarto (zonas, resets de 10 minutos, um lugar para cada coisa, fotos de antes e depois)
+    this.version(13).stores({
+      zonas: 'id, ordem',
+      resets: 'id, zonaId, dia',
+      lugares: 'id',
+      fotos: 'id',
     })
   }
 }

@@ -11,6 +11,8 @@ import { EditorEvento } from '../componentes/EditorEvento'
 import { EditorHabito } from '../componentes/EditorHabito'
 import type { ContextoMoldura } from '../componentes/Moldura'
 import { novoHabito } from '../dados/habitos'
+import { AREAS } from '../design/areas'
+import { AREAS_COM_HABITOS } from '../logica/habitos'
 import { EditorTarefa } from '../componentes/EditorTarefa'
 import { novoEvento } from '../dados/eventos'
 import type { ItemCaixa } from '../dados/banco'
@@ -35,7 +37,8 @@ export function Caixa() {
   const [virandoEvento, setVirandoEvento] = useState<ItemCaixa | null>(null)
   const [virandoHabito, setVirandoHabito] = useState<ItemCaixa | null>(null)
   const { perfil } = useOutletContext<ContextoMoldura>()
-  const comAcademia = perfil.areasAtivas.includes('academia')
+  // "Virar hábito" vale para as áreas com hábitos que estão ligadas
+  const areasHabito = AREAS_COM_HABITOS.filter((a) => perfil.areasAtivas.includes(a))
   if (!itens) return null
 
   async function resolver(item: ItemCaixa, destino: 'feito' | 'lixo') {
@@ -82,7 +85,7 @@ export function Caixa() {
                   <Botao variante="secundario" tom="bg-manteiga" className="min-h-10 px-4 text-sm" onClick={() => setVirandoEvento(item)}>
                     {t('caixa.virarEvento')}
                   </Botao>
-                  {comAcademia && (
+                  {areasHabito.length > 0 && (
                     <Botao variante="secundario" tom="bg-pessego" className="min-h-10 px-4 text-sm" onClick={() => setVirandoHabito(item)}>
                       {t('caixa.virarHabito')}
                     </Botao>
@@ -102,8 +105,9 @@ export function Caixa() {
 
       {virandoHabito && (
         <EditorHabito
-          habito={novoHabito({ area: 'academia', titulo: virandoHabito.texto })}
+          habito={novoHabito({ area: areasHabito[0], adesivo: AREAS[areasHabito[0]].adesivo, titulo: virandoHabito.texto })}
           novo
+          areas={areasHabito}
           fechar={() => setVirandoHabito(null)}
           aoSalvar={async () => {
             await resolverItem(virandoHabito.id, 'habito')

@@ -47,6 +47,9 @@ export type Preparo = { dia: Dia; itens: string[]; combinado?: boolean }
 /** Um registro por hábito e por dia. Sem registro = nada a mostrar (neutro). */
 export type RegistroHabito = { id: string; habitoId: string; dia: Dia; nivel: NivelHabito; quando: string }
 
+/** Áreas que têm hábitos (cada uma mostra os seus na própria tela). */
+export const AREAS_COM_HABITOS: IdArea[] = ['academia', 'quarto']
+
 export const idRegistro = (habitoId: string, dia: Dia) => `${habitoId}|${dia}`
 
 const diaDaSemanaDe = (dia: Dia) => new Date(`${dia}T12:00:00`).getDay()
@@ -150,6 +153,9 @@ export function deveAvisarVespera(h: Habito, agora: Date): Dia | null {
 
 /** Modelos prontos e editáveis (os textos vêm das traduções, pela chave). */
 export type ModeloHabito = { chave: string; meta: number; bloco?: Bloco; adesivo: NomeAdesivo; comBase?: boolean }
+/** Reset do quarto como hábito (textos em quarto.modeloHabito). */
+export const MODELO_HABITO_QUARTO: ModeloHabito = { chave: 'reset', meta: 3, bloco: 'noite', adesivo: 'vassoura' }
+
 export const MODELOS_ACADEMIA: ModeloHabito[] = [
   { chave: 'academia', meta: 3, bloco: 'tarde', adesivo: 'haltere', comBase: true },
   { chave: 'caminhada', meta: 3, bloco: 'tarde', adesivo: 'folha', comBase: true },

@@ -45,7 +45,7 @@ export const TELAS_AREAS: Tela[] = [
   { id: 'consultas', caminho: '/consultas', adesivo: 'prancheta', atalho: 'n', area: 'consultas' },
   { id: 'academia', caminho: '/academia', adesivo: 'haltere', atalho: 'a', area: 'academia' },
   { id: 'faculdade', caminho: '/faculdade', adesivo: 'livro', atalho: 'f', area: 'faculdade' },
-  { id: 'quarto', caminho: '/quarto', adesivo: 'vassoura', atalho: 'q', etapa: 11, area: 'quarto' },
+  { id: 'quarto', caminho: '/quarto', adesivo: 'vassoura', atalho: 'q', area: 'quarto' },
   { id: 'alimentacao', caminho: '/alimentacao', adesivo: 'prato', atalho: 'l', etapa: 12, area: 'alimentacao' },
   { id: 'dinheiro', caminho: '/dinheiro', adesivo: 'cofrinho', atalho: 'd', etapa: 13, area: 'dinheiro' },
   { id: 'bemestar', caminho: '/bem-estar', adesivo: 'cerebro', atalho: 'b', area: 'bemestar' },
