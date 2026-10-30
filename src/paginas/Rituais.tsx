@@ -240,7 +240,7 @@ export function Rituais() {
         <p className="max-w-prose text-lg">{t('rituais.intro')}</p>
       </Folha>
       <Letreiro frases={frases} />
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         {RITUAIS.map((r) => (
           <CartaoRitual
             key={r}

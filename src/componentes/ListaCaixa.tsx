@@ -42,8 +42,9 @@ export function ListaCaixa({ itens, areasHabito }: { itens: ItemCaixa[]; areasHa
     <>
       <ul className="flex flex-col gap-3">
         {itens.map((item) => (
-          <li key={item.id} className="cartao flex flex-col gap-3 bg-papel p-4 sm:flex-row sm:items-center">
-            <div className="min-w-0 flex-1">
+          // o texto ocupa pelo menos 14rem; sem esse espaço (tela estreita ou dentro do ritual), os botões descem
+          <li key={item.id} className="cartao flex flex-wrap items-center gap-3 bg-papel p-4">
+            <div className="min-w-0 flex-1 basis-56">
               <p className="text-lg font-semibold break-words">{item.texto}</p>
               <p className="text-xs text-tinta-suave">{tempoRelativo(item.criadoEm, i18n.language)}</p>
             </div>
