@@ -1,0 +1,119 @@
+// Aba Bem-estar: opcional, calma, com ferramentas que a pessoa liga uma ou duas de cada vez.
+// Cada ferramenta ligada aparece em "Ligadas agora". Com PIN, a aba toda fica atrás do pedido de PIN.
+
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Adesivo } from '../componentes/Adesivo'
+import { CheckinEmocoes } from '../componentes/CheckinEmocoes'
+import { CartaoAjuda } from '../componentes/CartaoAjuda'
+import { Hobbies } from '../componentes/Hobbies'
+import { PrivacidadeBemEstar } from '../componentes/PrivacidadeBemEstar'
+import { ProtecaoBemEstar } from '../componentes/ProtecaoBemEstar'
+import { ResumoConsulta } from '../componentes/ResumoConsulta'
+import { RegistroSintomas } from '../componentes/RegistroSintomas'
+import { Sono } from '../componentes/Sono'
+import { Sugestoes } from '../componentes/Sugestoes'
+import { alternar, useBemEstar } from '../dados/bemEstar'
+import { usePinConfigurado } from '../dados/pin'
+import { FERRAMENTAS } from '../logica/bemEstar'
+import { bloquear } from '../trava'
+
+export function BemEstar() {
+  return (
+    <ProtecaoBemEstar>
+      <ConteudoBemEstar />
+    </ProtecaoBemEstar>
+  )
+}
+
+function ConteudoBemEstar() {
+  const { t } = useTranslation()
+  const config = useBemEstar()
+  const temPin = usePinConfigurado()
+  const [muitas, setMuitas] = useState(false)
+  if (!config) return null
+  const ligadas = FERRAMENTAS.filter((f) => config.ferramentas.includes(f.id))
+
+  return (
+    <section className="flex flex-col gap-6">
+      <header className="cartao flex flex-col gap-3 bg-lilas p-6">
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 tabIndex={-1} className="flex flex-1 items-center gap-3 text-3xl font-semibold outline-none sm:text-5xl">
+            <Adesivo nome="cerebro" tamanho={60} />
+            {t('nav.bemestar')}
+          </h1>
+          {temPin && (
+            <button type="button" onClick={bloquear} className="min-h-11 rounded-full border-2 border-linha bg-papel px-4 font-bold">
+              {t('pin.bloquear')}
+            </button>
+          )}
+        </div>
+        <p className="max-w-prose text-lg">{t('bemEstar.intro')}</p>
+        <p className="max-w-prose text-sm">
+          {t('bemEstar.cuidado')} {t('bemEstar.privacidade')}
+        </p>
+      </header>
+
+      <CartaoAjuda />
+
+      <section aria-labelledby="titulo-ligadas" className="flex flex-col gap-3">
+        <h2 id="titulo-ligadas" className="text-2xl font-semibold">
+          {t('bemEstar.ligadasTitulo')}
+        </h2>
+        {ligadas.some((f) => f.id === 'checkin') && <CheckinEmocoes />}
+        {ligadas.some((f) => f.id === 'sintomas') && <RegistroSintomas />}
+        {/* logo depois do check-in e dos sintomas, que dão o contexto das ideias */}
+        {ligadas.some((f) => f.id === 'sugestoes') && <Sugestoes />}
+        {ligadas.some((f) => f.id === 'hobbies') && <Hobbies />}
+        {ligadas.some((f) => f.id === 'sono') && <Sono />}
+        {ligadas.some((f) => f.id === 'resumo') && <ResumoConsulta />}
+        {ligadas.length === 0 && <p className="cartao bg-papel p-4">{t('bemEstar.nenhumaLigada')}</p>}
+      </section>
+
+      <section aria-labelledby="titulo-ferramentas" className="cartao flex flex-col gap-4 bg-papel p-5">
+        <div>
+          <h2 id="titulo-ferramentas" className="text-2xl font-semibold">
+            {t('bemEstar.ferramentasTitulo')}
+          </h2>
+          <p className="text-sm">{t('bemEstar.ferramentasDica')}</p>
+        </div>
+        <ul className="grid gap-2 sm:grid-cols-2">
+          {FERRAMENTAS.map((f) => {
+            const ligada = config.ferramentas.includes(f.id)
+            return (
+              <li key={f.id}>
+                <button
+                  type="button"
+                  aria-pressed={ligada}
+                  onClick={async () => setMuitas(await alternar(f.id))}
+                  className={`flex h-full w-full flex-wrap items-center gap-3 rounded-2xl border-2 border-linha p-3 text-left ${
+                    ligada ? 'bg-lilas' : 'bg-papel'
+                  }`}
+                >
+                  <Adesivo nome={f.adesivo} tamanho={36} />
+                  <span className="min-w-0 flex-1 basis-40">
+                    <span className="block font-bold">{t(`bemEstar.ferramentas.${f.id}.nome`)}</span>
+                    <span className="block text-sm">{t(`bemEstar.ferramentas.${f.id}.desc`)}</span>
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className={`ml-auto shrink-0 rounded-full border-2 border-linha px-3 py-0.5 text-sm font-bold ${
+                      ligada ? 'bg-botao text-botao-texto' : ''
+                    }`}
+                  >
+                    {ligada ? `✓ ${t('ajustes.ligado')}` : t('ajustes.desligado')}
+                  </span>
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+        <p aria-live="polite" className="text-sm font-semibold">
+          {muitas && config.ferramentas.length > 2 ? t('bemEstar.muitas') : ''}
+        </p>
+      </section>
+
+      <PrivacidadeBemEstar />
+    </section>
+  )
+}

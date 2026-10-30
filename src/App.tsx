@@ -1,0 +1,79 @@
+import { createHashRouter, Navigate, RouterProvider } from 'react-router'
+import { DecoracaoNeutra, DefinicoesAdesivo } from './componentes/Adesivo'
+import { Moldura } from './componentes/Moldura'
+import { DefinicoesGiz } from './componentes/Papelaria'
+import { Ajustes } from './paginas/Ajustes'
+import { BoasVindas } from './paginas/BoasVindas'
+import { EmBreve } from './paginas/EmBreve'
+import { Hoje } from './paginas/Hoje'
+import { Caixa } from './paginas/Caixa'
+import { Tarefas } from './paginas/Tarefas'
+import { Mini } from './paginas/Mini'
+import { Remedios } from './paginas/Remedios'
+import { Consultas } from './paginas/Consultas'
+import { Calendario } from './paginas/Calendario'
+import { BemEstar } from './paginas/BemEstar'
+import { Faculdade } from './paginas/Faculdade'
+import { Academia } from './paginas/Academia'
+import { Quarto } from './paginas/Quarto'
+import { Alimentacao } from './paginas/Alimentacao'
+import { Dinheiro } from './paginas/Dinheiro'
+import { Ritual, Rituais } from './paginas/Rituais'
+import { ResetQuarto } from './paginas/ResetQuarto'
+import { Foco } from './paginas/Foco'
+import { GuiaDeEstilo } from './paginas/GuiaDeEstilo'
+import { GuiaIndigo } from './paginas/GuiaIndigo'
+import { NaoConsigoDormir } from './paginas/NaoConsigoDormir'
+import { ResumoImpressao } from './paginas/ResumoImpressao'
+import { useAplicarPreferencias } from './preferencias'
+import { TELA_AJUSTES, TODAS_AS_TELAS } from './rotas'
+
+// Rotas com "#" (ex.: #/hoje): funcionam em qualquer hospedagem estática e offline,
+// sem precisar configurar o servidor.
+const roteador = createHashRouter([
+  {
+    element: <Moldura />,
+    children: [
+      { index: true, element: <Navigate to="/hoje" replace /> },
+      { path: '/hoje', element: <Hoje /> },
+      { path: '/tarefas', element: <Tarefas /> },
+      { path: '/caixa', element: <Caixa /> },
+      { path: '/remedios', element: <Remedios /> },
+      { path: '/consultas', element: <Consultas /> },
+      { path: '/calendario', element: <Calendario /> },
+      { path: '/bem-estar', element: <BemEstar /> },
+      { path: '/faculdade', element: <Faculdade /> },
+      { path: '/academia', element: <Academia /> },
+      { path: '/quarto', element: <Quarto /> },
+      { path: '/alimentacao', element: <Alimentacao /> },
+      { path: '/dinheiro', element: <Dinheiro /> },
+      { path: '/rituais', element: <Rituais /> },
+      { path: '/rituais/:ritual', element: <Ritual /> },
+      ...TODAS_AS_TELAS.filter((tela) => tela.etapa).map((tela) => ({
+        path: tela.caminho,
+        element: <EmBreve tela={tela} />,
+      })),
+      { path: TELA_AJUSTES.caminho, element: <Ajustes /> },
+      { path: '*', element: <Navigate to="/hoje" replace /> },
+    ],
+  },
+  { path: '/boas-vindas', element: <BoasVindas /> },
+  { path: '/mini', element: <Mini /> },
+  { path: '/estilo', element: <GuiaDeEstilo /> },
+  { path: '/estilo/indigo', element: <GuiaIndigo /> },
+  { path: '/nao-consigo-dormir', element: <NaoConsigoDormir /> },
+  { path: '/foco', element: <Foco /> },
+  { path: '/quarto/reset', element: <ResetQuarto /> },
+  { path: '/resumo-consulta', element: <ResumoImpressao /> },
+])
+
+export function App() {
+  const prefs = useAplicarPreferencias()
+  return (
+    <DecoracaoNeutra value={prefs.decoracao === 'neutra'}>
+      <DefinicoesAdesivo />
+      <DefinicoesGiz />
+      <RouterProvider router={roteador} />
+    </DecoracaoNeutra>
+  )
+}

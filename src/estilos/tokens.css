@@ -1,0 +1,258 @@
+/*
+ * Tokens de cor do Caderninho.
+ * Este arquivo é a fonte única das cores: o teste src/design/contraste.test.ts
+ * lê os valores daqui e confere o contraste WCAG AA de cada combinação usada.
+ *
+ * Regras:
+ * - Tons claros = fundos de cartões e áreas, sempre com texto em "tinta".
+ * - Tons fortes = ícones, checks, barras e selos (nunca texto corrido).
+ * - "tinta" é chocolate no modo claro e creme no modo escuro.
+ */
+
+:root {
+  /* Paleta base (valores exatos pedidos) */
+  --creme: #fbf6ee;
+  --chocolate: #422f0e;
+
+  --lavanda: #f9d4f8;
+  --azul-nevoa: #aecfd0;
+  --pessego: #ffd094;
+  --manteiga: #f7e9b2;
+  --menta: #ddf2b8;
+  --morango-claro: #fcc4c0;
+
+  --rosa: #ea5e86;
+  --tomate: #ef6545;
+  --laranja: #f49625;
+  --verde-piscina: #037f71;
+  --verde-agua: #57b1a8;
+
+  /*
+   * Ajustes de contraste para selos com texto em chocolate.
+   * Rosa e tomate originais dão 3,9:1 e 4,0:1 (AA pede 4,5:1).
+   * Escurecer pioraria (o texto já é escuro), então clareamos levemente.
+   */
+  --rosa-selo: #ed7597;
+  --tomate-selo: #f1795d;
+
+  /* Papéis semânticos (modo claro) */
+  --fundo: var(--creme);
+  --papel: #fffdf8;
+  --tinta: var(--chocolate);
+  --tinta-suave: #67573b; /* só sobre fundo ou papel */
+  --linha: var(--chocolate);
+  /* texto suave e papel dentro de cartões em tom claro (iguais nos dois modos) */
+  --suave-claro: #67573b;
+  --papel-claro: #fffdf8;
+  --contorno-adesivo: #ffffff;
+
+  /* Tons claros usados como fundo de cartões */
+  --claro-lavanda: var(--lavanda);
+  --claro-azul-nevoa: var(--azul-nevoa);
+  --claro-pessego: var(--pessego);
+  --claro-manteiga: var(--manteiga);
+  --claro-menta: var(--menta);
+  --claro-morango: var(--morango-claro);
+
+  /* Tons fortes usados como ícone, check e barra */
+  --forte-rosa: var(--rosa);
+  --forte-tomate: var(--tomate);
+  --forte-laranja: var(--laranja);
+  --forte-piscina: var(--verde-piscina);
+  --forte-agua: var(--verde-agua);
+  --forte-chocolate: var(--chocolate);
+
+  /* Mapa de calor (sequencial, um só tom, validado contra o papel) */
+  --mapa-1: #ee9cbe;
+  --mapa-2: #e86a92;
+  --mapa-3: #c44770;
+  --mapa-4: #872c4e;
+
+  /* Botão principal */
+  --botao-fundo: var(--chocolate);
+  --botao-texto: var(--creme);
+
+  /* Tema (troca a "embalagem", não o sistema) */
+  --destaque: var(--chocolate);
+  --destaque-texto: var(--creme);
+  --destaque-claro: var(--manteiga);
+
+  color-scheme: light;
+}
+
+/* Temas trocáveis */
+:root[data-tema='cereja'] {
+  --destaque: var(--rosa-selo);
+  --destaque-texto: var(--chocolate);
+  --destaque-claro: var(--morango-claro);
+}
+:root[data-tema='piscina'] {
+  --destaque: var(--verde-piscina);
+  --destaque-texto: var(--creme);
+  --destaque-claro: var(--azul-nevoa);
+}
+:root[data-tema='pessego'] {
+  --destaque: var(--laranja);
+  --destaque-texto: var(--chocolate);
+  --destaque-claro: var(--pessego);
+}
+
+/*
+ * Modo escuro "cereja": fundo cereja escuro e texto creme.
+ * Os cartões das áreas continuam nos tons claros (um pouco apagados, 12% de cereja),
+ * como papéis coloridos sobre uma mesa escura; dentro deles o texto volta a ser chocolate
+ * (ver .cartao-claro em global.css). Assim cada área continua com sua cor.
+ */
+:root[data-modo='escuro'] {
+  --fundo: #521429;
+  --papel: #5e2437;
+  --tinta: var(--creme);
+  --tinta-suave: #d9c9c7;
+  --linha: #d9c9c7;
+
+  --claro-lavanda: #e5bddf;
+  --claro-azul-nevoa: #a3b9bc;
+  --claro-pessego: #eab987;
+  --claro-manteiga: #e3cfa2;
+  --claro-menta: #ccd7a7;
+  --claro-morango: #e8afae;
+
+  /* verde-piscina some sobre cereja (2,9:1); usamos uma versão mais clara */
+  --forte-piscina: #35978a;
+  --forte-chocolate: var(--creme);
+
+  --botao-fundo: var(--creme);
+  --botao-texto: #521429;
+
+  /* no escuro, "mais" fica mais claro */
+  --mapa-1: #c85e82;
+  --mapa-2: #de80a1;
+  --mapa-3: #f0a6c0;
+  --mapa-4: #fbd5e2;
+
+  --destaque-claro: #6e2e44;
+
+  color-scheme: dark;
+}
+:root[data-modo='escuro'][data-tema='creme'],
+:root[data-modo='escuro']:not([data-tema]) {
+  --destaque: var(--creme);
+  --destaque-texto: #521429;
+}
+
+/*
+ * Tema Índigo: troca fundo, texto, botões e destaques. As cores das áreas não mudam.
+ * Os seletores não usam :root para o guia de estilo poder mostrar uma prévia dentro de um quadro
+ * (<div data-tema="indigo">). Por isso cada bloco define todos os tokens, sem herdar dos outros.
+ * "chocolate" e "creme" viram índigo-noite e papel-gelo: tudo que era marrom fica azul-noite.
+ */
+[data-tema='indigo'] {
+  --papel-gelo: #f3f2ee;
+  --indigo-noite: #1e2350;
+  --indigo: #3949a3;
+  --azul-lavanda: #d9ddf5;
+  --mostarda: #e3a73b;
+
+  --chocolate: var(--indigo-noite);
+  --creme: var(--papel-gelo);
+
+  --fundo: var(--papel-gelo);
+  --papel: #fbfaf6;
+  --tinta: var(--indigo-noite);
+  --tinta-suave: #4a4f78;
+  --linha: var(--indigo-noite);
+  --suave-claro: #4a4f78;
+  --papel-claro: #fbfaf6;
+
+  --claro-lavanda: var(--lavanda);
+  --claro-azul-nevoa: var(--azul-nevoa);
+  --claro-pessego: var(--pessego);
+  --claro-manteiga: var(--manteiga);
+  --claro-menta: var(--menta);
+  --claro-morango: var(--morango-claro);
+
+  --forte-rosa: var(--rosa);
+  --forte-tomate: var(--tomate);
+  --forte-laranja: var(--laranja);
+  --forte-piscina: var(--verde-piscina);
+  --forte-agua: var(--verde-agua);
+  --forte-chocolate: var(--indigo-noite);
+
+  --mapa-1: #a9b1e6;
+  --mapa-2: #7683d0;
+  --mapa-3: #4a59b4;
+  --mapa-4: #2a347f;
+
+  --botao-fundo: var(--indigo);
+  --botao-texto: var(--papel-gelo);
+
+  --destaque: var(--indigo);
+  --destaque-texto: var(--papel-gelo);
+  --destaque-claro: var(--azul-lavanda);
+
+  --sombra-retro: 3px 3px 0 var(--linha);
+  color-scheme: light;
+}
+
+[data-modo='escuro'][data-tema='indigo'] {
+  --papel-gelo: #f3f2ee;
+  --indigo-noite: #1e2350;
+  --indigo: #3949a3;
+  --azul-lavanda: #d9ddf5;
+  --mostarda: #e3a73b;
+
+  --chocolate: var(--indigo-noite);
+  --creme: var(--papel-gelo);
+
+  --fundo: var(--indigo-noite);
+  --papel: #283066;
+  --tinta: var(--papel-gelo);
+  --tinta-suave: #c9cce0;
+  --linha: #c9cce0;
+  --suave-claro: #4a4f78;
+  --papel-claro: #fbfaf6;
+
+  /* tons claros 12% apagados com índigo-noite: papéis coloridos numa mesa azul-noite */
+  --claro-lavanda: #dfbfe4;
+  --claro-azul-nevoa: #9dbac1;
+  --claro-pessego: #e4bb8c;
+  --claro-manteiga: #ddd1a6;
+  --claro-menta: #c6d9ac;
+  --claro-morango: #e1b1b3;
+
+  --forte-rosa: var(--rosa);
+  --forte-tomate: var(--tomate);
+  --forte-laranja: var(--laranja);
+  /* verde-piscina some sobre índigo-noite (3,0:1); versão mais clara */
+  --forte-piscina: #3fa597;
+  --forte-agua: var(--verde-agua);
+  --forte-chocolate: var(--papel-gelo);
+
+  --mapa-1: #4553a8;
+  --mapa-2: #6d7cd0;
+  --mapa-3: #9ea9e6;
+  --mapa-4: #d3d8f7;
+
+  --botao-fundo: var(--papel-gelo);
+  --botao-texto: var(--indigo-noite);
+
+  --destaque: var(--azul-lavanda);
+  --destaque-texto: var(--indigo-noite);
+  --destaque-claro: #343b75;
+
+  --sombra-retro: 3px 3px 0 var(--linha);
+  color-scheme: dark;
+}
+
+/* Bem-estar: ameixa e lilás-névoa. No escuro, a ameixa clareia para continuar visível. */
+:root {
+  --ameixa: #8a5a9e;
+  --lilas-nevoa: #e6e0f5;
+  --forte-ameixa: var(--ameixa);
+  --claro-lilas: var(--lilas-nevoa);
+}
+:root[data-modo='escuro'],
+[data-modo='escuro'][data-tema='indigo'] {
+  --forte-ameixa: #c49bd6;
+  --claro-lilas: #cec9e1;
+}

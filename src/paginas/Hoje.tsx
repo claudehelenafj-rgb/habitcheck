@@ -1,0 +1,532 @@
+// Tela Hoje: o coração do app.
+// Folha do dia (data, saudação, relógio e quanto falta), cartão "Agora", até 3 tarefas A,
+// o dia em blocos, progresso por área, bônus recolhido e o plano de 2 semanas.
+
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Link, useOutletContext } from 'react-router'
+import { Adesivo, type NomeAdesivo } from '../componentes/Adesivo'
+import { Botao } from '../componentes/Botao'
+import { CartaoAgora } from '../componentes/CartaoAgora'
+import { CartaoPlano } from '../componentes/CartaoPlano'
+import { CartaoTarefa } from '../componentes/CartaoTarefa'
+import { EditorTarefa } from '../componentes/EditorTarefa'
+import { AnelProgresso } from '../componentes/Enfeites'
+import type { ContextoMoldura } from '../componentes/Moldura'
+import type { Tarefa } from '../dados/banco'
+import type { Consulta } from '../logica/consultas'
+import type { Avaliacao } from '../logica/faculdade'
+import { useAvaliacoes } from '../dados/faculdade'
+import { useHabitosAtivos } from '../dados/habitos'
+import { useAlimentacaoDeHoje } from '../dados/alimentacao'
+import { useContasAtivas } from '../dados/dinheiro'
+import { useConfigRituais, useRituaisDesde } from '../dados/rituais'
+import { diaDoRitual, eDiaDaRevisao, idRitual, type IdRitual } from '../logica/rituais'
+import { diasDaSemana } from '../logica/remedios'
+import { formatarValor, proximoVencimento, type Conta, type Vencimento } from '../logica/dinheiro'
+import { nomeRefeicao } from '../componentes/Refeicoes'
+import { blocoDaRefeicao, progressoDoDia, refeicoesAtivas, type Refeicao } from '../logica/alimentacao'
+import { diaDoPreparo, preparoCompleto, temPreparo, type Habito, type RegistroHabito } from '../logica/habitos'
+import { momento } from '../logica/remedios'
+import { dentroDoEfeito, janelasDeHoje } from '../logica/remedioNoPlano'
+import { atualizarPerfil } from '../dados/perfil'
+import { useDosesDoDia } from '../dados/remedios'
+import { useTarefas } from '../dados/tarefas'
+import { useCandidatoAgora } from '../dados/agora'
+import { useConsultas } from '../dados/consultas'
+import { useEventos } from '../dados/eventos'
+import { ocorrencias, type Ocorrencia } from '../logica/calendario'
+import { useAgora } from '../dados/timer'
+import { AREAS } from '../design/areas'
+import { abrirJanelinha } from '../janelinha'
+import { diaLocal, somarDias } from '../logica/datas'
+import {
+  BLOCOS,
+  blocoDoHorario,
+  blocoJaPassou,
+  fimDoBloco,
+  formatarDuracao,
+  habitosDoDia,
+  minutosAte,
+  tarefasDoDia,
+  type Bloco,
+} from '../logica/hoje'
+import { deveAcolher, diaDoPlano, DURACAO_PLANO, periodoDoDia, retomarPlano } from '../logica/planoInicio'
+import { agruparTarefas } from '../logica/tarefas'
+
+const ADESIVO_BLOCO: Record<Bloco, NomeAdesivo> = { manha: 'sol', tarde: 'flor', noite: 'lua' }
+
+function FolhaDoDia({ agora, nome }: { agora: Date; nome?: string }) {
+  const { t, i18n } = useTranslation()
+  const saudacao = t(`saudacao.${periodoDoDia(agora.getHours())}`)
+  const bloco = blocoDoHorario(agora)
+  const semana = agora.toLocaleDateString(i18n.language, { weekday: 'long' })
+  const mes = agora.toLocaleDateString(i18n.language, { month: 'long' })
+  const hora = agora.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })
+  return (
+    <header className="relative pt-3">
+      <div aria-hidden="true" className="estampa estampa-atual absolute inset-x-0 top-0 h-12 rounded-t-[1.75rem] bg-destaque-claro" />
+      <div className="folha-destacavel relative flex flex-col gap-3 rounded-b-[1.75rem] border-x-2 border-b-2 border-linha bg-papel px-5 pb-5 shadow-[3px_3px_0_var(--linha)] sm:px-7">
+        {/* linha de cima: data e relógio; linha de baixo: saudação sozinha (nome longo nunca encosta em nada) */}
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+          <div className="flex items-center gap-3">
+            <span className="font-titulo text-6xl leading-none font-semibold tabular-nums">{agora.getDate()}</span>
+            <span className="flex flex-col">
+              <span className="rotulo">{semana}</span>
+              <span className="font-destaque text-2xl italic">{mes}</span>
+            </span>
+          </div>
+          <div className="flex flex-col items-start sm:items-end">
+            <span className="font-titulo text-4xl font-semibold tabular-nums">{hora}</span>
+            <span className="flex items-center gap-1.5 text-sm font-semibold">
+              <Adesivo nome={ADESIVO_BLOCO[bloco]} tamanho={20} />
+              {t('hoje.blocoAcaba', { bloco: t(`hoje.blocos.${bloco}`), tempo: formatarDuracao(minutosAte(agora, fimDoBloco(agora))) })}
+            </span>
+          </div>
+        </div>
+        <h1 tabIndex={-1} className="text-3xl font-semibold break-words outline-none sm:text-4xl">
+          {nome ? t('saudacao.comNome', { saudacao, nome }) : t('saudacao.semNome', { saudacao })}
+        </h1>
+      </div>
+    </header>
+  )
+}
+
+type HabitoDoDia = { habito: Habito; registro?: RegistroHabito }
+type RefeicaoDoDia = { refeicao: Refeicao; nome: string; feita: boolean }
+/** conta que vence hoje ou que venceu e ainda não foi marcada */
+type ContaDoDia = { conta: Conta; vencimento: Vencimento }
+/** base de lançamento para amanhã, lembrada no bloco da noite */
+type PreparoDaNoite = { habito: Habito; completo: boolean }
+
+function LinhaDoDia({
+  tarefas,
+  agora,
+  consultas,
+  eventos,
+  avaliacoes,
+  habitos,
+  preparos,
+  refeicoes,
+  contas,
+  rituaisFeitos,
+  blocoDaRevisao,
+}: {
+  tarefas: Tarefa[]
+  agora: Date
+  consultas: Consulta[]
+  eventos: Ocorrencia[]
+  avaliacoes: Avaliacao[]
+  habitos: HabitoDoDia[]
+  preparos: PreparoDaNoite[]
+  refeicoes: RefeicaoDoDia[]
+  contas: ContaDoDia[]
+  /** ritual da manhã e da noite (de hoje) e revisão (da semana) já feitos */
+  rituaisFeitos: Record<IdRitual, boolean>
+  /** dia da revisão semanal: em que bloco ela aparece */
+  blocoDaRevisao?: Bloco
+}) {
+  const { t, i18n } = useTranslation()
+  const atual = blocoDoHorario(agora)
+  const semBloco = tarefas.filter((x) => !x.bloco)
+  const habitosSemBloco = habitos.filter((x) => !x.habito.bloco)
+  const diaTodo = eventos.filter((o) => o.evento.diaInteiro)
+  return (
+    <section aria-labelledby="titulo-linha" className="flex flex-col gap-3">
+      <h2 id="titulo-linha" className="text-2xl font-semibold">
+        {t('hoje.linhaDia')}
+      </h2>
+      {(diaTodo.length > 0 || avaliacoes.length > 0 || contas.length > 0) && (
+        <ul className="flex flex-wrap gap-2">
+          {contas.map(({ conta, vencimento }) => (
+            <li key={conta.id}>
+              <Link to="/dinheiro" className="flex items-center gap-2 rounded-full border-2 border-linha bg-menta py-1 pr-3 pl-1 text-sm font-semibold">
+                <Adesivo nome="cofrinho" tamanho={22} />
+                {conta.nome} · {vencimento.estado === 'hoje' ? t('dinheiro.venceHoje') : t('dinheiro.ainda')}
+                {conta.valor !== undefined && <span className="tabular-nums"> · {formatarValor(conta.valor, i18n.language)}</span>}
+              </Link>
+            </li>
+          ))}
+          {avaliacoes.map((a) => (
+            <li key={a.id} className="flex items-center gap-2 rounded-full border-2 border-linha bg-lavanda py-1 pr-3 pl-1 text-sm font-semibold">
+              <Adesivo nome="livro" tamanho={22} />
+              {t(`faculdade.tipos.${a.tipo}`)} · {a.materia}: {a.titulo}
+              {a.hora && <span className="tabular-nums"> · {a.hora}</span>}
+            </li>
+          ))}
+          {diaTodo.map((o) => (
+            <li key={o.evento.id} className="flex items-center gap-2 rounded-full border-2 border-linha bg-manteiga py-1 pr-3 pl-1 text-sm font-semibold">
+              <Adesivo nome="calendario" tamanho={22} />
+              {o.evento.titulo} · {t('calendario.diaInteiro')}
+            </li>
+          ))}
+        </ul>
+      )}
+      <ol className="grid gap-3 md:grid-cols-3">
+        {BLOCOS.map((bloco) => {
+          const doBloco = tarefas.filter((x) => x.bloco === bloco)
+          const consultasDoBloco = consultas.filter((c) => c.hora && blocoDoHorario(momento(c.data!, c.hora)) === bloco)
+          const eventosDoBloco = eventos.filter((o) => !o.evento.diaInteiro && blocoDoHorario(o.inicio) === bloco)
+          const habitosDoBloco = habitos.filter((x) => x.habito.bloco === bloco)
+          const preparosDoBloco = bloco === 'noite' ? preparos : []
+          const refeicoesDoBloco = refeicoes.filter((x) => blocoDaRefeicao(x.refeicao) === bloco)
+          const passou = blocoJaPassou(bloco, atual)
+          const eAgora = bloco === atual
+          return (
+            <li
+              key={bloco}
+              aria-current={eAgora ? 'time' : undefined}
+              className={`relative flex flex-col gap-2 rounded-[1.5rem] border-2 p-4 ${
+                eAgora ? 'border-linha bg-papel shadow-[3px_3px_0_var(--linha)]' : passou ? 'border-dashed border-linha/50' : 'border-linha/40 bg-papel'
+              }`}
+            >
+              <p className="flex items-center gap-2 font-bold">
+                <Adesivo nome={ADESIVO_BLOCO[bloco]} tamanho={26} />
+                {t(`hoje.blocos.${bloco}`)}
+                {(eAgora || passou) && (
+                  <span className="ml-auto rounded-full border-2 border-linha/50 px-2 text-xs">{eAgora ? t('hoje.agoraBloco') : t('hoje.passou')}</span>
+                )}
+              </p>
+              {(bloco === 'manha' || bloco === 'noite') && (
+                <Link
+                  to={`/rituais/${bloco}`}
+                  className="flex items-center gap-2 rounded-full border-2 border-dashed border-linha bg-papel py-1 pr-3 pl-1 text-sm font-semibold"
+                >
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 border-linha bg-papel text-xs" aria-hidden="true">
+                    {rituaisFeitos[bloco] ? '✓' : ''}
+                  </span>
+                  {t(`rituais.${bloco}`)} · {t('rituais.cincoMin')}
+                  {rituaisFeitos[bloco] && <span className="so-leitor">({t('grade.feito')})</span>}
+                </Link>
+              )}
+              {blocoDaRevisao === bloco && (
+                <Link
+                  to="/rituais/revisao"
+                  className="flex items-center gap-2 rounded-full border-2 border-dashed border-linha bg-azul-nevoa py-1 pr-3 pl-1 text-sm font-semibold"
+                >
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 border-linha bg-papel text-xs" aria-hidden="true">
+                    {rituaisFeitos.revisao ? '✓' : ''}
+                  </span>
+                  {t('rituais.revisao')} · {t('rituais.vinteMin')}
+                  {rituaisFeitos.revisao && <span className="so-leitor">({t('grade.feito')})</span>}
+                </Link>
+              )}
+              {consultasDoBloco.map((c) => (
+                <p key={c.id} className="flex items-center gap-2 rounded-full border-2 border-linha bg-azul-nevoa py-1 pr-3 pl-1 text-sm font-semibold">
+                  <Adesivo nome="prancheta" tamanho={22} />
+                  <span className="tabular-nums">{c.hora}</span> {c.titulo}
+                </p>
+              ))}
+              {eventosDoBloco.map((o) => (
+                <p key={`${o.evento.id}|${o.inicio.toISOString()}`} className="flex items-center gap-2 rounded-full border-2 border-linha bg-manteiga py-1 pr-3 pl-1 text-sm font-semibold">
+                  <Adesivo nome="calendario" tamanho={22} />
+                  <span className="tabular-nums">{o.inicio.toTimeString().slice(0, 5)}</span> {o.evento.titulo}
+                </p>
+              ))}
+              {refeicoesDoBloco.map(({ refeicao, nome, feita }) => (
+                <p key={refeicao.id} className="flex items-center gap-2 rounded-full border-2 border-linha/60 bg-menta py-1 pr-3 pl-1 text-sm font-semibold">
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 border-linha bg-papel text-xs" aria-hidden="true">
+                    {feita ? '✓' : ''}
+                  </span>
+                  <Adesivo nome="prato" tamanho={18} />
+                  {refeicao.hora && <span className="tabular-nums">{refeicao.hora}</span>} {nome}
+                  {feita && <span className="so-leitor">({t('alimentacao.comi')})</span>}
+                </p>
+              ))}
+              {preparosDoBloco.map(({ habito, completo }) => (
+                <Link
+                  key={habito.id}
+                  to="/academia"
+                  className="flex items-center gap-2 rounded-full border-2 border-dashed border-linha bg-papel py-1 pr-3 pl-1 text-sm font-semibold"
+                >
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 border-linha bg-papel text-xs" aria-hidden="true">
+                    {completo ? '✓' : ''}
+                  </span>
+                  <Adesivo nome={habito.adesivo} tamanho={18} />
+                  {t('academia.baseAmanha', { titulo: habito.titulo })}
+                  {completo && <span className="so-leitor">({t('academia.tudoPronto')})</span>}
+                </Link>
+              ))}
+              {doBloco.length || habitosDoBloco.length ? (
+                <ul className="flex flex-col gap-1.5">
+                  {doBloco.map((x) => (
+                    <ItemLinha key={x.id} tarefa={x} />
+                  ))}
+                  {habitosDoBloco.map((x) => (
+                    <ItemHabito key={x.habito.id} {...x} />
+                  ))}
+                </ul>
+              ) : consultasDoBloco.length || eventosDoBloco.length || preparosDoBloco.length || refeicoesDoBloco.length || bloco !== 'tarde' || blocoDaRevisao === bloco ? null : (
+                <p className="text-sm text-tinta-suave">{t('hoje.livre')}</p>
+              )}
+            </li>
+          )
+        })}
+      </ol>
+      {(semBloco.length > 0 || habitosSemBloco.length > 0) && (
+        <div className="flex flex-col gap-1.5 rounded-[1.5rem] border-2 border-linha/40 p-4">
+          <p className="font-bold">{t('hoje.qualquerHora')}</p>
+          <ul className="flex flex-wrap gap-2">
+            {semBloco.map((x) => (
+              <ItemLinha key={x.id} tarefa={x} />
+            ))}
+            {habitosSemBloco.map((x) => (
+              <ItemHabito key={x.habito.id} {...x} />
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  )
+}
+
+function ItemLinha({ tarefa }: { tarefa: Tarefa }) {
+  const area = tarefa.area ? AREAS[tarefa.area] : undefined
+  const feita = !!tarefa.feitaEm
+  return (
+    <li className={`flex items-center gap-2 rounded-full border-2 border-linha/60 py-1 pr-3 pl-1 text-sm font-semibold ${area ? area.claro : 'bg-papel'}`}>
+      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 border-linha bg-papel text-xs" aria-hidden="true">
+        {feita ? '✓' : ''}
+      </span>
+      {area && <Adesivo nome={area.adesivo} tamanho={18} />}
+      <span className={feita ? 'line-through decoration-2' : ''}>{tarefa.titulo}</span>
+      <span className="so-leitor">{feita ? '(feita)' : ''}</span>
+    </li>
+  )
+}
+
+function ItemHabito({ habito, registro }: HabitoDoDia) {
+  const { t } = useTranslation()
+  const area = AREAS[habito.area ?? 'academia']
+  return (
+    <li className={`flex items-center gap-2 rounded-full border-2 border-linha/60 py-1 pr-3 pl-1 text-sm font-semibold ${area.claro}`}>
+      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 border-linha bg-papel text-xs" aria-hidden="true">
+        {registro ? '✓' : ''}
+      </span>
+      <Adesivo nome={habito.adesivo} tamanho={18} />
+      <span className={registro ? 'line-through decoration-2' : ''}>{habito.titulo}</span>
+      {registro?.nivel === 'minimo' && <span className="text-xs">({t('grade.min')})</span>}
+      <span className="so-leitor">{registro ? `(${t(registro.nivel === 'completo' ? 'grade.feito' : 'grade.minimo')})` : ''}</span>
+    </li>
+  )
+}
+
+function ProgressoAreas({
+  tarefas,
+  areasAtivas,
+  extras = {},
+}: {
+  tarefas: Tarefa[]
+  areasAtivas: ContextoMoldura['perfil']['areasAtivas']
+  /** contagens que não vêm de tarefas (doses de remédio, refeições...) */
+  extras?: Partial<Record<string, { feitos: number; total: number }>>
+}) {
+  const { t } = useTranslation()
+  const porArea = areasAtivas
+    .map((id) => {
+      const daArea = tarefas.filter((x) => x.area === id)
+      const extra = extras[id] ?? { feitos: 0, total: 0 }
+      return { area: AREAS[id], feitos: daArea.filter((x) => x.feitaEm).length + extra.feitos, total: daArea.length + extra.total }
+    })
+    .filter((x) => x.total > 0)
+  return (
+    <section aria-labelledby="titulo-progresso" className="cartao flex flex-col gap-3 bg-papel p-5">
+      <h2 id="titulo-progresso" className="text-xl font-semibold">
+        {t('hoje.progresso')}
+      </h2>
+      {porArea.length ? (
+        <div className="flex flex-wrap gap-5">
+          {porArea.map(({ area, feitos, total }) => (
+            <AnelProgresso key={area.id} feitos={feitos} total={total} nome={t(`nav.${area.id}`)} adesivo={area.adesivo} cor={area.forteCss} />
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm">{t('hoje.progressoVazio')}</p>
+      )}
+    </section>
+  )
+}
+
+export function Hoje() {
+  const { t } = useTranslation()
+  const { perfil, visitaAnterior } = useOutletContext<ContextoMoldura>()
+  const [acolhimentoFechado, setAcolhimentoFechado] = useState(false)
+  const [editando, setEditando] = useState<Tarefa | null>(null)
+  const agora = useAgora(15_000)
+  const tarefas = useTarefas()
+  const doses = useDosesDoDia(diaLocal(agora))
+  const consultas = useConsultas()
+  const avaliacoes = useAvaliacoes()
+  const eventos = useEventos()
+  const habitos = useHabitosAtivos()
+  const comida = useAlimentacaoDeHoje(diaLocal(agora))
+  const contas = useContasAtivas()
+  // desde a segunda-feira (a revisão da semana) ou desde ontem (o ritual da noite de ontem), o que vier antes
+  const rituais = useRituaisDesde([diasDaSemana(diaLocal(agora))[0], somarDias(diaLocal(agora), -1)].sort()[0])
+  const configRituais = useConfigRituais()
+  const { candidato } = useCandidatoAgora(agora)
+  const hoje = diaLocal(agora)
+  const dia = diaDoPlano(perfil.inicioPlano, hoje)
+
+  const acolher = !acolhimentoFechado && deveAcolher(visitaAnterior, hoje)
+  const diaAlcancado = visitaAnterior ? diaDoPlano(perfil.inicioPlano, visitaAnterior) : dia
+  const podeContinuar = acolher && visitaAnterior && diaAlcancado < DURACAO_PLANO
+
+  if (!tarefas || !doses || !consultas || !eventos || !avaliacoes || !habitos || comida === undefined || contas === undefined || !rituais || !configRituais) return null
+  const doDia = tarefasDoDia(tarefas, hoje)
+  const grupos = agruparTarefas(tarefas, hoje)
+  const remediosHoje = { feitos: doses.registros.filter((r) => r.status === 'tomei').length, total: doses.doses.length }
+  const habitosHoje = habitosDoDia(habitos.habitos, habitos.registros, hoje)
+  // hábitos de hoje contam no anel da área de cada um
+  const extrasHabitos: Partial<Record<string, { feitos: number; total: number }>> = {}
+  for (const { habito, registro } of habitosHoje) {
+    const area = habito.area ?? 'academia'
+    const atual = extrasHabitos[area] ?? { feitos: 0, total: 0 }
+    extrasHabitos[area] = { feitos: atual.feitos + (registro ? 1 : 0), total: atual.total + 1 }
+  }
+  const refeicoesHoje = comida
+    ? refeicoesAtivas(comida.config).map((r) => ({ refeicao: r, nome: nomeRefeicao(t, r), feita: !!comida.dia?.refeicoes[r.id] }))
+    : []
+  const comidaHoje = comida ? progressoDoDia(comida.config, comida.dia) : undefined
+  const contasHoje = (contas ?? [])
+    .map((conta) => ({ conta, vencimento: proximoVencimento(conta, hoje) }))
+    .filter((x): x is ContaDoDia => !!x.vencimento && (x.vencimento.estado === 'hoje' || x.vencimento.estado === 'atrasada'))
+  const amanha = somarDias(hoje, 1)
+  const preparos = habitos.habitos
+    .filter((h) => temPreparo(h) && diaDoPreparo(h, habitos.registros.filter((r) => r.habitoId === h.id), agora) === amanha)
+    .map((h) => ({ habito: h, completo: preparoCompleto(h, amanha) }))
+  const tarefasA = doDia.filter((x) => x.prioridade === 'A')
+  const bonus = [...grupos.b, ...grupos.c]
+
+  return (
+    <div className="flex flex-col gap-6">
+      <FolhaDoDia agora={agora} nome={perfil.nome} />
+
+      {acolher && (
+        <section role="status" className="cartao flex flex-col gap-3 bg-lavanda p-5">
+          <p className="flex items-center gap-2 text-2xl font-semibold">
+            <Adesivo nome="coracao" tamanho={40} />
+            {perfil.nome ? t('acolher.tituloComNome', { nome: perfil.nome }) : t('acolher.titulo')}
+          </p>
+          <p className="text-lg">{t('acolher.texto')}</p>
+          <div className="flex flex-wrap gap-2">
+            {podeContinuar ? (
+              <>
+                <Botao
+                  onClick={async () => {
+                    await atualizarPerfil({ inicioPlano: retomarPlano(perfil.inicioPlano, visitaAnterior, hoje) })
+                    setAcolhimentoFechado(true)
+                  }}
+                >
+                  {t('acolher.continuar', { dia: Math.min(diaAlcancado + 1, DURACAO_PLANO) })}
+                </Botao>
+                <Botao variante="contorno" onClick={() => setAcolhimentoFechado(true)}>
+                  {t('acolher.seguir')}
+                </Botao>
+              </>
+            ) : (
+              <Botao variante="contorno" onClick={() => setAcolhimentoFechado(true)}>
+                {t('acolher.fechar')}
+              </Botao>
+            )}
+          </div>
+        </section>
+      )}
+
+      <CartaoAgora
+        candidato={candidato}
+        semNada={
+          tarefasA.length === 0 && (
+            <Link to="/tarefas" className="self-start font-bold underline decoration-2 underline-offset-4">
+              {t('hoje.escolherA')}
+            </Link>
+          )
+        }
+      />
+
+      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <section aria-labelledby="titulo-a" className="flex flex-col gap-3">
+          <h2 id="titulo-a" className="text-2xl font-semibold">
+            {t('hoje.tarefasA')}
+          </h2>
+          {janelasDeHoje(doses.doses).map((j) => (
+            <p key={j.nome} className="flex items-start gap-2 text-sm">
+              <Adesivo nome="pilula" tamanho={22} />
+              <span>
+                {dentroDoEfeito(j, agora)
+                  ? t('hoje.efeitoAgora', { nome: j.nome, ate: j.ate })
+                  : t('hoje.efeitoJanela', { nome: j.nome, de: j.de, ate: j.ate })}
+              </span>
+            </p>
+          ))}
+          {tarefasA.length ? (
+            <ul className="flex flex-col gap-3">
+              {tarefasA.map((x) => (
+                <li key={x.id}>
+                  <CartaoTarefa tarefa={x} editar={() => setEditando(x)} />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <Link to="/tarefas" className="cartao block bg-papel p-4 font-semibold">
+              {t('tarefas.vazioA')} →
+            </Link>
+          )}
+          {bonus.length > 0 && (
+            <details className="rounded-[1.5rem] border-2 border-linha/40 p-4">
+              <summary className="cursor-pointer font-bold">{t('hoje.bonus', { count: bonus.length })}</summary>
+              <ul className="mt-3 flex flex-col gap-3">
+                {bonus.map((x) => (
+                  <li key={x.id}>
+                    <CartaoTarefa tarefa={x} editar={() => setEditando(x)} />
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+        </section>
+
+        <div className="flex flex-col gap-4">
+          <ProgressoAreas tarefas={doDia} areasAtivas={perfil.areasAtivas} extras={{
+              ...extrasHabitos,
+              remedios: remediosHoje,
+              ...(comidaHoje ? { alimentacao: { feitos: comidaHoje.feitas, total: comidaHoje.total } } : {}),
+            }} />
+          <div className="cartao flex flex-col gap-2 bg-papel p-5">
+            <Botao variante="secundario" tom="bg-azul-nevoa" className="self-start" onClick={() => abrirJanelinha()} icone={<Adesivo nome="balao" tamanho={24} />}>
+              {t('hoje.janelinha')}
+            </Botao>
+            <p className="text-sm">{t('hoje.janelinhaDica')}</p>
+          </div>
+        </div>
+      </div>
+
+      <LinhaDoDia
+        tarefas={doDia}
+        agora={agora}
+        consultas={consultas.filter((c) => c.status === 'marcada' && c.data === hoje)}
+        eventos={ocorrencias(eventos, hoje, hoje)}
+        avaliacoes={avaliacoes.filter((a) => a.data === hoje && !a.feitaEm)}
+        habitos={habitosHoje}
+        preparos={preparos}
+        refeicoes={refeicoesHoje}
+        contas={contasHoje}
+        rituaisFeitos={{
+          manha: rituais.some((r) => r.id === idRitual('manha', diaDoRitual('manha', agora)) && !!r.feitoEm),
+          noite: rituais.some((r) => r.id === idRitual('noite', diaDoRitual('noite', agora)) && !!r.feitoEm),
+          revisao: rituais.some((r) => r.id === idRitual('revisao', diaDoRitual('revisao', agora)) && !!r.feitoEm),
+        }}
+        blocoDaRevisao={
+          eDiaDaRevisao(configRituais.lembretes.revisao, agora)
+            ? blocoDoHorario(new Date(`${hoje}T${configRituais.lembretes.revisao.hora}:00`))
+            : undefined
+        }
+      />
+
+      {!perfil.planoEscondido && <CartaoPlano dia={dia} />}
+
+      {editando && <EditorTarefa tarefa={editando} nova={false} fechar={() => setEditando(null)} />}
+    </div>
+  )
+}
+

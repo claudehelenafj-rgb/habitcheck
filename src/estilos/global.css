@@ -1,0 +1,355 @@
+@import 'tailwindcss';
+@import './tokens.css';
+@import './estampas.css';
+
+/* Fontes guardadas dentro do app: funcionam offline e não chamam o Google. */
+@import '@fontsource-variable/fraunces/full.css';
+@import '@fontsource/instrument-serif/400-italic.css';
+@import '@fontsource-variable/dm-sans/index.css';
+@import '@fontsource-variable/caveat/index.css';
+@import '@fontsource-variable/atkinson-hyperlegible-next/index.css';
+
+@custom-variant escuro (&:where([data-modo='escuro'], [data-modo='escuro'] *));
+
+@theme inline {
+  --color-fundo: var(--fundo);
+  --color-papel: var(--papel);
+  --color-tinta: var(--tinta);
+  --color-tinta-suave: var(--tinta-suave);
+  --color-linha: var(--linha);
+
+  --color-creme: var(--creme);
+  --color-chocolate: var(--chocolate);
+
+  --color-lavanda: var(--claro-lavanda);
+  --color-azul-nevoa: var(--claro-azul-nevoa);
+  --color-pessego: var(--claro-pessego);
+  --color-manteiga: var(--claro-manteiga);
+  --color-menta: var(--claro-menta);
+  --color-morango-claro: var(--claro-morango);
+
+  --color-rosa: var(--forte-rosa);
+  --color-tomate: var(--forte-tomate);
+  --color-laranja: var(--forte-laranja);
+  --color-verde-piscina: var(--forte-piscina);
+  --color-verde-agua: var(--forte-agua);
+  --color-ameixa: var(--forte-ameixa);
+  --color-lilas: var(--claro-lilas);
+
+  --color-botao: var(--botao-fundo);
+  --color-botao-texto: var(--botao-texto);
+  --color-destaque: var(--destaque);
+  --color-destaque-texto: var(--destaque-texto);
+  --color-destaque-claro: var(--destaque-claro);
+
+  --font-titulo: var(--fonte-titulo);
+  --font-destaque: var(--fonte-destaque);
+  --font-texto: var(--fonte-texto);
+  --font-mao: var(--fonte-mao);
+
+  --radius-cartao: 1.75rem;
+}
+
+:root {
+  --fonte-titulo: 'Fraunces Variable', 'Georgia', serif;
+  --fonte-destaque: 'Instrument Serif', 'Georgia', serif;
+  --fonte-texto: 'DM Sans Variable', system-ui, sans-serif;
+  --fonte-mao: 'Caveat Variable', 'Comic Sans MS', cursive;
+  --sombra-retro: 3px 3px 0 var(--linha);
+  font-size: 100%;
+}
+
+/* Fonte de alta legibilidade: troca tudo, inclusive títulos e anotações. */
+:root[data-fonte='legivel'] {
+  --fonte-titulo: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
+  --fonte-destaque: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
+  --fonte-texto: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
+  --fonte-mao: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
+}
+
+/* Tamanho do texto ajustável (tudo é medido em rem) */
+:root[data-tamanho='grande'] {
+  font-size: 112.5%;
+}
+:root[data-tamanho='maior'] {
+  font-size: 125%;
+}
+:root[data-tamanho='enorme'] {
+  font-size: 137.5%;
+}
+
+html,
+body {
+  background: var(--fundo);
+  color: var(--tinta);
+  font-family: var(--fonte-texto);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--fonte-titulo);
+  font-variation-settings: 'SOFT' 100, 'WONK' 0;
+  letter-spacing: -0.01em;
+}
+
+:focus-visible {
+  outline: 3px solid var(--tinta);
+  outline-offset: 3px;
+  border-radius: 0.5rem;
+}
+
+/*
+ * No modo escuro, cartões em tom claro são "papel colorido": dentro deles
+ * os tokens de texto e linha voltam aos valores do modo claro.
+ */
+[data-modo='escuro'] :is(.bg-lavanda, .bg-azul-nevoa, .bg-pessego, .bg-manteiga, .bg-menta, .bg-morango-claro, .bg-lilas) {
+  --tinta: var(--chocolate);
+  --tinta-suave: var(--suave-claro);
+  --linha: var(--chocolate);
+  --papel: var(--papel-claro);
+  --forte-chocolate: var(--chocolate);
+  --forte-piscina: var(--verde-piscina);
+  --botao-fundo: var(--chocolate);
+  --botao-texto: var(--creme);
+  color: var(--chocolate);
+}
+
+/* Rótulo pequeno em caixa alta */
+.rotulo {
+  font-family: var(--fonte-texto);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Cartão retrô: cantos bem arredondados, contorno e sombra deslocada */
+.cartao {
+  border-radius: var(--radius-cartao);
+  border: 2px solid var(--linha);
+  box-shadow: var(--sombra-retro);
+}
+
+/* ---------- Padrões decorativos (somem no modo calmo) ---------- */
+
+.listras {
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--claro-morango) 0 14px,
+    var(--claro-manteiga) 14px 28px,
+    var(--claro-azul-nevoa) 28px 42px,
+    var(--claro-lavanda) 42px 56px,
+    var(--claro-menta) 56px 70px,
+    var(--claro-pessego) 70px 84px
+  );
+}
+
+.listras-destaque {
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--destaque-claro) 0 16px,
+    var(--papel) 16px 32px
+  );
+}
+
+.xadrez {
+  background-color: var(--papel);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--destaque-claro) 70%, transparent) 0 14px,
+      transparent 14px 28px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--destaque-claro) 70%, transparent) 0 14px,
+      transparent 14px 28px
+    );
+}
+
+.bolinhas {
+  background-color: var(--papel);
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--destaque) 35%, transparent) 2.5px,
+    transparent 3px
+  );
+  background-size: 18px 18px;
+}
+
+/* Folha destacável: mordidas redondas no topo, como um bloco de calendário */
+.folha-destacavel {
+  --raio: 9px;
+  -webkit-mask: radial-gradient(circle at 50% 0, transparent var(--raio), #000 calc(var(--raio) + 0.5px))
+    0 0 / calc(var(--raio) * 2.6) 100% repeat-x;
+  mask: radial-gradient(circle at 50% 0, transparent var(--raio), #000 calc(var(--raio) + 0.5px)) 0 0 /
+    calc(var(--raio) * 2.6) 100% repeat-x;
+  padding-top: calc(var(--raio) + 0.75rem);
+}
+
+/* Adesivo die-cut: contorno branco + sombra leve */
+.adesivo {
+  filter: drop-shadow(2.5px 0 0 var(--contorno-adesivo)) drop-shadow(-2.5px 0 0 var(--contorno-adesivo))
+    drop-shadow(0 2.5px 0 var(--contorno-adesivo)) drop-shadow(0 -2.5px 0 var(--contorno-adesivo))
+    drop-shadow(1px 2px 2px rgb(66 47 14 / 0.3));
+}
+
+/* Faixa de letreiro */
+.letreiro-trilho {
+  display: flex;
+  width: max-content;
+  animation: letreiro 28s linear infinite;
+}
+@keyframes letreiro {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Animação de adesivo sendo colado */
+@keyframes colar {
+  0% {
+    transform: scale(1.5) rotate(-18deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.92) rotate(4deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+.colando {
+  animation: colar 420ms cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+
+/* Traço de caneta circulando o dia de hoje */
+.traco-caneta {
+  stroke-dasharray: 260;
+  stroke-dashoffset: 260;
+  animation: desenhar 700ms ease-out 150ms forwards;
+}
+@keyframes desenhar {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ---------- Modo calmo e reduzir movimento ---------- */
+
+:root[data-calmo='sim'] .decor {
+  display: none !important;
+}
+:root[data-calmo='sim'] .listras,
+:root[data-calmo='sim'] .listras-destaque,
+:root[data-calmo='sim'] .xadrez,
+:root[data-calmo='sim'] .bolinhas {
+  background-image: none;
+  background-color: var(--papel);
+}
+:root[data-calmo='sim'] .adesivo {
+  filter: none;
+}
+
+:root[data-calmo='sim'] *,
+:root[data-animacoes='nao'] * {
+  animation: none !important;
+  transition: none !important;
+}
+:root[data-calmo='sim'] .traco-caneta,
+:root[data-animacoes='nao'] .traco-caneta {
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .traco-caneta {
+    stroke-dashoffset: 0;
+  }
+}
+
+.so-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Papelaria ---------- */
+
+/* Miçanga de letrinha: bolinha branca com brilho e sombra */
+.micanga {
+  background: radial-gradient(circle at 32% 28%, #ffffff 0 18%, #f6f1ea 45%, #e4dccf 100%);
+  box-shadow:
+    inset -2px -3px 4px rgb(66 47 14 / 0.18),
+    1px 2px 2px rgb(66 47 14 / 0.25);
+  line-height: 1;
+}
+
+/*
+ * Folha de caderno: continua papel claro no modo escuro (é um objeto),
+ * então o texto dentro dela é sempre chocolate.
+ */
+.folha-caderno {
+  --pauta: 2rem;
+  color: var(--chocolate);
+  background-color: var(--papel-claro);
+  background-image:
+    linear-gradient(90deg, transparent 3.1rem, rgb(234 94 134 / 0.75) 3.1rem 3.2rem, transparent 3.2rem),
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 calc(var(--pauta) - 1px),
+      rgb(3 127 113 / 0.28) calc(var(--pauta) - 1px) var(--pauta)
+    );
+  background-position: 0 0, 0 0;
+  line-height: var(--pauta);
+}
+.folha-caderno :focus-visible {
+  outline-color: var(--chocolate);
+}
+
+/* Decoração neutra: adesivos sem carinha */
+.sem-rosto .rosto,
+:root[data-decoracao='neutra'] .rosto:not(.com-rosto .rosto) {
+  display: none;
+}
+
+/* Tela "Não consigo dormir": nada se mexe, nem as transições */
+:root[data-tela-noite='sim'] * {
+  animation: none !important;
+  transition: none !important;
+}
+:root[data-tela-noite='sim'],
+:root[data-tela-noite='sim'] body {
+  background: #120e16;
+}
+
+/* Resumo para a consulta: só o conteúdo na impressão, em fundo branco */
+@media print {
+  .nao-imprimir {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  .resumo-impressao {
+    padding: 0;
+  }
+  @page {
+    margin: 16mm;
+  }
+}
