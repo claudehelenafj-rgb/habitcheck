@@ -226,7 +226,7 @@ export function ComidasFaceis({ config, comidas }: { config: ConfigAlimentacao; 
         <fieldset className="flex flex-col gap-1">
           <legend className="mb-1 text-sm font-bold">{t('alimentacao.servePara')}</legend>
           <div className="flex flex-wrap gap-1.5">
-            {config.refeicoes.map((x) => {
+            {config.refeicoes.filter((x) => x.ativa || r.refeicoes.includes(x.id)).map((x) => {
               const marcado = r.refeicoes.includes(x.id)
               return (
                 <button

@@ -1,4 +1,5 @@
-// Alimentação: regularidade, não restrição. Bolinhas das refeições e copos de água de hoje, a semana,
+// Alimentação: regularidade, não restrição. Bolinhas das refeições e copos de água de hoje, o plano alimentar
+// da pessoa (o PDF dela, lido no aparelho, com o que comer em cada horário), a semana,
 // "não sei o que comer", comidas fáceis, lista de compras e os horários de cada refeição com lembrete para
 // comer mesmo sem fome. Sem calorias, peso ou julgamento.
 
@@ -9,6 +10,7 @@ import { Adesivo } from '../componentes/Adesivo'
 import { ComidasFaceis, ListaDeCompras, NaoSeiOQueComer } from '../componentes/ComidasECompras'
 import { GradeSemanal, type Dia as DiaGrade } from '../componentes/GradeSemanal'
 import { BolinhasRefeicoes, CoposDeAgua, nomeRefeicao } from '../componentes/Refeicoes'
+import { MeuPlanoAlimentar } from '../componentes/PlanoAlimentar'
 import { mudarConfigAlimentacao, useComidas, useCompras, useConfigAlimentacao, useDiasAlimentacao } from '../dados/alimentacao'
 import { useAgora } from '../dados/timer'
 import { estadoDiaAlimentacao, progressoDoDia, type ConfigAlimentacao, type IdRefeicao, type Refeicao } from '../logica/alimentacao'
@@ -143,6 +145,8 @@ export function Alimentacao() {
           <CoposDeAgua config={config} dia={doDia(hoje)} hoje={hoje} />
         </div>
       </section>
+
+      <MeuPlanoAlimentar config={config} />
 
       <GradeSemanal titulo={t('alimentacao.semana')} adesivo="prato" tom="bg-papel" dias={grade} textoMinimo={t('alimentacao.algumas')} />
 

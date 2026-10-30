@@ -36,7 +36,8 @@ export default defineConfig({
       },
       workbox: {
         // guarda tudo (telas, estilos, fontes, ícones) para abrir sem internet
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        // (mjs: o leitor de PDF do plano alimentar)
+        globPatterns: ['**/*.{js,mjs,css,html,svg,png,woff2}'],
         cleanupOutdatedCaches: true,
       },
     }),

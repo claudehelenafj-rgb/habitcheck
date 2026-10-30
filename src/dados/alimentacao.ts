@@ -7,6 +7,7 @@ import type { IdArea } from '../design/areas'
 import {
   alternarRefeicao,
   CONFIG_ALIMENTACAO_PADRAO,
+  completarRefeicoes,
   diaVazio,
   novosItensDeCompra,
   tocarCopo,
@@ -23,7 +24,7 @@ const CHAVE = 'alimentacao'
 
 async function lerConfig(): Promise<ConfigAlimentacao> {
   const guardada = (await banco.configuracoes.get(CHAVE))?.valor as Partial<ConfigAlimentacao> | undefined
-  return { ...CONFIG_ALIMENTACAO_PADRAO, ...guardada }
+  return { ...CONFIG_ALIMENTACAO_PADRAO, ...guardada, refeicoes: completarRefeicoes(guardada?.refeicoes) }
 }
 
 export function useConfigAlimentacao(): ConfigAlimentacao | undefined {

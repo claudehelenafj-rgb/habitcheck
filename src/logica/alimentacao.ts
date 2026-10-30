@@ -5,7 +5,9 @@
 import type { Dia } from './datas'
 import { blocoDoHorario, type Bloco, type Candidato } from './hoje'
 
-export type IdRefeicao = 'cafe' | 'almoco' | 'lanche' | 'jantar'
+/** As seis refeições de um plano alimentar comum; lanche da manhã e ceia começam desligados. */
+export type IdRefeicao = 'cafe' | 'lancheManha' | 'almoco' | 'lanche' | 'jantar' | 'ceia'
+export const IDS_REFEICAO: IdRefeicao[] = ['cafe', 'lancheManha', 'almoco', 'lanche', 'jantar', 'ceia']
 
 export type Refeicao = {
   id: IdRefeicao
@@ -23,11 +25,18 @@ export type ConfigAlimentacao = { refeicoes: Refeicao[]; aguaMeta: number }
 export const CONFIG_ALIMENTACAO_PADRAO: ConfigAlimentacao = {
   refeicoes: [
     { id: 'cafe', hora: '08:00', ativa: true, lembrar: false },
+    { id: 'lancheManha', hora: '10:00', ativa: false, lembrar: false },
     { id: 'almoco', hora: '12:30', ativa: true, lembrar: false },
     { id: 'lanche', hora: '16:00', ativa: true, lembrar: false },
     { id: 'jantar', hora: '19:30', ativa: true, lembrar: false },
+    { id: 'ceia', hora: '21:30', ativa: false, lembrar: false },
   ],
   aguaMeta: 8,
+}
+
+/** Configuração guardada antes do lanche da manhã e da ceia existirem: completa com as que faltam, na ordem do dia. */
+export function completarRefeicoes(guardadas: Refeicao[] | undefined): Refeicao[] {
+  return CONFIG_ALIMENTACAO_PADRAO.refeicoes.map((padrao) => guardadas?.find((r) => r.id === padrao.id) ?? padrao)
 }
 
 /** O registro de um dia: quando cada refeição foi marcada e quantos copos de água. */
@@ -94,7 +103,7 @@ export function deveLembrarRefeicao(r: Refeicao, d: DiaAlimentacao | undefined, 
 /** Em que parte do dia a refeição aparece na linha do dia. */
 export function blocoDaRefeicao(r: Refeicao): Bloco {
   if (r.hora) return blocoDoHorario(horarioNoDia(r.hora, new Date(2026, 0, 1)))
-  return r.id === 'cafe' ? 'manha' : r.id === 'jantar' ? 'noite' : 'tarde'
+  return r.id === 'cafe' || r.id === 'lancheManha' ? 'manha' : r.id === 'jantar' || r.id === 'ceia' ? 'noite' : 'tarde'
 }
 
 /** Candidata ao cartão "Agora" (vem antes das tarefas A, só na hora da refeição). */

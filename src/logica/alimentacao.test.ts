@@ -53,7 +53,7 @@ describe('refeições e água', () => {
   })
 
   it('lembrete: só com lembrete ligado, até 30 min depois, sem ter marcado', () => {
-    const almoco = { ...padrao.refeicoes[1], lembrar: true }
+    const almoco = { ...padrao.refeicoes.find((r) => r.id === 'almoco')!, lembrar: true }
     expect(deveLembrarRefeicao(almoco, undefined, as('12:30'))).toBe(true)
     expect(deveLembrarRefeicao(almoco, undefined, as('13:01'))).toBe(false)
     expect(deveLembrarRefeicao({ ...almoco, lembrar: false }, undefined, as('12:40'))).toBe(false)
@@ -62,7 +62,7 @@ describe('refeições e água', () => {
   })
 
   it('bloco da linha do dia pelo horário', () => {
-    expect(padrao.refeicoes.map(blocoDaRefeicao)).toEqual(['manha', 'tarde', 'tarde', 'noite'])
+    expect(padrao.refeicoes.map(blocoDaRefeicao)).toEqual(['manha', 'manha', 'tarde', 'tarde', 'noite', 'noite'])
     expect(blocoDaRefeicao({ id: 'jantar', ativa: true, lembrar: false })).toBe('noite')
   })
 

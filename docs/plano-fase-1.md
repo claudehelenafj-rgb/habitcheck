@@ -214,6 +214,20 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
   riscado); "tirar os comprados" com desfazer.
 - A moldura não tira mais o foco de um título que a própria tela já focou (links para uma seção).
 
+### Meu plano alimentar (pedido depois do plano)
+
+- Parte 1 (pronta): a pessoa traz o PDF do plano alimentar dela. O app lê o texto no próprio aparelho (pdf.js,
+  guardado com o app para funcionar sem internet; nada sai do aparelho) e acha as refeições, os horários e as opções
+  ("Opção 1", "Opção 2" ou "ou"). O cabeçalho (nome, profissional) e as orientações ficam de fora.
+- A pessoa confere o que o app entendeu (refeição, horário e o que comer, uma opção por bloco) e salva. PDF escaneado
+  (sem texto): o app avisa e deixa escrever. Também dá para escrever o plano sem PDF.
+- "Usar as refeições e os horários do plano no app": as bolinhas e os lembretes passam a seguir o plano. O app agora
+  tem seis refeições (café da manhã, lanche da manhã, almoço, lanche da tarde, jantar e ceia); as duas novas começam
+  desligadas, e quem já usava o app não perde nada.
+- O plano aparece por horário, com "Agora é hora de: Colação (desde as 10:00)" e a próxima. O PDF fica guardado
+  (abrir, trocar, editar, apagar com desfazer) e entra no backup.
+- Parte 2: os avisos de cada refeição e o cartão "Agora" da tela Hoje dizem as opções do plano.
+
 ## Dinheiro (etapa 13)
 
 - Contas a pagar: nome, valor (opcional, lido do jeito que a pessoa escrever: "129,9", "1.500", "R$ 35,90"),
@@ -270,4 +284,5 @@ Horários de lembretes (adiar, repetir, silêncio), recorrências, vencimento de
 saldo dos potes e virada da semana, espera de 48 h da lista de desejos, progresso do cofrinho, planejamento reverso (prova → sessões; consulta → alarmes),
 avisos do semestre, fases do modo foco e "achei × levou", aviso do estudo acompanhado, hábitos (semana, pendente hoje, véspera), reset do quarto, refeições e água, ideias de comida e lista de compras, contas, potes e gasto rápido, pausa de 48 h, cofrinho, estoque de remédio, "X de 7 dias", limite de 3 tarefas A, escolha do cartão "Agora",
 importação de .ics sem duplicar, passos e dia dos rituais (a noite até as 5h), escolha das tarefas A e pendências da noite,
-agenda do dia, e o contraste de todas as cores usadas.
+agenda do dia, leitura do plano alimentar (títulos, horários, opções, "lanche" da manhã ou da tarde), e o contraste de todas
+as cores usadas.

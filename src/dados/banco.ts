@@ -60,6 +60,9 @@ export type Objetivo = {
   arquivadoEm?: string
 }
 
+/** Arquivo guardado no aparelho (ex.: o PDF do plano alimentar), como data URL para entrar no backup. */
+export type Arquivo = { id: string; nome: string; tipo: string; tamanho: number; dados: string; salvoEm: string }
+
 /** Configurações guardadas como chave → valor (preferências, idioma, primeiro uso...). */
 export type Configuracao = { chave: string; valor: unknown }
 
@@ -97,6 +100,7 @@ export class BancoCaderninho extends Dexie {
   cofrinhos!: EntityTable<Cofrinho, 'id'>
   depositos!: EntityTable<Deposito, 'id'>
   rituais!: EntityTable<RegistroRitual, 'id'>
+  arquivos!: EntityTable<Arquivo, 'id'>
 
   constructor(nome = 'caderninho') {
     super(nome)
@@ -184,6 +188,10 @@ export class BancoCaderninho extends Dexie {
     // etapa 14: rituais da manhã e da noite (um por dia: em que passo parou e quando terminou)
     this.version(17).stores({
       rituais: 'id, dia, ritual',
+    })
+    // plano alimentar: o PDF da pessoa, guardado só no aparelho
+    this.version(18).stores({
+      arquivos: 'id',
     })
   }
 }
