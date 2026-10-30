@@ -11,6 +11,9 @@ import { useContasAtivas } from '../dados/dinheiro'
 import { useEventos } from '../dados/eventos'
 import { useAvaliacoes } from '../dados/faculdade'
 import { marcarHabito, useHabitosAtivos } from '../dados/habitos'
+import { useObjetivos } from '../dados/objetivos'
+import { objetivoDoDia } from '../logica/objetivos'
+import { FolhaCaderno } from './Papelaria'
 import type { Perfil } from '../dados/perfil'
 import { desfazerResposta, responderDose, useDosesDoDia } from '../dados/remedios'
 import { concluirTarefa, novaTarefa, reabrirTarefa, salvarTarefa, useCaixaAberta, useTarefas } from '../dados/tarefas'
@@ -140,10 +143,21 @@ export function PassoDia({ dia }: PropsPasso) {
   const { t } = useTranslation()
   const agenda = useAgenda(dia)
   const habitos = useHabitosAtivos()
-  if (!agenda || !habitos) return null
+  const objetivos = useObjetivos()
+  if (!agenda || !habitos || !objetivos) return null
   const doDia = habitosDoDia(habitos.habitos, habitos.registros, dia)
+  const objetivo = objetivoDoDia(objetivos, dia)
   return (
     <div className="flex flex-col gap-4">
+      {objetivo && (
+        <FolhaCaderno inclinacao={-0.5} className="mb-2 max-w-xl">
+          <section aria-label={t('objetivos.doDia')}>
+            <p className="rotulo leading-8">{t('objetivos.doDia')}</p>
+            <p className="font-titulo text-xl leading-8 font-semibold">{objetivo.titulo}</p>
+            <p className="font-destaque text-xl leading-8 italic">{objetivo.porque}</p>
+          </section>
+        </FolhaCaderno>
+      )}
       <ListaAgenda itens={agenda} vazio={t('rituais.semCompromissos')} />
       {doDia.length > 0 && (
         <div className="flex flex-col gap-2">

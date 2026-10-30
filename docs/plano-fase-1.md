@@ -113,7 +113,8 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | 13 | **Dinheiro**: pausa antes de comprar e cofrinho (parte 3) | Pronta |
 | 14 | **Rituais** da manhã e da noite, guiados, com check-in e rotina de desacelerar (parte 1) | Pronta |
 | 14 | **Revisão semanal** (com 5 min de dinheiro, os hobbies e os avisos sem resposta) (parte 2) | Pronta |
-| 15 | **Meus objetivos** com gráficos | |
+| 15 | **Meus objetivos**: folha de caderno, o que faz andar, o porquê no ritual da manhã e na revisão (parte 1) | Pronta |
+| 15 | Painel com números e gráficos do que foi feito (parte 2) | |
 | 16 | Álbum de adesivos, recompensas e conferência final | |
 
 ## Faculdade (etapa 9)
@@ -305,11 +306,25 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 - Histórico das revisões com as respostas, na tela Rituais. A pergunta "isso ainda é importante pra mim?" dos objetivos
   entra na etapa 15.
 
+## Meus objetivos (etapa 15)
+
+- Tela Objetivos (atalho O): cada objetivo numa folha de caderno (fita, furos, estrelinhas de giz), com "Meu objetivo"
+  e "Por que isso importa para mim" escritos pela pessoa e editados na própria folha (grava ao sair do campo).
+- "O que faço por ele": hábitos (com "X de meta nesta semana"), tarefas abertas (inclusive sessões de estudo) e as
+  feitas, e cofrinhos (quanto já foi guardado). "Ligar hábitos, tarefas e cofrinhos" marca o que faz o objetivo andar;
+  o que está ligado a outro objetivo mostra onde está e muda ao marcar.
+- Poucos de cada vez: com mais de 3, uma dica sugere deixar algum de lado (sem impedir). "Deixar de lado por agora"
+  (arquivar) e "Trazer de volta"; apagar solta o que estava ligado e o "Desfazer" religa.
+- Ritual da manhã: no passo "Ver o dia", "Hoje, lembre por quê" com o porquê de um objetivo por dia, em rodízio.
+- Revisão semanal: no último passo, "Isso ainda é importante pra mim?" para cada objetivo (sim, quero mudar, deixar
+  de lado), guardado na revisão; "quero mudar" abre o objetivo.
+- A moldura não tira o foco de nada que a tela já tenha focado dentro do conteúdo.
+
 ## Lógica com testes automáticos
 
 Horários de lembretes (adiar, repetir, silêncio), recorrências, vencimento de contas (ex.: dia 31 em mês de 30 dias),
 saldo dos potes e virada da semana, espera de 48 h da lista de desejos, progresso do cofrinho, planejamento reverso (prova → sessões; consulta → alarmes),
 avisos do semestre, fases do modo foco e "achei × levou", aviso do estudo acompanhado, hábitos (semana, pendente hoje, véspera), reset do quarto, refeições e água, ideias de comida e lista de compras, contas, potes e gasto rápido, pausa de 48 h, cofrinho, estoque de remédio, "X de 7 dias", limite de 3 tarefas A, escolha do cartão "Agora",
 importação de .ics sem duplicar, passos e dia dos rituais (a noite até as 5h), escolha das tarefas A e pendências da noite,
-agenda do dia, resumo da semana e avisos sem resposta da revisão, leitura do plano alimentar (títulos, horários, opções, "lanche" da manhã ou da tarde), e o contraste de todas
+agenda do dia, objetivo do dia e o que faz cada objetivo andar, resumo da semana e avisos sem resposta da revisão, leitura do plano alimentar (títulos, horários, opções, "lanche" da manhã ou da tarde), e o contraste de todas
 as cores usadas.

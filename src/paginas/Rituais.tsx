@@ -279,7 +279,7 @@ function HistoricoRevisoes() {
   const revisoes = useRevisoes()
   if (!revisoes) return null
   const comRespostas = revisoes
-    .filter((r) => r.feitoEm && Object.values(r.respostas ?? {}).some((v) => v?.trim()))
+    .filter((r) => r.feitoEm && [r.respostas?.funcionou, r.respostas?.travou, r.respostas?.ajusto].some((v) => v?.trim()))
     .sort((a, b) => b.dia.localeCompare(a.dia))
   if (!comRespostas.length) return null
   return (

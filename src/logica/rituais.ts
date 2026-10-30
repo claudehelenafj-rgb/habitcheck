@@ -45,7 +45,9 @@ export function duracaoDoRitual(ritual: IdRitual): number {
   return ritual === 'revisao' ? DURACAO_REVISAO_MIN : DURACAO_RITUAL_MIN
 }
 
-export type RespostasRevisao = { funcionou?: string; travou?: string; ajusto?: string }
+export type RespostaObjetivo = 'sim' | 'mudar' | 'deLado'
+/** As três perguntas e, para cada objetivo, a resposta a "isso ainda é importante pra mim?". */
+export type RespostasRevisao = { funcionou?: string; travou?: string; ajusto?: string; objetivos?: Record<string, RespostaObjetivo> }
 
 /**
  * Um ritual de um dia (a revisão: de uma semana, pela segunda-feira): em que passo parou e quando terminou.

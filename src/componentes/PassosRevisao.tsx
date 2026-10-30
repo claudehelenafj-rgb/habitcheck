@@ -19,7 +19,9 @@ import { diaLocal, type Dia } from '../logica/datas'
 import { diaDoPlano, faseDoDia } from '../logica/planoInicio'
 import { diasDaSemana } from '../logica/remedios'
 import { ajusteAnterior, avisosSemResposta, proximosDias, resumoDaSemana, ultimos7Dias, type AvisoIgnorado } from '../logica/revisao'
-import { agendaDoDia, DURACAO_DINHEIRO_MIN, idRitual, type RegistroRitual, type RespostasRevisao } from '../logica/rituais'
+import { agendaDoDia, DURACAO_DINHEIRO_MIN, idRitual, type RegistroRitual, type RespostaObjetivo, type RespostasRevisao } from '../logica/rituais'
+import { arquivarObjetivo, useObjetivos } from '../dados/objetivos'
+import { objetivosAtivos } from '../logica/objetivos'
 import { Adesivo } from './Adesivo'
 import { mostrarAviso } from './Avisos'
 import { Botao } from './Botao'
@@ -351,7 +353,76 @@ export function PassoProximas({ agora }: PropsPasso) {
 
 // ---------- as três perguntas ----------
 
-const PERGUNTAS: Array<keyof RespostasRevisao> = ['funcionou', 'travou', 'ajusto']
+const PERGUNTAS: Array<'funcionou' | 'travou' | 'ajusto'> = ['funcionou', 'travou', 'ajusto']
+
+/** Para cada objetivo: "isso ainda é importante pra mim?" (sim, quero mudar, deixar de lado). */
+function AindaImportante({ registro }: { registro: RegistroRitual }) {
+  const { t } = useTranslation()
+  const objetivos = useObjetivos()
+  if (!objetivos) return null
+  const respostas = registro.respostas?.objetivos ?? {}
+  // os deixados de lado nesta revisão continuam aqui, com a resposta, até ela acabar
+  const lista = objetivosAtivos(objetivos.filter((o) => !o.arquivadoEm || respostas[o.id] === 'deLado').map((o) => ({ ...o, arquivadoEm: undefined })))
+  if (!lista.length) return null
+  const responder = (id: string, r: RespostaObjetivo) => mudarRespostas(registro.id, { objetivos: { ...respostas, [id]: r } })
+  const chip = (marcado: boolean) => `min-h-10 rounded-full border-2 border-linha px-4 text-sm font-bold ${marcado ? 'bg-botao text-botao-texto' : 'bg-papel'}`
+  return (
+    <section aria-labelledby="titulo-ainda-importante" className="flex flex-col gap-3">
+      <h3 id="titulo-ainda-importante" className="font-destaque text-2xl italic">
+        {t('objetivos.aindaImportante')}
+      </h3>
+      <ul className="flex flex-col gap-2">
+        {lista.map((o) => {
+          const r = respostas[o.id]
+          return (
+            <li key={o.id} className={`${linha} flex-col items-stretch`}>
+              <p>
+                <span className="font-bold">{o.titulo}</span>
+                {o.porque && <span className="block text-sm italic">{o.porque}</span>}
+              </p>
+              <div role="group" aria-label={`${t('objetivos.aindaImportante')} ${o.titulo}`} className="flex flex-wrap gap-2">
+                <button type="button" aria-pressed={r === 'sim'} onClick={() => responder(o.id, 'sim')} className={chip(r === 'sim')}>
+                  {t('objetivos.sim')}
+                </button>
+                <button type="button" aria-pressed={r === 'mudar'} onClick={() => responder(o.id, 'mudar')} className={chip(r === 'mudar')}>
+                  {t('objetivos.queroMudar')}
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={r === 'deLado'}
+                  onClick={async () => {
+                    await responder(o.id, 'deLado')
+                    await arquivarObjetivo(o.id, true)
+                    mostrarAviso(t('objetivos.deixado', { titulo: o.titulo }), async () => {
+                      await arquivarObjetivo(o.id, false)
+                      await mudarRespostas(registro.id, { objetivos: { ...respostas, [o.id]: 'sim' } })
+                    })
+                  }}
+                  className={chip(r === 'deLado')}
+                >
+                  {t('objetivos.deixarDeLado')}
+                </button>
+              </div>
+              {r && (
+                <p className="text-sm" role="status">
+                  {r === 'sim' ? t('objetivos.respostaSim') : r === 'deLado' ? t('objetivos.respostaDeLado') : t('objetivos.respostaMudar')}
+                  {r === 'mudar' && (
+                    <>
+                      {' '}
+                      <Link to={`/objetivos#objetivo-${o.id}`} className="font-bold underline decoration-2 underline-offset-4">
+                        {t('objetivos.abrir')}
+                      </Link>
+                    </>
+                  )}
+                </p>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+    </section>
+  )
+}
 
 export function PassoPerguntas({ agora, perfil, registro }: PropsPasso) {
   const { t, i18n } = useTranslation()
@@ -384,6 +455,7 @@ export function PassoPerguntas({ agora, perfil, registro }: PropsPasso) {
         </label>
       ))}
       <p className="text-sm">{t('rituais.salvaSozinha')}</p>
+      <AindaImportante registro={registro} />
       {dia14 && (
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-semibold">
           {t('rituais.dia14')}
