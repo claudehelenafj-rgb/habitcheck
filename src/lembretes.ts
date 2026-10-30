@@ -18,7 +18,7 @@ import { deveLembrarRefeicao, type Refeicao } from './logica/alimentacao'
 import { avisoDeConta, fimDaEspera, prontoParaDecidir, type Conta, type Desejo, type Vencimento } from './logica/dinheiro'
 import { acabouFase, type EstadoFoco, type FaseFoco } from './logica/foco'
 import { deveAvisarVespera, deveLembrar, type Habito } from './logica/habitos'
-import { deveLembrarRitual, diaDoRitual, idRitual, RITUAIS, type IdRitual } from './logica/rituais'
+import { deveLembrarRitual, diaDoRitual, idRitual, TODOS_OS_RITUAIS, type IdRitual } from './logica/rituais'
 import { TELAS_AREAS } from './rotas'
 import { tocarSino } from './telaFoco'
 import { jaAvisouTransicao, registrarTransicao, useConsultas } from './dados/consultas'
@@ -322,14 +322,18 @@ function useAvisosDesejos(agora: Date, textos: TextosLembretes, discretos: boole
   }, [desejos, agora, textos, discretos])
 }
 
-/** Rituais com lembrete: no horário (até 30 min depois), uma vez por dia, só se o ritual daquele dia não foi feito. */
+/**
+ * Rituais com lembrete: no horário (até 30 min depois), uma vez por dia, só se o ritual daquele dia não foi feito.
+ * A revisão semanal: no dia fixo, se a revisão da semana ainda não foi feita.
+ */
 function useAvisosRituais(agora: Date, textos: TextosLembretes, discretos: boolean) {
   const config = useConfigRituais()
-  const registros = useRituaisDesde(somarDias(diaLocal(agora), -1))
+  // desde a segunda-feira (a revisão da semana) ou desde ontem (o ritual da noite de ontem), o que vier antes
+  const registros = useRituaisDesde([diaDoRitual('revisao', agora), somarDias(diaLocal(agora), -1)].sort()[0])
   const emAndamento = useRef(new Set<string>())
   useEffect(() => {
     if (!config || !registros) return
-    for (const r of RITUAIS) {
+    for (const r of TODOS_OS_RITUAIS) {
       const id = idRitual(r, diaDoRitual(r, agora))
       if (!deveLembrarRitual(config.lembretes[r], registros.find((x) => x.id === id), agora)) continue
       const aviso = `ritual|${id}`

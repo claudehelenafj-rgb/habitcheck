@@ -11,6 +11,7 @@ import {
   deveLembrarRitual,
   diaDoRitual,
   dosesSemResposta,
+  eDiaDaRevisao,
   escolhidasParaHoje,
   indiceDoPasso,
   paraODia,
@@ -80,10 +81,39 @@ describe('dia e hora do ritual', () => {
   })
 
   it('5 minutos contados do começo, sem passar de zero', () => {
-    const r = { comecouEm: em(8).toISOString() }
+    const r = { comecouEm: em(8).toISOString(), ritual: 'manha' as const }
     expect(segundosRestantesRitual(r, em(8))).toBe(300)
     expect(segundosRestantesRitual(r, em(8, 2))).toBe(180)
     expect(segundosRestantesRitual(r, em(9))).toBe(0)
+  })
+})
+
+describe('revisão semanal', () => {
+  it('passos: hobbies e dinheiro só quando ligados', () => {
+    expect(passosDoRitual('revisao', { checkin: false, remedios: false, desacelerar: false })).toEqual(['semana', 'alarmes', 'proximas', 'perguntas'])
+    expect(passosDoRitual('revisao', { checkin: true, remedios: true, desacelerar: true, hobbies: true, dinheiro: true })).toEqual([
+      'semana',
+      'alarmes',
+      'hobbies',
+      'dinheiro',
+      'proximas',
+      'perguntas',
+    ])
+  })
+
+  it('uma por semana (a segunda-feira) e 20 minutos', () => {
+    expect(diaDoRitual('revisao', em(18, 0, 1))).toBe('2026-09-28')
+    expect(diaDoRitual('revisao', new Date(2026, 10, 1, 18))).toBe('2026-10-26')
+    expect(diaDoRitual('revisao', new Date(2026, 10, 2, 9))).toBe('2026-11-02')
+    expect(segundosRestantesRitual({ comecouEm: em(18).toISOString(), ritual: 'revisao' }, em(18, 10))).toBe(600)
+  })
+
+  it('lembrete só no dia fixo', () => {
+    const l = { ativo: true, hora: '18:00', diaSemana: 0 }
+    expect(deveLembrarRitual(l, undefined, new Date(2026, 10, 1, 18, 5))).toBe(true)
+    expect(deveLembrarRitual(l, undefined, new Date(2026, 10, 2, 18, 5))).toBe(false)
+    expect(eDiaDaRevisao(l, new Date(2026, 10, 1, 9))).toBe(true)
+    expect(eDiaDaRevisao({ ativo: false, hora: '08:00' }, new Date(2026, 10, 1, 9))).toBe(false)
   })
 })
 

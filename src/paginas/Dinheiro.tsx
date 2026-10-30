@@ -76,7 +76,8 @@ function ItemConta({ conta, v, editar }: { conta: Conta; v: Vencimento; editar: 
   )
 }
 
-function ContasAPagar({ contas, hoje }: { contas: Conta[]; hoje: string }) {
+/** Contas a pagar (também usada nos 5 minutos de dinheiro da revisão semanal). */
+export function ContasAPagar({ contas, hoje }: { contas: Conta[]; hoje: string }) {
   const { t, i18n } = useTranslation()
   const [editando, setEditando] = useState<{ conta: Conta; nova: boolean } | null>(null)
   const ordenadas = ordenarContas(contas, hoje)

@@ -418,7 +418,8 @@ function MesDosHobbies({ hobbies, vezes }: { hobbies: Hobby[]; vezes: VezHobby[]
   )
 }
 
-export function Hobbies() {
+/** `compacto`: para a revisão semanal, sem o título, os arquivados e o mês. */
+export function Hobbies({ compacto = false }: { compacto?: boolean }) {
   const { t } = useTranslation()
   const dados = useHobbies()
   const [editando, setEditando] = useState<Hobby | 'novo' | null>(null)
@@ -433,12 +434,16 @@ export function Hobbies() {
   const deLado = ativos.filter((a) => a.situacao.tipo === 'deLado')
 
   return (
-    <section aria-labelledby="titulo-hobbies" className="cartao flex flex-col gap-5 bg-papel p-3 sm:p-6">
+    <section aria-labelledby={compacto ? undefined : 'titulo-hobbies'} className="cartao flex flex-col gap-5 bg-papel p-3 sm:p-6">
       <div className="flex flex-wrap items-center gap-3">
-        <Adesivo nome="flor" tamanho={44} />
-        <h2 id="titulo-hobbies" className="flex-1 text-2xl font-semibold">
-          {t('bemEstar.ferramentas.hobbies.nome')}
-        </h2>
+        {!compacto && (
+          <>
+            <Adesivo nome="flor" tamanho={44} />
+            <h2 id="titulo-hobbies" className="flex-1 text-2xl font-semibold">
+              {t('bemEstar.ferramentas.hobbies.nome')}
+            </h2>
+          </>
+        )}
         {editando === null && (
           <Botao variante="contorno" onClick={() => setEditando('novo')}>
             + {t('hobbies.novo')}
@@ -489,7 +494,7 @@ export function Hobbies() {
         </ul>
       )}
 
-      {arquivados.length > 0 && (
+      {!compacto && arquivados.length > 0 && (
         <details>
           <summary className="cursor-pointer font-semibold underline decoration-2 underline-offset-4">
             {t('hobbies.arquivados', { count: arquivados.length })}
@@ -510,7 +515,7 @@ export function Hobbies() {
         </details>
       )}
 
-      {dados.hobbies.length > 0 && (
+      {!compacto && dados.hobbies.length > 0 && (
         <>
           <hr className="border-t-2 border-linha/20" />
           <MesDosHobbies hobbies={dados.hobbies} vezes={dados.vezes} />

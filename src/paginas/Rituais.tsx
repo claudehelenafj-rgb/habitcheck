@@ -21,6 +21,7 @@ import {
   PassoTarefasA,
   type PropsPasso,
 } from '../componentes/PassosRitual'
+import { PassoAlarmes, PassoDinheiro, PassoHobbies, PassoPerguntas, PassoProximas, PassoSemana, RespostasAntigas } from '../componentes/PassosRevisao'
 import { useBemEstar, type ConfigBemEstar } from '../dados/bemEstar'
 import type { Perfil } from '../dados/perfil'
 import {
@@ -31,6 +32,7 @@ import {
   refazerRitual,
   terminarRitual,
   useConfigRituais,
+  useRevisoes,
   useRitual,
   useRituaisDesde,
 } from '../dados/rituais'
@@ -39,14 +41,16 @@ import { pedirPermissaoAvisos, permissaoAvisos, type PermissaoAvisos } from '../
 import { diaLocal, somarDias } from '../logica/datas'
 import { diasDaSemana } from '../logica/remedios'
 import {
-  DURACAO_RITUAL_MIN,
   diaDoRitual,
+  duracaoDoRitual,
+  eDiaDaRevisao,
   idRitual,
   indiceDoPasso,
   passosDoRitual,
   RITUAIS,
   ritualDaHora,
   segundosRestantesRitual,
+  TODOS_OS_RITUAIS,
   type ConfigRituais,
   type IdPassoRitual,
   type IdRitual,
@@ -54,9 +58,9 @@ import {
   type RegistroRitual,
 } from '../logica/rituais'
 
-const TOM: Record<IdRitual, string> = { manha: 'bg-manteiga', noite: 'bg-lavanda' }
-const ADESIVO: Record<IdRitual, 'sol' | 'lua'> = { manha: 'sol', noite: 'lua' }
-const COR_TIMER: Record<IdRitual, string> = { manha: 'var(--forte-laranja)', noite: 'var(--forte-ameixa)' }
+const TOM: Record<IdRitual, string> = { manha: 'bg-manteiga', noite: 'bg-lavanda', revisao: 'bg-azul-nevoa' }
+const ADESIVO: Record<IdRitual, 'sol' | 'lua' | 'calendario'> = { manha: 'sol', noite: 'lua', revisao: 'calendario' }
+const COR_TIMER: Record<IdRitual, string> = { manha: 'var(--forte-laranja)', noite: 'var(--forte-ameixa)', revisao: 'var(--forte-piscina)' }
 
 const PASSOS: Record<IdPassoRitual, (p: PropsPasso) => ReactNode> = {
   checkin: PassoCheckin,
@@ -68,18 +72,26 @@ const PASSOS: Record<IdPassoRitual, (p: PropsPasso) => ReactNode> = {
   caixa: PassoCaixa,
   amanha: PassoAmanha,
   desacelerar: PassoDesacelerar,
+  semana: PassoSemana,
+  alarmes: PassoAlarmes,
+  hobbies: PassoHobbies,
+  dinheiro: PassoDinheiro,
+  proximas: PassoProximas,
+  perguntas: PassoPerguntas,
 }
 
 const botaoLink = 'inline-flex min-h-11 items-center justify-center self-start rounded-full border-2 px-5 font-bold'
 const linkSublinhado = 'font-bold underline decoration-2 underline-offset-4'
 
-/** Check-in e desacelerar vêm do Bem-estar (aba e ferramenta ligadas); remédios e consultas, das áreas. */
+/** Check-in, desacelerar e hobbies vêm do Bem-estar (aba e ferramenta ligadas); remédios, consultas e dinheiro, das áreas. */
 export function opcoesDoRitual(perfil: Perfil, bemEstar: ConfigBemEstar): OpcoesRitual {
   const comBemEstar = perfil.areasAtivas.includes('bemestar')
   return {
     checkin: comBemEstar && bemEstar.ferramentas.includes('checkin'),
     remedios: perfil.areasAtivas.includes('remedios') || perfil.areasAtivas.includes('consultas'),
     desacelerar: comBemEstar && bemEstar.ferramentas.includes('sono'),
+    hobbies: comBemEstar && bemEstar.ferramentas.includes('hobbies'),
+    dinheiro: perfil.areasAtivas.includes('dinheiro'),
   }
 }
 
@@ -107,8 +119,20 @@ function useHora() {
 
 // ---------- tela dos rituais ----------
 
-function CartaoRitual({ ritual, registro, passos, daHora }: { ritual: IdRitual; registro?: RegistroRitual; passos: IdPassoRitual[]; daHora: boolean }) {
-  const { t } = useTranslation()
+function CartaoRitual({
+  ritual,
+  registro,
+  passos,
+  daHora,
+  extra,
+}: {
+  ritual: IdRitual
+  registro?: RegistroRitual
+  passos: IdPassoRitual[]
+  daHora: boolean
+  extra?: ReactNode
+}) {
+  const { t, i18n } = useTranslation()
   const hora = useHora()
   const feito = !!registro?.feitoEm
   const atual = registro ? indiceDoPasso(passos, registro.passo) : -1
@@ -119,9 +143,12 @@ function CartaoRitual({ ritual, registro, passos, daHora }: { ritual: IdRitual; 
         <h2 id={`titulo-${ritual}`} className="min-w-0 flex-1 text-2xl font-semibold">
           {t(`rituais.${ritual}`)}
         </h2>
-        <span className="rounded-full border-2 border-linha bg-papel px-3 py-0.5 text-sm font-bold">{t('rituais.cincoMin')}</span>
+        <span className="rounded-full border-2 border-linha bg-papel px-3 py-0.5 text-sm font-bold">
+          {ritual === 'revisao' ? t('rituais.vinteMin') : t('rituais.cincoMin')}
+        </span>
       </div>
       {daHora && !feito && <p className="rotulo">{t('rituais.daHora')}</p>}
+      {extra}
       <ol className="flex flex-col gap-1.5">
         {passos.map((p, i) => (
           <li key={p} className="flex items-center gap-2">
@@ -134,7 +161,15 @@ function CartaoRitual({ ritual, registro, passos, daHora }: { ritual: IdRitual; 
       </ol>
       {feito ? (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <p className="font-semibold">✓ {t('rituais.feitoAs', { hora: hora(registro!.feitoEm!) })}</p>
+          <p className="font-semibold">
+            ✓{' '}
+            {ritual === 'revisao'
+              ? t('rituais.feitaEm', {
+                  data: new Date(registro!.feitoEm!).toLocaleDateString(i18n.language, { weekday: 'long' }),
+                  hora: hora(registro!.feitoEm!),
+                })
+              : t('rituais.feitoAs', { hora: hora(registro!.feitoEm!) })}
+          </p>
           <Link to={`/rituais/${ritual}`} className={linkSublinhado}>
             {t('rituais.abrirDeNovo')}
           </Link>
@@ -169,18 +204,40 @@ function LembretesRituais({ config }: { config: ConfigRituais }) {
   const [permissao, setPermissao] = useState<PermissaoAvisos>(permissaoAvisos)
   const mudar = (ritual: IdRitual, m: Partial<ConfigRituais['lembretes'][IdRitual]>) =>
     mudarConfigRituais((c) => ({ lembretes: { ...c.lembretes, [ritual]: { ...c.lembretes[ritual], ...m } } }))
-  const algumLigado = RITUAIS.some((r) => config.lembretes[r].ativo)
+  const { i18n } = useTranslation()
+  const algumLigado = TODOS_OS_RITUAIS.some((r) => config.lembretes[r].ativo)
+  // domingo (0) a sábado (6), no idioma da pessoa (4 de outubro de 2026 foi um domingo)
+  const nomeDia = (d: number) => new Date(2026, 9, 4 + d, 12).toLocaleDateString(i18n.language, { weekday: 'long' })
   return (
     <section aria-labelledby="titulo-lembretes-rituais" className="cartao flex flex-col gap-4 bg-papel p-5">
       <h2 id="titulo-lembretes-rituais" className="text-xl font-semibold">
         {t('rituais.lembretes')}
       </h2>
       <div className="flex flex-wrap gap-x-8 gap-y-4">
-        {RITUAIS.map((r) => {
+        {TODOS_OS_RITUAIS.map((r) => {
           const l = config.lembretes[r]
           return (
             <fieldset key={r} className="flex flex-wrap items-center gap-3">
               <legend className="mb-1.5 font-bold">{t(`rituais.${r}`)}</legend>
+              {l.diaSemana !== undefined && (
+                <label className="flex items-center gap-2">
+                  <span className="so-leitor">{t('rituais.diaDaRevisao')}</span>
+                  <select
+                    value={l.diaSemana}
+                    onChange={(e) => {
+                      const diaSemana = Number(e.target.value)
+                      void mudar(r, { diaSemana })
+                    }}
+                    className="min-h-11 rounded-full border-2 border-linha bg-papel px-4"
+                  >
+                    {[0, 1, 2, 3, 4, 5, 6].map((d) => (
+                      <option key={d} value={d}>
+                        {nomeDia(d)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <label className="flex min-h-11 items-center gap-2">
                 <input type="checkbox" checked={l.ativo} onChange={(e) => mudar(r, { ativo: e.target.checked })} className="h-5 w-5 accent-[var(--chocolate)]" />
                 {t('rituais.avisarAs')}
@@ -217,8 +274,39 @@ function LembretesRituais({ config }: { config: ConfigRituais }) {
   )
 }
 
+function HistoricoRevisoes() {
+  const { t, i18n } = useTranslation()
+  const revisoes = useRevisoes()
+  if (!revisoes) return null
+  const comRespostas = revisoes
+    .filter((r) => r.feitoEm && Object.values(r.respostas ?? {}).some((v) => v?.trim()))
+    .sort((a, b) => b.dia.localeCompare(a.dia))
+  if (!comRespostas.length) return null
+  return (
+    <section aria-labelledby="titulo-historico-revisoes" className="cartao flex flex-col gap-3 bg-papel p-5">
+      <h2 id="titulo-historico-revisoes" className="text-xl font-semibold">
+        {t('rituais.revisoesAnteriores', { count: comRespostas.length })}
+      </h2>
+      <ul className="flex flex-col gap-2">
+        {comRespostas.map((r) => (
+          <li key={r.id}>
+            <details className="rounded-2xl border-2 border-linha/40 p-3">
+              <summary className="cursor-pointer font-bold">
+                {t('rituais.revisaoDe', { data: new Date(`${r.dia}T12:00:00`).toLocaleDateString(i18n.language, { day: 'numeric', month: 'long' }) })}
+              </summary>
+              <div className="mt-2">
+                <RespostasAntigas revisao={r} />
+              </div>
+            </details>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
 export function Rituais() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { perfil } = useOutletContext<ContextoMoldura>()
   const agora = useAgora(60_000)
   const hoje = diaLocal(agora)
@@ -256,6 +344,25 @@ export function Rituais() {
           <SemanaRitual key={r} ritual={r} registros={registros} hoje={hoje} />
         ))}
       </div>
+      <div className="grid items-start gap-4 lg:grid-cols-2">
+        <CartaoRitual
+          ritual="revisao"
+          registro={registros.find((x) => x.id === idRitual('revisao', diaDoRitual('revisao', agora)))}
+          passos={passosDoRitual('revisao', opcoes)}
+          daHora={eDiaDaRevisao(config.lembretes.revisao, agora)}
+          extra={
+            config.lembretes.revisao.ativo && (
+              <p className="text-sm font-semibold">
+                {t('rituais.proximaRevisao', {
+                  dia: new Date(2026, 9, 4 + (config.lembretes.revisao.diaSemana ?? 0), 12).toLocaleDateString(i18n.language, { weekday: 'long' }),
+                  hora: config.lembretes.revisao.hora,
+                })}
+              </p>
+            )
+          }
+        />
+        <HistoricoRevisoes />
+      </div>
       <LembretesRituais config={config} />
     </div>
   )
@@ -270,7 +377,7 @@ function TimerRitual({ ritual, registro }: { ritual: IdRitual; registro: Registr
   return (
     <div className="flex items-center gap-3">
       <TimerVisual
-        fracaoRestante={segundos / (DURACAO_RITUAL_MIN * 60)}
+        fracaoRestante={segundos / (duracaoDoRitual(ritual) * 60)}
         rotulo={segundos > 0 ? t('rituais.faltam', { count: Math.ceil(segundos / 60) }) : t('rituais.acabou')}
         cor={COR_TIMER[ritual]}
         tamanho={72}
@@ -300,11 +407,11 @@ function Fim({ ritual, registro, primeiro, titulo }: { ritual: IdRitual; registr
           <Adesivo nome={ADESIVO[ritual]} tamanho={96} />
         </span>
         <h2 id="titulo-fim" ref={titulo} tabIndex={-1} className="text-3xl font-semibold outline-none">
-          {t(ritual === 'manha' ? 'rituais.prontoManha' : 'rituais.prontoNoite')}
+          {t(ritual === 'manha' ? 'rituais.prontoManha' : ritual === 'revisao' ? 'rituais.prontoRevisao' : 'rituais.prontoNoite')}
         </h2>
         <p>{t('rituais.feitoAsHora', { hora: hora(registro.feitoEm!) })}</p>
         <div className="flex flex-wrap justify-center gap-2">
-          {ritual === 'manha' && (
+          {ritual !== 'noite' && (
             <Link to="/hoje" className={`${botaoLink} border-botao bg-botao text-botao-texto`}>
               {t('rituais.irParaHoje')}
             </Link>
@@ -399,7 +506,7 @@ function RitualGuiado({ ritual }: { ritual: IdRitual }) {
               </h2>
               <p className="mt-1 max-w-prose">{t(`rituais.dicas.${passo}`)}</p>
             </div>
-            <Conteudo dia={dia} agora={agora} perfil={perfil} />
+            <Conteudo dia={dia} agora={agora} perfil={perfil} registro={registro} />
           </section>
           <div className="flex flex-wrap items-center gap-3">
             <Link to="/rituais" className={linkSublinhado}>
@@ -423,6 +530,6 @@ function RitualGuiado({ ritual }: { ritual: IdRitual }) {
 
 export function Ritual() {
   const { ritual } = useParams()
-  if (ritual !== 'manha' && ritual !== 'noite') return <Navigate to="/rituais" replace />
+  if (ritual !== 'manha' && ritual !== 'noite' && ritual !== 'revisao') return <Navigate to="/rituais" replace />
   return <RitualGuiado key={ritual} ritual={ritual} />
 }

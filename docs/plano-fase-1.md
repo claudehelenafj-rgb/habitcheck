@@ -112,7 +112,7 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | 13 | **Dinheiro**: potes da semana e gasto rápido pelo ⌘K (parte 2) | Pronta |
 | 13 | **Dinheiro**: pausa antes de comprar e cofrinho (parte 3) | Pronta |
 | 14 | **Rituais** da manhã e da noite, guiados, com check-in e rotina de desacelerar (parte 1) | Pronta |
-| 14 | Revisão semanal (com 5 min de dinheiro e os hobbies) (parte 2) | |
+| 14 | **Revisão semanal** (com 5 min de dinheiro, os hobbies e os avisos sem resposta) (parte 2) | Pronta |
 | 15 | **Meus objetivos** com gráficos | |
 | 16 | Álbum de adesivos, recompensas e conferência final | |
 
@@ -286,11 +286,30 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
   nos blocos da manhã e da noite, com ✓ quando feitos. O cartão do plano de 2 semanas abre os rituais nos dias 3 a 6.
 - Ao mudar uma tarefa de lista, o foco do teclado vai para a próxima, e não para o começo da página.
 
+### Revisão semanal (etapa 14, parte 2)
+
+- Terceiro cartão da tela Rituais: 20 minutos, dia e hora fixos (padrão: domingo às 18h), com lembrete opcional que toca
+  uma vez no dia, se a revisão da semana ainda não foi feita. No dia, ela aparece também na linha do dia da tela Hoje,
+  no bloco da hora marcada. O cartão do plano de 2 semanas abre a revisão nos dias 7 e 14.
+- Uma revisão por semana; guiada, um passo por vez, com o timer de 20 minutos; sair no meio guarda o passo e as respostas.
+  1. A semana: só o que foi feito nos últimos 7 dias (tarefas, vezes de cada hábito, rituais da manhã e da noite).
+  2. Avisos sem resposta: doses com aviso e sem resposta, e lembretes de hábito, refeição e ritual que tocaram num dia
+     em que a coisa não foi feita, dos mais repetidos para os menos. Para cada um: mudar o horário, desligar o aviso
+     (no remédio, tirar aquele horário, se houver outro) ou deixar como está, com desfazer. O registro dos avisos já
+     mostrados guarda os 400 mais recentes, para cobrir a semana.
+  3. Hobbies (com o Bem-estar e os hobbies ligados, atrás do PIN): os hobbies, para escolher um e marcar um horário.
+  4. 5 minutos de dinheiro (com a área ligada), com timer próprio: contas a pagar, potes da semana e cofrinho.
+  5. As próximas 2 semanas: compromissos, provas, contas e tarefas A de cada dia.
+  6. "O que funcionou? O que travou? O que eu ajusto?", salvo enquanto a pessoa escreve, lembrando o que ela combinou
+     na revisão anterior; no dia 14 do plano, "quer ativar mais uma área?".
+- Histórico das revisões com as respostas, na tela Rituais. A pergunta "isso ainda é importante pra mim?" dos objetivos
+  entra na etapa 15.
+
 ## Lógica com testes automáticos
 
 Horários de lembretes (adiar, repetir, silêncio), recorrências, vencimento de contas (ex.: dia 31 em mês de 30 dias),
 saldo dos potes e virada da semana, espera de 48 h da lista de desejos, progresso do cofrinho, planejamento reverso (prova → sessões; consulta → alarmes),
 avisos do semestre, fases do modo foco e "achei × levou", aviso do estudo acompanhado, hábitos (semana, pendente hoje, véspera), reset do quarto, refeições e água, ideias de comida e lista de compras, contas, potes e gasto rápido, pausa de 48 h, cofrinho, estoque de remédio, "X de 7 dias", limite de 3 tarefas A, escolha do cartão "Agora",
 importação de .ics sem duplicar, passos e dia dos rituais (a noite até as 5h), escolha das tarefas A e pendências da noite,
-agenda do dia, leitura do plano alimentar (títulos, horários, opções, "lanche" da manhã ou da tarde), e o contraste de todas
+agenda do dia, resumo da semana e avisos sem resposta da revisão, leitura do plano alimentar (títulos, horários, opções, "lanche" da manhã ou da tarde), e o contraste de todas
 as cores usadas.

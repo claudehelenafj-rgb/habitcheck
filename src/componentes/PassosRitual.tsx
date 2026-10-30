@@ -30,6 +30,7 @@ import {
   pendenciasDoDia,
   virarB,
   type ItemAgenda,
+  type RegistroRitual,
 } from '../logica/rituais'
 import { noiteDaRotina } from '../logica/sono'
 import { cabeTarefaA, LIMITE_TAREFAS_A } from '../logica/tarefas'
@@ -42,7 +43,7 @@ import { ListaCaixa } from './ListaCaixa'
 import { ProtecaoBemEstar } from './ProtecaoBemEstar'
 import { RotinaDesacelerar } from './Sono'
 
-export type PropsPasso = { dia: Dia; agora: Date; perfil: Perfil }
+export type PropsPasso = { dia: Dia; agora: Date; perfil: Perfil; registro?: RegistroRitual }
 
 const link = 'self-start font-bold underline decoration-2 underline-offset-4'
 const linha = 'flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border-2 border-linha/40 bg-papel px-3 py-2'

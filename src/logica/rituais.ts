@@ -1,6 +1,8 @@
 // Rituais de 5 minutos (seção 4.7 do guia). De manhã: ver o dia, escolher até 3 tarefas A, conferir remédios e
 // consultas. À noite: marcar o que foi feito, passar pendências, esvaziar a caixa de entrada e preparar o dia seguinte.
 // Com o Bem-estar ligado, entram o check-in (manhã) e a rotina de desacelerar (noite).
+// Revisão semanal (20 min, dia e hora fixos): a semana, os avisos sem resposta, os hobbies, 5 minutos de dinheiro,
+// as próximas 2 semanas e "o que funcionou? o que travou? o que eu ajusto?".
 
 import type { Tarefa } from '../dados/banco'
 import { ocorrencias, type Evento } from './calendario'
@@ -8,38 +10,72 @@ import { planoReverso, situacaoMarcar, type Consulta } from './consultas'
 import { diaLocal, diasEntre, somarDias, type Dia } from './datas'
 import { proximoVencimento, type Centavos, type Conta, type EstadoConta } from './dinheiro'
 import type { Avaliacao } from './faculdade'
-import { estadoDose, type DosePrevista, type RegistroDose } from './remedios'
+import { diasDaSemana, estadoDose, type DosePrevista, type RegistroDose } from './remedios'
 import { dentroDaJanela } from './sono'
 import { tarefasADoDia } from './tarefas'
 
-export type IdRitual = 'manha' | 'noite'
+export type IdRitual = 'manha' | 'noite' | 'revisao'
+/** Os rituais do dia (5 minutos cada). */
 export const RITUAIS: IdRitual[] = ['manha', 'noite']
+export const TODOS_OS_RITUAIS: IdRitual[] = ['manha', 'noite', 'revisao']
 
-export type IdPassoRitual = 'checkin' | 'dia' | 'tarefasA' | 'remedios' | 'feito' | 'pendencias' | 'caixa' | 'amanha' | 'desacelerar'
+export type IdPassoRitual =
+  | 'checkin'
+  | 'dia'
+  | 'tarefasA'
+  | 'remedios'
+  | 'feito'
+  | 'pendencias'
+  | 'caixa'
+  | 'amanha'
+  | 'desacelerar'
+  | 'semana'
+  | 'alarmes'
+  | 'hobbies'
+  | 'dinheiro'
+  | 'proximas'
+  | 'perguntas'
 
 export const DURACAO_RITUAL_MIN = 5
+export const DURACAO_REVISAO_MIN = 20
+/** O passo do dinheiro na revisão: 5 minutos. */
+export const DURACAO_DINHEIRO_MIN = 5
 
-/** Um ritual de um dia: em que passo parou e quando terminou. id = `${ritual}|${dia}`. */
+export function duracaoDoRitual(ritual: IdRitual): number {
+  return ritual === 'revisao' ? DURACAO_REVISAO_MIN : DURACAO_RITUAL_MIN
+}
+
+export type RespostasRevisao = { funcionou?: string; travou?: string; ajusto?: string }
+
+/**
+ * Um ritual de um dia (a revisão: de uma semana, pela segunda-feira): em que passo parou e quando terminou.
+ * id = `${ritual}|${dia}`.
+ */
 export type RegistroRitual = {
   id: string
   ritual: IdRitual
   dia: Dia
-  /** início dos 5 minutos (dá para recomeçar) */
+  /** início do timer (dá para recomeçar) */
   comecouEm: string // ISO
   passo: IdPassoRitual
+  /** quando entrou no passo atual (o dinheiro da revisão tem 5 minutos só dele) */
+  passoDesde?: string // ISO
   feitoEm?: string // ISO
+  respostas?: RespostasRevisao
 }
 
 export function idRitual(ritual: IdRitual, dia: Dia): string {
   return `${ritual}|${dia}`
 }
 
-/** O que está ligado e muda os passos: check-in e sono (Bem-estar), remédios ou consultas. */
-export type OpcoesRitual = { checkin: boolean; remedios: boolean; desacelerar: boolean }
+/** O que está ligado e muda os passos: check-in, sono e hobbies (Bem-estar), remédios ou consultas, dinheiro. */
+export type OpcoesRitual = { checkin: boolean; remedios: boolean; desacelerar: boolean; hobbies?: boolean; dinheiro?: boolean }
 
 /** Passos de cada ritual, sempre na mesma ordem. Os opcionais só aparecem com a ferramenta ou a área ligada. */
 export function passosDoRitual(ritual: IdRitual, op: OpcoesRitual): IdPassoRitual[] {
   if (ritual === 'manha') return [...(op.checkin ? (['checkin'] as const) : []), 'dia', 'tarefasA', ...(op.remedios ? (['remedios'] as const) : [])]
+  if (ritual === 'revisao')
+    return ['semana', 'alarmes', ...(op.hobbies ? (['hobbies'] as const) : []), ...(op.dinheiro ? (['dinheiro'] as const) : []), 'proximas', 'perguntas']
   return ['feito', 'pendencias', 'caixa', 'amanha', ...(op.desacelerar ? (['desacelerar'] as const) : [])]
 }
 
@@ -48,9 +84,10 @@ export function indiceDoPasso(passos: IdPassoRitual[], passo: IdPassoRitual | un
   return Math.max(0, passo ? passos.indexOf(passo) : 0)
 }
 
-/** A noite vai até as 5h: o ritual da noite feito à 1h é o do dia anterior. */
+/** A noite vai até as 5h: o ritual da noite feito à 1h é o do dia anterior. A revisão é uma por semana (a segunda-feira). */
 export function diaDoRitual(ritual: IdRitual, agora: Date): Dia {
   const hoje = diaLocal(agora)
+  if (ritual === 'revisao') return diasDaSemana(hoje)[0]
   return ritual === 'noite' && agora.getHours() < 5 ? somarDias(hoje, -1) : hoje
 }
 
@@ -60,9 +97,9 @@ export function ritualDaHora(agora: Date): IdRitual {
   return h >= 5 && h < 15 ? 'manha' : 'noite'
 }
 
-export function segundosRestantesRitual(r: Pick<RegistroRitual, 'comecouEm'>, agora: Date): number {
+export function segundosRestantesRitual(r: Pick<RegistroRitual, 'comecouEm' | 'ritual'>, agora: Date): number {
   const passou = (agora.getTime() - new Date(r.comecouEm).getTime()) / 1000
-  return Math.max(0, Math.ceil(DURACAO_RITUAL_MIN * 60 - passou))
+  return Math.max(0, Math.ceil(duracaoDoRitual(r.ritual) * 60 - passou))
 }
 
 // ---------- Tarefas A (manhã) e pendências (noite) ----------
@@ -153,14 +190,25 @@ export function dosesSemResposta(doses: DosePrevista[], registros: RegistroDose[
 
 // ---------- Lembretes ----------
 
-export type LembreteRitual = { ativo: boolean; hora: string }
+/** `diaSemana` (0 = domingo): só para a revisão semanal, que tem dia fixo. */
+export type LembreteRitual = { ativo: boolean; hora: string; diaSemana?: number }
 export type ConfigRituais = { lembretes: Record<IdRitual, LembreteRitual> }
 
 export const CONFIG_RITUAIS_PADRAO: ConfigRituais = {
-  lembretes: { manha: { ativo: false, hora: '08:00' }, noite: { ativo: false, hora: '21:30' } },
+  lembretes: {
+    manha: { ativo: false, hora: '08:00' },
+    noite: { ativo: false, hora: '21:30' },
+    revisao: { ativo: false, hora: '18:00', diaSemana: 0 },
+  },
 }
 
-/** Lembra uma vez, até 30 min depois do horário, se o ritual daquele dia ainda não foi feito. */
+/** Lembra uma vez, até 30 min depois do horário (no dia fixo, para a revisão), se ainda não foi feito. */
 export function deveLembrarRitual(lembrete: LembreteRitual | undefined, registro: Pick<RegistroRitual, 'feitoEm'> | undefined, agora: Date): boolean {
+  if (lembrete?.diaSemana !== undefined && agora.getDay() !== lembrete.diaSemana) return false
   return !!lembrete?.ativo && !registro?.feitoEm && dentroDaJanela(lembrete.hora, agora)
+}
+
+/** A revisão é hoje (dia fixo)? */
+export function eDiaDaRevisao(lembrete: LembreteRitual | undefined, agora: Date): boolean {
+  return lembrete?.diaSemana !== undefined && agora.getDay() === lembrete.diaSemana
 }

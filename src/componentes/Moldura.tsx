@@ -290,7 +290,10 @@ function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
           t('alimentacao.avisoTitulo', { refeicao: doPlano?.nome || nomeRefeicao(t, r) }),
           doPlano?.opcoes.length ? t('planoAlimentar.avisoCorpo', { opcoes: resumoDasOpcoes(doPlano.opcoes, t('planoAlimentar.ou')) }) : t('alimentacao.avisoCorpo'),
         ] as [string, string],
-      ritual: (r: 'manha' | 'noite') => [t(r === 'manha' ? 'rituais.avisoManha' : 'rituais.avisoNoite'), t('rituais.avisoCorpo')] as [string, string],
+      ritual: (r: 'manha' | 'noite' | 'revisao') =>
+        (r === 'revisao'
+          ? [t('rituais.avisoRevisao'), t('rituais.avisoRevisaoCorpo')]
+          : [t(r === 'manha' ? 'rituais.avisoManha' : 'rituais.avisoNoite'), t('rituais.avisoCorpo')]) as [string, string],
       fimFoco: textosFimFoco(t),
       discretoTitulo: t('avisos.discretoTitulo'),
       discretoCorpo: t('avisos.discretoCorpo'),
