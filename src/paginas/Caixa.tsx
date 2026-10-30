@@ -1,50 +1,22 @@
 // Caixa de entrada: tudo o que foi despejado na captura rápida, esperando uma decisão.
 
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useOutletContext } from 'react-router'
 import { Adesivo } from '../componentes/Adesivo'
-import { mostrarAviso } from '../componentes/Avisos'
 import { Botao } from '../componentes/Botao'
 import { abrirCaptura, ATALHO_CAPTURA } from '../componentes/Captura'
-import { EditorEvento } from '../componentes/EditorEvento'
-import { EditorHabito } from '../componentes/EditorHabito'
+import { ListaCaixa } from '../componentes/ListaCaixa'
 import type { ContextoMoldura } from '../componentes/Moldura'
-import { novoHabito } from '../dados/habitos'
-import { AREAS } from '../design/areas'
 import { AREAS_COM_HABITOS } from '../logica/habitos'
-import { EditorTarefa } from '../componentes/EditorTarefa'
-import { novoEvento } from '../dados/eventos'
-import type { ItemCaixa } from '../dados/banco'
-import { desfazerResolucao, novaTarefa, resolverItem, useCaixaAberta } from '../dados/tarefas'
-
-function tempoRelativo(iso: string, idioma: string): string {
-  const segundos = (new Date(iso).getTime() - Date.now()) / 1000
-  const rtf = new Intl.RelativeTimeFormat(idioma, { numeric: 'auto' })
-  const passos: Array<[Intl.RelativeTimeFormatUnit, number]> = [
-    ['day', 86400],
-    ['hour', 3600],
-    ['minute', 60],
-  ]
-  for (const [unidade, s] of passos) if (Math.abs(segundos) >= s) return rtf.format(Math.round(segundos / s), unidade)
-  return rtf.format(0, 'minute')
-}
+import { useCaixaAberta } from '../dados/tarefas'
 
 export function Caixa() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const itens = useCaixaAberta()
-  const [virando, setVirando] = useState<ItemCaixa | null>(null)
-  const [virandoEvento, setVirandoEvento] = useState<ItemCaixa | null>(null)
-  const [virandoHabito, setVirandoHabito] = useState<ItemCaixa | null>(null)
   const { perfil } = useOutletContext<ContextoMoldura>()
   // "Virar hábito" vale para as áreas com hábitos que estão ligadas
   const areasHabito = AREAS_COM_HABITOS.filter((a) => perfil.areasAtivas.includes(a))
   if (!itens) return null
-
-  async function resolver(item: ItemCaixa, destino: 'feito' | 'lixo') {
-    await resolverItem(item.id, destino)
-    mostrarAviso(destino === 'lixo' ? t('caixa.foiLixo') : t('caixa.resolvido'), () => desfazerResolucao(item.id))
-  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -71,78 +43,8 @@ export function Caixa() {
           <p className="rotulo" aria-live="polite">
             {t('caixa.contagem', { count: itens.length })}
           </p>
-          <ul className="flex flex-col gap-3">
-            {itens.map((item) => (
-              <li key={item.id} className="cartao flex flex-col gap-3 bg-papel p-4 sm:flex-row sm:items-center">
-                <div className="min-w-0 flex-1">
-                  <p className="text-lg font-semibold break-words">{item.texto}</p>
-                  <p className="text-xs text-tinta-suave">{tempoRelativo(item.criadoEm, i18n.language)}</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Botao className="min-h-10 px-4 text-sm" onClick={() => setVirando(item)}>
-                    {t('caixa.virarTarefa')}
-                  </Botao>
-                  <Botao variante="secundario" tom="bg-manteiga" className="min-h-10 px-4 text-sm" onClick={() => setVirandoEvento(item)}>
-                    {t('caixa.virarEvento')}
-                  </Botao>
-                  {areasHabito.length > 0 && (
-                    <Botao variante="secundario" tom="bg-pessego" className="min-h-10 px-4 text-sm" onClick={() => setVirandoHabito(item)}>
-                      {t('caixa.virarHabito')}
-                    </Botao>
-                  )}
-                  <Botao variante="secundario" tom="bg-menta" className="min-h-10 px-4 text-sm" onClick={() => resolver(item, 'feito')}>
-                    ✓ {t('caixa.jaResolvi')}
-                  </Botao>
-                  <Botao variante="contorno" className="min-h-10 px-4 text-sm" onClick={() => resolver(item, 'lixo')}>
-                    {t('caixa.lixo')}
-                  </Botao>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <ListaCaixa itens={itens} areasHabito={areasHabito} />
         </>
-      )}
-
-      {virandoHabito && (
-        <EditorHabito
-          habito={novoHabito({ area: areasHabito[0], adesivo: AREAS[areasHabito[0]].adesivo, titulo: virandoHabito.texto })}
-          novo
-          areas={areasHabito}
-          fechar={() => setVirandoHabito(null)}
-          aoSalvar={async () => {
-            await resolverItem(virandoHabito.id, 'habito')
-            mostrarAviso(t('caixa.virouHabito'))
-          }}
-        />
-      )}
-
-      {virandoEvento && (
-        <EditorEvento
-          evento={(() => {
-            const amanha9 = new Date()
-            amanha9.setDate(amanha9.getDate() + 1)
-            amanha9.setHours(9, 0, 0, 0)
-            return novoEvento(amanha9, virandoEvento.texto)
-          })()}
-          novo
-          fechar={() => setVirandoEvento(null)}
-          aoSalvar={async () => {
-            await resolverItem(virandoEvento.id, 'evento')
-            mostrarAviso(t('editorEvento.virouEvento'))
-          }}
-        />
-      )}
-
-      {virando && (
-        <EditorTarefa
-          tarefa={novaTarefa(virando.texto)}
-          nova
-          fechar={() => setVirando(null)}
-          aoSalvar={async () => {
-            await resolverItem(virando.id, 'tarefa')
-            mostrarAviso(t('caixa.virouTarefa'))
-          }}
-        />
       )}
     </div>
   )

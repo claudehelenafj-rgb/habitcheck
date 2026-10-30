@@ -37,7 +37,7 @@ export const TELAS_PRINCIPAIS: Tela[] = [
   { id: 'tarefas', caminho: '/tarefas', adesivo: 'lista', atalho: 't' },
   { id: 'caixa', caminho: '/caixa', adesivo: 'envelope', atalho: 'x' },
   { id: 'objetivos', caminho: '/objetivos', adesivo: 'estrela', atalho: 'o', etapa: 15 },
-  { id: 'rituais', caminho: '/rituais', adesivo: 'lua', atalho: 'r', etapa: 14 },
+  { id: 'rituais', caminho: '/rituais', adesivo: 'lua', atalho: 'r' },
 ]
 
 export const TELAS_AREAS: Tela[] = [

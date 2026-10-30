@@ -18,6 +18,7 @@ import { Academia } from './paginas/Academia'
 import { Quarto } from './paginas/Quarto'
 import { Alimentacao } from './paginas/Alimentacao'
 import { Dinheiro } from './paginas/Dinheiro'
+import { Ritual, Rituais } from './paginas/Rituais'
 import { ResetQuarto } from './paginas/ResetQuarto'
 import { Foco } from './paginas/Foco'
 import { GuiaDeEstilo } from './paginas/GuiaDeEstilo'
@@ -46,6 +47,8 @@ const roteador = createHashRouter([
       { path: '/quarto', element: <Quarto /> },
       { path: '/alimentacao', element: <Alimentacao /> },
       { path: '/dinheiro', element: <Dinheiro /> },
+      { path: '/rituais', element: <Rituais /> },
+      { path: '/rituais/:ritual', element: <Ritual /> },
       ...TODAS_AS_TELAS.filter((tela) => tela.etapa).map((tela) => ({
         path: tela.caminho,
         element: <EmBreve tela={tela} />,

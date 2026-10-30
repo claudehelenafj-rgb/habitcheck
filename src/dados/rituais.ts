@@ -1,0 +1,66 @@
+// Rituais no banco local: um registro por ritual e por dia (tabela rituais) e os lembretes
+// (configuracoes, chave "rituais").
+
+import { useLiveQuery } from 'dexie-react-hooks'
+import type { Dia } from '../logica/datas'
+import { CONFIG_RITUAIS_PADRAO, idRitual, type ConfigRituais, type IdPassoRitual, type IdRitual, type RegistroRitual } from '../logica/rituais'
+import { banco } from './banco'
+
+const CHAVE = 'rituais'
+
+async function lerConfig(): Promise<ConfigRituais> {
+  const guardada = (await banco.configuracoes.get(CHAVE))?.valor as Partial<ConfigRituais> | undefined
+  return { lembretes: { ...CONFIG_RITUAIS_PADRAO.lembretes, ...guardada?.lembretes } }
+}
+
+export function useConfigRituais(): ConfigRituais | undefined {
+  return useLiveQuery(lerConfig, [])
+}
+
+/** Muda a partir do que está guardado agora (mudanças rápidas não se apagam). */
+export async function mudarConfigRituais(mudar: (c: ConfigRituais) => Partial<ConfigRituais>) {
+  await banco.transaction('rw', banco.configuracoes, async () => {
+    const atual = await lerConfig()
+    await banco.configuracoes.put({ chave: CHAVE, valor: { ...atual, ...mudar(atual) } })
+  })
+}
+
+/** null = ainda não começou neste dia; undefined = carregando */
+export function useRitual(ritual: IdRitual, dia: Dia): RegistroRitual | null | undefined {
+  return useLiveQuery(async () => (await banco.rituais.get(idRitual(ritual, dia))) ?? null, [ritual, dia])
+}
+
+/** Rituais a partir de um dia (para a semana em adesivos e a revisão semanal). */
+export function useRituaisDesde(dia: Dia): RegistroRitual[] | undefined {
+  return useLiveQuery(() => banco.rituais.where('dia').aboveOrEqual(dia).toArray(), [dia])
+}
+
+/** Começa o ritual do dia (ou devolve o que já existe, para continuar de onde parou). */
+export async function comecarRitual(ritual: IdRitual, dia: Dia, primeiro: IdPassoRitual): Promise<RegistroRitual> {
+  return banco.transaction('rw', banco.rituais, async () => {
+    const id = idRitual(ritual, dia)
+    const ja = await banco.rituais.get(id)
+    if (ja) return ja
+    const novo: RegistroRitual = { id, ritual, dia, comecouEm: new Date().toISOString(), passo: primeiro }
+    await banco.rituais.add(novo)
+    return novo
+  })
+}
+
+export async function irParaPasso(id: string, passo: IdPassoRitual) {
+  await banco.rituais.update(id, { passo })
+}
+
+/** Os 5 minutos contam de novo a partir de agora. */
+export async function recomecarTimer(id: string) {
+  await banco.rituais.update(id, { comecouEm: new Date().toISOString() })
+}
+
+export async function terminarRitual(id: string) {
+  await banco.rituais.update(id, { feitoEm: new Date().toISOString() })
+}
+
+/** Fazer de novo: volta ao primeiro passo, com 5 minutos novos. */
+export async function refazerRitual(id: string, primeiro: IdPassoRitual) {
+  await banco.rituais.update(id, { feitoEm: undefined, passo: primeiro, comecouEm: new Date().toISOString() })
+}

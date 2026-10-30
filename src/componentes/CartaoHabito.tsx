@@ -36,7 +36,7 @@ export function textosVespera(t: TFunction, h: Pick<Habito, 'titulo' | 'base' | 
 }
 
 /** Base de lançamento: o que deixar pronto (e o "combinei com…") para o próximo dia do hábito. */
-function BaseDeLancamento({ habito, registros }: { habito: Habito; registros: RegistroHabito[] }) {
+export function BaseDeLancamento({ habito, registros }: { habito: Habito; registros: RegistroHabito[] }) {
   const { t, i18n } = useTranslation()
   const agora = new Date()
   const dia = diaDoPreparo(habito, registros, agora)

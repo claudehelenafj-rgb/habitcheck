@@ -111,7 +111,8 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | 13 | **Dinheiro**: contas a pagar (parte 1) | Pronta |
 | 13 | **Dinheiro**: potes da semana e gasto rápido pelo ⌘K (parte 2) | Pronta |
 | 13 | **Dinheiro**: pausa antes de comprar e cofrinho (parte 3) | Pronta |
-| 14 | Rituais e revisão semanal (com 5 min de dinheiro) | |
+| 14 | **Rituais** da manhã e da noite, guiados, com check-in e rotina de desacelerar (parte 1) | Pronta |
+| 14 | Revisão semanal (com 5 min de dinheiro e os hobbies) (parte 2) | |
 | 15 | **Meus objetivos** com gráficos | |
 | 16 | Álbum de adesivos, recompensas e conferência final | |
 
@@ -241,9 +242,32 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
   foco, "Ver como tabela" em reais). O campo `objetivoId` fica pronto para ligar o cofrinho a um objetivo (etapa 15).
 - O gráfico de colunas aceita valores formatados (reais) e o "Ver como tabela" fala português e inglês.
 
+## Rituais (etapa 14)
+
+- Tela Rituais (atalho R): estampa no alto, letreiro com frases curtas, os dois rituais com os passos de cada um,
+  "é a hora deste" (manhã das 5h às 15h; noite depois), a semana em adesivos de cada um e os lembretes.
+- Cada ritual é guiado, um passo por vez, com o timer visual de 5 minutos. Passou dos 5 minutos: "tudo bem passar",
+  e dá para pedir mais 5. Sair no meio guarda o passo ("Continuar no passo 3 de 4"); dá para pular para qualquer
+  passo pela barrinha de cima. No fim, "Pronto!" com a hora e "Fazer de novo".
+- Manhã: como você está (check-in curto, só com o Bem-estar e o check-in ligados, atrás do PIN); ver o dia
+  (consultas com a hora de se arrumar, eventos, provas e entregas, contas do dia, hábitos de hoje); escolher até 3
+  tarefas A (primeiro as A que ficaram de outro dia, depois as A sem dia, as B e as C; escolher o bloco; tirar de
+  hoje vira B; "outra coisa para hoje"); remédios e consultas (doses de hoje com "tomei"; consultas dos próximos
+  7 dias e as que já está na hora de marcar), só com essas áreas ligadas.
+- Noite: marcar o que fez (tarefas do dia, hábitos com "fiz" e "fiz o mínimo", doses sem resposta); passar
+  pendências (para amanhã, se couber no limite de 3 A, ou virar B); esvaziar a caixa de entrada (as mesmas decisões
+  da tela da caixa); preparar amanhã (o que está marcado, as A de amanhã e a base de lançamento dos hábitos);
+  desacelerar (a rotina do sono e a hora de acordar, só com o Bem-estar e o sono ligados, atrás do PIN).
+- A noite vai até as 5h: o ritual feito à 1h conta para o dia anterior.
+- Lembrete opcional de cada ritual num horário fixo: toca uma vez, até 30 min depois, só se o ritual ainda não foi
+  feito (respeita os avisos discretos). Na tela Hoje, "Ritual da manhã · 5 min" e "Ritual da noite · 5 min" ficam
+  nos blocos da manhã e da noite, com ✓ quando feitos. O cartão do plano de 2 semanas abre os rituais nos dias 3 a 6.
+- Ao mudar uma tarefa de lista, o foco do teclado vai para a próxima, e não para o começo da página.
+
 ## Lógica com testes automáticos
 
 Horários de lembretes (adiar, repetir, silêncio), recorrências, vencimento de contas (ex.: dia 31 em mês de 30 dias),
 saldo dos potes e virada da semana, espera de 48 h da lista de desejos, progresso do cofrinho, planejamento reverso (prova → sessões; consulta → alarmes),
 avisos do semestre, fases do modo foco e "achei × levou", aviso do estudo acompanhado, hábitos (semana, pendente hoje, véspera), reset do quarto, refeições e água, ideias de comida e lista de compras, contas, potes e gasto rápido, pausa de 48 h, cofrinho, estoque de remédio, "X de 7 dias", limite de 3 tarefas A, escolha do cartão "Agora",
-importação de .ics sem duplicar, e o contraste de todas as cores usadas.
+importação de .ics sem duplicar, passos e dia dos rituais (a noite até as 5h), escolha das tarefas A e pendências da noite,
+agenda do dia, e o contraste de todas as cores usadas.

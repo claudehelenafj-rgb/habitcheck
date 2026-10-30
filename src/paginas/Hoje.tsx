@@ -20,6 +20,8 @@ import { useAvaliacoes } from '../dados/faculdade'
 import { useHabitosAtivos } from '../dados/habitos'
 import { useAlimentacaoDeHoje } from '../dados/alimentacao'
 import { useContasAtivas } from '../dados/dinheiro'
+import { useRituaisDesde } from '../dados/rituais'
+import { diaDoRitual, idRitual, type IdRitual } from '../logica/rituais'
 import { formatarValor, proximoVencimento, type Conta, type Vencimento } from '../logica/dinheiro'
 import { nomeRefeicao } from '../componentes/Refeicoes'
 import { blocoDaRefeicao, progressoDoDia, refeicoesAtivas, type Refeicao } from '../logica/alimentacao'
@@ -106,6 +108,7 @@ function LinhaDoDia({
   preparos,
   refeicoes,
   contas,
+  rituaisFeitos,
 }: {
   tarefas: Tarefa[]
   agora: Date
@@ -116,6 +119,8 @@ function LinhaDoDia({
   preparos: PreparoDaNoite[]
   refeicoes: RefeicaoDoDia[]
   contas: ContaDoDia[]
+  /** ritual da manhã e da noite já feitos hoje */
+  rituaisFeitos: Record<IdRitual, boolean>
 }) {
   const { t, i18n } = useTranslation()
   const atual = blocoDoHorario(agora)
@@ -178,6 +183,18 @@ function LinhaDoDia({
                   <span className="ml-auto rounded-full border-2 border-linha/50 px-2 text-xs">{eAgora ? t('hoje.agoraBloco') : t('hoje.passou')}</span>
                 )}
               </p>
+              {(bloco === 'manha' || bloco === 'noite') && (
+                <Link
+                  to={`/rituais/${bloco}`}
+                  className="flex items-center gap-2 rounded-full border-2 border-dashed border-linha bg-papel py-1 pr-3 pl-1 text-sm font-semibold"
+                >
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 border-linha bg-papel text-xs" aria-hidden="true">
+                    {rituaisFeitos[bloco] ? '✓' : ''}
+                  </span>
+                  {t(`rituais.${bloco}`)} · {t('rituais.cincoMin')}
+                  {rituaisFeitos[bloco] && <span className="so-leitor">({t('grade.feito')})</span>}
+                </Link>
+              )}
               {consultasDoBloco.map((c) => (
                 <p key={c.id} className="flex items-center gap-2 rounded-full border-2 border-linha bg-azul-nevoa py-1 pr-3 pl-1 text-sm font-semibold">
                   <Adesivo nome="prancheta" tamanho={22} />
@@ -223,7 +240,7 @@ function LinhaDoDia({
                     <ItemHabito key={x.habito.id} {...x} />
                   ))}
                 </ul>
-              ) : consultasDoBloco.length || eventosDoBloco.length || preparosDoBloco.length || refeicoesDoBloco.length ? null : (
+              ) : consultasDoBloco.length || eventosDoBloco.length || preparosDoBloco.length || refeicoesDoBloco.length || bloco !== 'tarde' ? null : (
                 <p className="text-sm text-tinta-suave">{t('hoje.livre')}</p>
               )}
             </li>
@@ -328,6 +345,7 @@ export function Hoje() {
   const habitos = useHabitosAtivos()
   const comida = useAlimentacaoDeHoje(diaLocal(agora))
   const contas = useContasAtivas()
+  const rituais = useRituaisDesde(somarDias(diaLocal(agora), -1))
   const { candidato } = useCandidatoAgora(agora)
   const hoje = diaLocal(agora)
   const dia = diaDoPlano(perfil.inicioPlano, hoje)
@@ -336,7 +354,7 @@ export function Hoje() {
   const diaAlcancado = visitaAnterior ? diaDoPlano(perfil.inicioPlano, visitaAnterior) : dia
   const podeContinuar = acolher && visitaAnterior && diaAlcancado < DURACAO_PLANO
 
-  if (!tarefas || !doses || !consultas || !eventos || !avaliacoes || !habitos || comida === undefined || contas === undefined) return null
+  if (!tarefas || !doses || !consultas || !eventos || !avaliacoes || !habitos || comida === undefined || contas === undefined || !rituais) return null
   const doDia = tarefasDoDia(tarefas, hoje)
   const grupos = agruparTarefas(tarefas, hoje)
   const remediosHoje = { feitos: doses.registros.filter((r) => r.status === 'tomei').length, total: doses.doses.length }
@@ -475,6 +493,10 @@ export function Hoje() {
         preparos={preparos}
         refeicoes={refeicoesHoje}
         contas={contasHoje}
+        rituaisFeitos={{
+          manha: rituais.some((r) => r.id === idRitual('manha', diaDoRitual('manha', agora)) && !!r.feitoEm),
+          noite: rituais.some((r) => r.id === idRitual('noite', diaDoRitual('noite', agora)) && !!r.feitoEm),
+        }}
       />
 
       {!perfil.planoEscondido && <CartaoPlano dia={dia} />}

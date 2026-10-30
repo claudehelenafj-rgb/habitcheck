@@ -37,7 +37,7 @@ describe('potes e gastos no banco', () => {
     expect((await banco.gastos.get(g1.id))!.poteId).toBeUndefined()
     await restaurarPote(apagado)
     expect((await banco.gastos.get(g1.id))!.poteId).toBe(fora.id)
-    expect((await banco.potes.toArray()).map((p) => [p.nome, p.ordem])).toEqual([
+    expect((await banco.potes.orderBy('ordem').toArray()).map((p) => [p.nome, p.ordem])).toEqual([
       ['Mercado', 0],
       ['Comida fora', 1],
     ])

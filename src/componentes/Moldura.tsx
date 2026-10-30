@@ -285,6 +285,7 @@ function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
       conta: (c: Conta, aviso: { tipo: 'antes' | 'dia'; vencimento: Vencimento }) => textosAvisoConta(t, i18n.language, c, aviso),
       desejo: (d: { nome: string }) => [t('dinheiro.avisoDesejoTitulo', { nome: d.nome }), t('dinheiro.avisoDesejoCorpo')] as [string, string],
       refeicao: (r: Refeicao) => [t('alimentacao.avisoTitulo', { refeicao: nomeRefeicao(t, r) }), t('alimentacao.avisoCorpo')] as [string, string],
+      ritual: (r: 'manha' | 'noite') => [t(r === 'manha' ? 'rituais.avisoManha' : 'rituais.avisoNoite'), t('rituais.avisoCorpo')] as [string, string],
       fimFoco: textosFimFoco(t),
       discretoTitulo: t('avisos.discretoTitulo'),
       discretoCorpo: t('avisos.discretoCorpo'),

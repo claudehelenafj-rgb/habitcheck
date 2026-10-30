@@ -64,6 +64,15 @@ export function CartaoPlano({ dia }: { dia: number }) {
         </ol>
       )}
 
+      {fase === 'rituais' && (
+        <Link
+          to="/rituais"
+          className="inline-flex min-h-11 items-center self-start rounded-full border-2 border-botao bg-botao px-5 font-bold text-botao-texto"
+        >
+          {t('rituais.abrir')}
+        </Link>
+      )}
+
       {(fase === 'revisao2' || concluido) && (
         <div className="flex flex-wrap gap-2">
           <Link

@@ -13,6 +13,7 @@ import type { Foto, Lugar, ResetQuarto, Zona } from '../logica/quarto'
 import type { Comida, DiaAlimentacao, ItemCompra } from '../logica/alimentacao'
 import type { Cofrinho, Conta, Deposito, Desejo, Gasto, Pote } from '../logica/dinheiro'
 import type { Hobby, VezHobby } from '../logica/hobbies'
+import type { RegistroRitual } from '../logica/rituais'
 import type { NotaRemedio } from '../logica/remedioNoPlano'
 import type { RegistroSintoma } from '../logica/sintomas'
 import type { RegistroSono } from '../logica/sono'
@@ -95,6 +96,7 @@ export class BancoCaderninho extends Dexie {
   desejos!: EntityTable<Desejo, 'id'>
   cofrinhos!: EntityTable<Cofrinho, 'id'>
   depositos!: EntityTable<Deposito, 'id'>
+  rituais!: EntityTable<RegistroRitual, 'id'>
 
   constructor(nome = 'caderninho') {
     super(nome)
@@ -178,6 +180,10 @@ export class BancoCaderninho extends Dexie {
       desejos: 'id, criadoEm',
       cofrinhos: 'id',
       depositos: 'id, cofrinhoId, dia',
+    })
+    // etapa 14: rituais da manhã e da noite (um por dia: em que passo parou e quando terminou)
+    this.version(17).stores({
+      rituais: 'id, dia, ritual',
     })
   }
 }

@@ -204,7 +204,8 @@ function LembretesCheckin() {
   )
 }
 
-export function CheckinEmocoes() {
+/** `compacto`: só os termômetros e o último check-in (para o ritual da manhã), sem título, lembretes e lista do dia. */
+export function CheckinEmocoes({ compacto = false }: { compacto?: boolean }) {
   const { t, i18n } = useTranslation()
   const hoje = diaLocal()
   const doDia = useCheckinsDoDia(hoje)
@@ -231,16 +232,18 @@ export function CheckinEmocoes() {
   }
 
   return (
-    <section aria-labelledby="titulo-checkin" className="cartao flex flex-col gap-5 bg-papel p-3 sm:p-6">
-      <div className="flex flex-wrap items-center gap-3">
-        <Adesivo nome="nuvem" tamanho={44} />
-        <h2 id="titulo-checkin" className="flex-1 text-2xl font-semibold">
-          {t('bemEstar.ferramentas.checkin.nome')}
-        </h2>
-        <Botao variante="contorno" onClick={() => setPlanoAberto((a) => !a)} aria-expanded={planoAberto}>
-          {t('checkin.planoTitulo')}
-        </Botao>
-      </div>
+    <section aria-labelledby={compacto ? undefined : 'titulo-checkin'} className="cartao flex flex-col gap-5 bg-papel p-3 sm:p-6">
+      {!compacto && (
+        <div className="flex flex-wrap items-center gap-3">
+          <Adesivo nome="nuvem" tamanho={44} />
+          <h2 id="titulo-checkin" className="flex-1 text-2xl font-semibold">
+            {t('bemEstar.ferramentas.checkin.nome')}
+          </h2>
+          <Botao variante="contorno" onClick={() => setPlanoAberto((a) => !a)} aria-expanded={planoAberto}>
+            {t('checkin.planoTitulo')}
+          </Botao>
+        </div>
+      )}
 
       {planoAberto && <PlanoPorFaixa aoFechar={() => setPlanoAberto(false)} />}
       {doDia?.[0] && <UltimoCheckin checkin={doDia[0]} abrirPlano={() => setPlanoAberto(true)} />}
@@ -284,9 +287,9 @@ export function CheckinEmocoes() {
         </div>
       </form>
 
-      <LembretesCheckin />
+      {!compacto && <LembretesCheckin />}
 
-      {doDia && doDia.length > 0 && (
+      {!compacto && doDia && doDia.length > 0 && (
         <section aria-labelledby="titulo-hoje-checkins" className="flex flex-col gap-2">
           <h3 id="titulo-hoje-checkins" className="rotulo">
             {t('checkin.hoje', { count: doDia.length })}

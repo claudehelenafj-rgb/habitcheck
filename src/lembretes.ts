@@ -10,18 +10,20 @@ import { useContasAtivas, useDesejosAtivos } from './dados/dinheiro'
 import { useAvaliacoes, useConfigFaculdade } from './dados/faculdade'
 import { marcarAvisoFoco, useEstadoFoco } from './dados/foco'
 import { useHabitosAtivos } from './dados/habitos'
+import { useConfigRituais, useRituaisDesde } from './dados/rituais'
 import { avisoAcompanhado, lembreteDeHoje, type Avaliacao } from './logica/faculdade'
 import { deveLembrarRefeicao, type Refeicao } from './logica/alimentacao'
 import { avisoDeConta, fimDaEspera, prontoParaDecidir, type Conta, type Desejo, type Vencimento } from './logica/dinheiro'
 import { acabouFase, type EstadoFoco, type FaseFoco } from './logica/foco'
 import { deveAvisarVespera, deveLembrar, type Habito } from './logica/habitos'
+import { deveLembrarRitual, diaDoRitual, idRitual, RITUAIS, type IdRitual } from './logica/rituais'
 import { TELAS_AREAS } from './rotas'
 import { tocarSino } from './telaFoco'
 import { jaAvisouTransicao, registrarTransicao, useConsultas } from './dados/consultas'
 import { registrarAviso, useConfigAvisos, useDosesDoDia } from './dados/remedios'
 import { planoReverso } from './logica/consultas'
 import { useAgora } from './dados/timer'
-import { diaLocal } from './logica/datas'
+import { diaLocal, somarDias } from './logica/datas'
 import { deveAvisar, textoDoLembrete, type DosePrevista } from './logica/remedios'
 import { dentroDaJanela, horaDeDesacelerar, noiteDaRotina } from './logica/sono'
 
@@ -77,6 +79,8 @@ export type TextosLembretes = {
   desejo: (d: Desejo) => [string, string]
   /** hora de comer: [título, texto] */
   refeicao: (r: Refeicao) => [string, string]
+  /** hora do ritual da manhã ou da noite: [título, texto] */
+  ritual: (r: IdRitual) => [string, string]
   /** fim de uma fase do modo foco: [título, texto] */
   fimFoco: (fase: FaseFoco) => [string, string]
   /** "avisos discretos": título e texto que trocam todos os outros */
@@ -315,6 +319,28 @@ function useAvisosDesejos(agora: Date, textos: TextosLembretes, discretos: boole
   }, [desejos, agora, textos, discretos])
 }
 
+/** Rituais com lembrete: no horário (até 30 min depois), uma vez por dia, só se o ritual daquele dia não foi feito. */
+function useAvisosRituais(agora: Date, textos: TextosLembretes, discretos: boolean) {
+  const config = useConfigRituais()
+  const registros = useRituaisDesde(somarDias(diaLocal(agora), -1))
+  const emAndamento = useRef(new Set<string>())
+  useEffect(() => {
+    if (!config || !registros) return
+    for (const r of RITUAIS) {
+      const id = idRitual(r, diaDoRitual(r, agora))
+      if (!deveLembrarRitual(config.lembretes[r], registros.find((x) => x.id === id), agora)) continue
+      const aviso = `ritual|${id}`
+      if (emAndamento.current.has(aviso)) continue
+      emAndamento.current.add(aviso)
+      ;(async () => {
+        if (await jaAvisouTransicao(aviso)) return
+        await registrarTransicao(aviso)
+        await mostrarAvisoSistema(...comDiscricao(textos, discretos, ...textos.ritual(r)), aviso, `#/rituais/${r}`)
+      })().finally(() => emAndamento.current.delete(aviso))
+    }
+  }, [config, registros, agora, textos, discretos])
+}
+
 /** Com a pessoa em outra tela do app, o fim da fase de foco também avisa (a cada 20 s). */
 function useAvisosFoco(agora: Date, textos: TextosLembretes, discretos: boolean) {
   const foco = useEstadoFoco()
@@ -341,6 +367,7 @@ export function useLembretes(textos: TextosLembretes, areas: AreasDosLembretes =
   useAvisosAlimentacao(agora, textos, discretos)
   useAvisosContas(agora, textos, discretos)
   useAvisosDesejos(agora, textos, discretos)
+  useAvisosRituais(agora, textos, discretos)
 
   useEffect(() => {
     if (!dados) return

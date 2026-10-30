@@ -249,7 +249,8 @@ function DuasSemanas({ registros }: { registros: RegistroSono[] }) {
   )
 }
 
-function Rotina({ config, noite }: { config: ConfigBemEstar; noite: Dia }) {
+/** Rotina de desacelerar da noite (também usada no ritual da noite). */
+export function RotinaDesacelerar({ config, noite }: { config: ConfigBemEstar; noite: Dia }) {
   const { t } = useTranslation()
   const [editando, setEditando] = useState(false)
   const [novo, setNovo] = useState('')
@@ -473,7 +474,7 @@ export function Sono() {
       </section>
 
       <hr className="border-t-2 border-linha/20" />
-      <Rotina config={config} noite={noiteDaRotina(agora, hoje)} />
+      <RotinaDesacelerar config={config} noite={noiteDaRotina(agora, hoje)} />
       <hr className="border-t-2 border-linha/20" />
       <DuasSemanas registros={registros} />
       <Horarios config={config} />
