@@ -17,6 +17,7 @@ import { textosFimFoco } from '../paginas/Foco'
 import { textosVespera } from './CartaoHabito'
 import { nomeRefeicao } from './Refeicoes'
 import type { Refeicao } from '../logica/alimentacao'
+import { resumoDasOpcoes, type RefeicaoPlano } from '../logica/planoAlimentar'
 import type { Conta, Vencimento } from '../logica/dinheiro'
 import { textosAvisoConta } from './EditorConta'
 import { ATALHO_CAPTURA, Captura } from './Captura'
@@ -284,7 +285,11 @@ function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
       vespera: (h: { titulo: string; base?: string[]; companhia?: string }) => textosVespera(t, h),
       conta: (c: Conta, aviso: { tipo: 'antes' | 'dia'; vencimento: Vencimento }) => textosAvisoConta(t, i18n.language, c, aviso),
       desejo: (d: { nome: string }) => [t('dinheiro.avisoDesejoTitulo', { nome: d.nome }), t('dinheiro.avisoDesejoCorpo')] as [string, string],
-      refeicao: (r: Refeicao) => [t('alimentacao.avisoTitulo', { refeicao: nomeRefeicao(t, r) }), t('alimentacao.avisoCorpo')] as [string, string],
+      refeicao: (r: Refeicao, doPlano?: RefeicaoPlano) =>
+        [
+          t('alimentacao.avisoTitulo', { refeicao: doPlano?.nome || nomeRefeicao(t, r) }),
+          doPlano?.opcoes.length ? t('planoAlimentar.avisoCorpo', { opcoes: resumoDasOpcoes(doPlano.opcoes, t('planoAlimentar.ou')) }) : t('alimentacao.avisoCorpo'),
+        ] as [string, string],
       ritual: (r: 'manha' | 'noite') => [t(r === 'manha' ? 'rituais.avisoManha' : 'rituais.avisoNoite'), t('rituais.avisoCorpo')] as [string, string],
       fimFoco: textosFimFoco(t),
       discretoTitulo: t('avisos.discretoTitulo'),

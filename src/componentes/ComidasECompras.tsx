@@ -28,6 +28,9 @@ import { Adesivo } from './Adesivo'
 import { mostrarAviso } from './Avisos'
 import { Botao } from './Botao'
 import { nomeRefeicao } from './Refeicoes'
+import { OpcoesDoPlano } from './PlanoAlimentar'
+import { usePlanoAlimentar } from '../dados/planoAlimentar'
+import { doPlano } from '../logica/planoAlimentar'
 
 const campo = 'min-h-11 rounded-full border-2 border-linha bg-papel px-4'
 const chip = (marcado: boolean) => `min-h-11 rounded-full border-2 border-linha px-4 text-sm font-semibold ${marcado ? 'bg-menta' : 'bg-papel'}`
@@ -51,10 +54,13 @@ export function NaoSeiOQueComer({ config, comidas }: { config: ConfigAlimentacao
   const { t } = useTranslation()
   const [refeicao, setRefeicao] = useState<IdRefeicao | undefined>(() => refeicaoMaisPerto(config, new Date()))
   const [rodada, setRodada] = useState(0)
+  const plano = usePlanoAlimentar()
   const ativas = refeicoesAtivas(config)
   const escolhida = ativas.some((r) => r.id === refeicao) ? refeicao : ativas[0]?.id
   const ideias = escolhida ? sugerirComidas(comidas, escolhida, rodada) : []
   const quantasServem = escolhida ? comidas.filter((c) => !c.refeicoes.length || c.refeicoes.includes(escolhida)).length : 0
+  // com plano alimentar, o que o plano manda para essa refeição vem primeiro
+  const doMeuPlano = escolhida ? doPlano(plano, escolhida) : undefined
 
   return (
     <section id="nao-sei" aria-labelledby="titulo-nao-sei" className="cartao flex scroll-mt-6 flex-col gap-4 bg-papel p-5">
@@ -78,6 +84,13 @@ export function NaoSeiOQueComer({ config, comidas }: { config: ConfigAlimentacao
           </button>
         ))}
       </div>
+      {doMeuPlano && doMeuPlano.opcoes.length > 0 && (
+        <div className="flex flex-col gap-2 rounded-2xl border-2 border-linha bg-menta/50 p-4" aria-live="polite">
+          <h3 className="font-bold">{t('planoAlimentar.noSeuPlano', { refeicao: doMeuPlano.nome || nomeRefeicao(t, { id: doMeuPlano.id }) })}</h3>
+          {doMeuPlano.nota && <p className="text-sm italic">{doMeuPlano.nota}</p>}
+          <OpcoesDoPlano opcoes={doMeuPlano.opcoes} />
+        </div>
+      )}
       {ideias.length ? (
         <ul className="grid gap-3 sm:grid-cols-3" aria-live="polite">
           {ideias.map((c) => (

@@ -6,8 +6,11 @@ import {
   lerCabecalho,
   lerPlano,
   limparPlano,
+  observacao,
   opcoesParaTexto,
   refeicaoDoHorario,
+  resumoDasOpcoes,
+  semCalorias,
   textoParaOpcoes,
 } from './planoAlimentar'
 
@@ -90,6 +93,72 @@ describe('lendo o plano', () => {
     expect(plano).toEqual([{ id: 'almoco', hora: '12:00', nome: 'Almoço', opcoes: [['arroz e feijão'], ['macarrão']] }])
   })
 
+  it('jeito do Dietbox: coluna de calorias, "Substituição N", "Assim que acordar", linhas quebradas, rodapé', () => {
+    // tudo inventado, só no formato
+    const plano = lerPlano([
+      '01/02/2026, 08:00 — Dietbox',
+      'Profissional Exemplo',
+      'CRN: 00/00000',
+      'Plano Alimentar',
+      'Pessoa Exemplo',
+      'Todos os dias',
+      '-> Meta de água: 2L por dia',
+      '06:30 - Assim que acordar — Kcal',
+      '• Beber um copo de água (300ml) — 0,00 kcal',
+      '09:00 - Café da manhã / Lanche — Kcal',
+      '• Pão integral: 2 fatias (50g) — 115,00 kcal',
+      '• Ovo mexido: 1 unidade OU Queijo branco: 1 fatia — 74,50 kcal',
+      '(30g)',
+      '• Suco natural: 1 copo — 90,00 kcal',
+      'pequeno (200ml)',
+      'Obs: Sanduíche de ovo + suco. -> EM CASA: pode trocar o suco por',
+      'café com leite',
+      'Substituição 1 — Kcal',
+      '• Tapioca: 3 colheres de sopa (60g) — 198,00 kcal',
+      '• Queijo coalho: 1 fatia (30g) — 68,00 kcal',
+      'Obs: Tapioca com queijo',
+      '12:30 - Almoço — Kcal',
+      '• Salada crua à vontade — 1,95 kcal',
+      'https://exemplo.app/plano/imprimir — 1/2',
+      '01/02/2026, 08:00 — Dietbox',
+      '• Arroz (cozido): 4 colheres de sopa — 112,22 kcal',
+      '19:30 - Jantar (TODAS AS OPÇÕES PODEM TER SALADA) — Kcal',
+      '• Sopa de legumes: 1 prato — 150,00 kcal',
+      'Substituição 1 — Kcal',
+      '• Omelete: 2 ovos — 149,00 kcal',
+      'Este documento é de uso exclusivo do destinatário e pode ter conteúdo confidencial.',
+      'proibido.',
+      'https://exemplo.app/plano/imprimir — 2/2',
+    ])
+    expect(plano.map((r) => [r.id, r.hora, r.nome])).toEqual([
+      ['acordar', '06:30', 'Assim que acordar'],
+      ['cafe', '09:00', 'Café da manhã / Lanche'],
+      ['almoco', '12:30', 'Almoço'],
+      ['jantar', '19:30', 'Jantar'],
+    ])
+    expect(plano[1].opcoes).toEqual([
+      [
+        'Pão integral: 2 fatias (50g)',
+        'Ovo mexido: 1 unidade OU Queijo branco: 1 fatia (30g)',
+        'Suco natural: 1 copo pequeno (200ml)',
+        'Obs: Sanduíche de ovo + suco. -> EM CASA: pode trocar o suco por café com leite',
+      ],
+      ['Tapioca: 3 colheres de sopa (60g)', 'Queijo coalho: 1 fatia (30g)', 'Obs: Tapioca com queijo'],
+    ])
+    expect(plano[2].opcoes).toEqual([['Salada crua à vontade', 'Arroz (cozido): 4 colheres de sopa']])
+    expect(plano[3]).toMatchObject({ nota: 'Todas as opções podem ter salada', opcoes: [['Sopa de legumes: 1 prato'], ['Omelete: 2 ovos']] })
+    const tudo = JSON.stringify(plano)
+    for (const fora of ['kcal', 'Kcal', 'Dietbox', 'CRN', 'Pessoa Exemplo', 'https', 'exclusivo', 'proibido', 'Meta de água']) expect(tudo).not.toContain(fora)
+  })
+
+  it('"• Café" no meio de uma refeição é comida, não título', () => {
+    const plano = lerPlano(['Lanche da tarde 16h', '• Pão de queijo', '• Café', 'Jantar 19h', '• Sopa'])
+    expect(plano.map((r) => [r.id, r.opcoes])).toEqual([
+      ['lanche', [['Pão de queijo', 'Café']]],
+      ['jantar', [['Sopa']]],
+    ])
+  })
+
   it('PDF sem texto de refeição (foto escaneada, outro assunto): nada encontrado', () => {
     expect(lerPlano([])).toEqual([])
     expect(lerPlano(['Relatório', 'Resultados do exame'])).toEqual([])
@@ -97,6 +166,20 @@ describe('lendo o plano', () => {
 })
 
 describe('conferir, salvar e usar', () => {
+  it('calorias e observações', () => {
+    expect(semCalorias('Pão: 2 fatias (50g) — 115,00 kcal')).toBe('Pão: 2 fatias (50g)')
+    expect(semCalorias('12:30 - Almoço — Kcal')).toBe('12:30 - Almoço')
+    expect(semCalorias('Total: 1.850 kcal')).toBe('Total:')
+    expect(observacao('Obs: Tapioca com queijo')).toBe('Tapioca com queijo')
+    expect(observacao('Tapioca')).toBeUndefined()
+  })
+
+  it('resumo para o aviso: a observação de cada opção (ou os itens), separados por "ou"', () => {
+    expect(resumoDasOpcoes([['1 fruta']], 'ou')).toBe('1 fruta')
+    expect(resumoDasOpcoes([['Pão', 'Ovo', 'Obs: Sanduíche de ovo. -> Em casa: café'], ['Tapioca', 'Queijo']], 'ou')).toBe('Sanduíche de ovo ou Tapioca, Queijo')
+    expect(resumoDasOpcoes([['a'.repeat(200)]], 'ou')).toHaveLength(160)
+  })
+
   it('opções viram texto com linha em branco entre elas, e voltam', () => {
     const opcoes = [['2 fatias de pão', '1 ovo'], ['1 tapioca']]
     expect(opcoesParaTexto(opcoes)).toBe('2 fatias de pão\n1 ovo\n\n1 tapioca')
@@ -114,6 +197,15 @@ describe('conferir, salvar e usar', () => {
     expect(r.map((x) => x.id)).toEqual(['cafe', 'jantar'])
   })
 
+  it('usar o plano com aviso: liga o lembrete das refeições do plano que têm horário', () => {
+    const r = aplicarNoConfig(CONFIG_ALIMENTACAO_PADRAO.refeicoes, [{ id: 'acordar', hora: '06:30', opcoes: [] }, { id: 'cafe', opcoes: [] }], true)
+    expect(r.filter((x) => x.ativa).map((x) => [x.id, x.hora, x.lembrar])).toEqual([
+      ['acordar', '06:30', true],
+      ['cafe', '08:00', true],
+    ])
+    expect(r.filter((x) => !x.ativa).every((x) => !x.lembrar)).toBe(true)
+  })
+
   it('usar o plano: as refeições dele ficam ligadas com o horário dele; as outras, desligadas', () => {
     const r = aplicarNoConfig(CONFIG_ALIMENTACAO_PADRAO.refeicoes, [
       { id: 'cafe', hora: '07:00', opcoes: [] },
@@ -121,6 +213,7 @@ describe('conferir, salvar e usar', () => {
       { id: 'almoco', opcoes: [] },
     ])
     expect(r.map((x) => [x.id, x.ativa, x.hora])).toEqual([
+      ['acordar', false, '07:00'],
       ['cafe', true, '07:00'],
       ['lancheManha', true, '10:00'],
       ['almoco', true, '12:30'],

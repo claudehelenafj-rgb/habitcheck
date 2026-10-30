@@ -6,6 +6,8 @@ import { useEffect, useRef } from 'react'
 import { useBemEstar } from './dados/bemEstar'
 import { useUltimoCheckin } from './dados/checkins'
 import { useAlimentacaoDeHoje } from './dados/alimentacao'
+import { usePlanoAlimentar } from './dados/planoAlimentar'
+import { doPlano, type RefeicaoPlano } from './logica/planoAlimentar'
 import { useContasAtivas, useDesejosAtivos } from './dados/dinheiro'
 import { useAvaliacoes, useConfigFaculdade } from './dados/faculdade'
 import { marcarAvisoFoco, useEstadoFoco } from './dados/foco'
@@ -77,8 +79,8 @@ export type TextosLembretes = {
   conta: (c: Conta, aviso: { tipo: 'antes' | 'dia'; vencimento: Vencimento }) => [string, string]
   /** a espera de 48 h da lista de desejos acabou: [título, texto] */
   desejo: (d: Desejo) => [string, string]
-  /** hora de comer: [título, texto] */
-  refeicao: (r: Refeicao) => [string, string]
+  /** hora de comer: [título, texto]; com plano alimentar, o texto diz o que o plano manda */
+  refeicao: (r: Refeicao, doPlano?: RefeicaoPlano) => [string, string]
   /** hora do ritual da manhã ou da noite: [título, texto] */
   ritual: (r: IdRitual) => [string, string]
   /** fim de uma fase do modo foco: [título, texto] */
@@ -253,9 +255,10 @@ function useAvisosHabitos(agora: Date, textos: TextosLembretes, discretos: boole
 function useAvisosAlimentacao(agora: Date, textos: TextosLembretes, discretos: boolean) {
   const hoje = diaLocal(agora)
   const comida = useAlimentacaoDeHoje(hoje)
+  const plano = usePlanoAlimentar()
   const emAndamento = useRef(new Set<string>())
   useEffect(() => {
-    if (!comida) return
+    if (!comida || plano === undefined) return
     for (const r of comida.config.refeicoes) {
       if (!deveLembrarRefeicao(r, comida.dia, agora)) continue
       const id = `refeicao|${r.id}|${hoje}`
@@ -264,10 +267,10 @@ function useAvisosAlimentacao(agora: Date, textos: TextosLembretes, discretos: b
       ;(async () => {
         if (await jaAvisouTransicao(id)) return
         await registrarTransicao(id)
-        await mostrarAvisoSistema(...comDiscricao(textos, discretos, ...textos.refeicao(r)), id, '#/hoje')
+        await mostrarAvisoSistema(...comDiscricao(textos, discretos, ...textos.refeicao(r, doPlano(plano, r.id))), id, '#/hoje')
       })().finally(() => emAndamento.current.delete(id))
     }
-  }, [comida, agora, hoje, textos, discretos])
+  }, [comida, plano, agora, hoje, textos, discretos])
 }
 
 /** A partir desta hora, avisa das contas (alguns dias antes e no dia do vencimento). */

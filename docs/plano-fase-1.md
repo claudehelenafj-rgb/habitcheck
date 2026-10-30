@@ -222,11 +222,19 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 - A pessoa confere o que o app entendeu (refeição, horário e o que comer, uma opção por bloco) e salva. PDF escaneado
   (sem texto): o app avisa e deixa escrever. Também dá para escrever o plano sem PDF.
 - "Usar as refeições e os horários do plano no app": as bolinhas e os lembretes passam a seguir o plano. O app agora
-  tem seis refeições (café da manhã, lanche da manhã, almoço, lanche da tarde, jantar e ceia); as duas novas começam
+  tem seis refeições (café da manhã, lanche da manhã, almoço, lanche da tarde, jantar e ceia); as novas começam
   desligadas, e quem já usava o app não perde nada.
 - O plano aparece por horário, com "Agora é hora de: Colação (desde as 10:00)" e a próxima. O PDF fica guardado
   (abrir, trocar, editar, apagar com desfazer) e entra no backup.
-- Parte 2: os avisos de cada refeição e o cartão "Agora" da tela Hoje dizem as opções do plano.
+- Lê também o jeito do Dietbox: a coluna de calorias ("— Kcal") sai, "Substituição 1, 2…" viram as opções seguintes
+  da mesma refeição, "Assim que acordar" (ou "ao acordar", "em jejum") é uma refeição, a observação entre parênteses
+  no título vira nota, as linhas quebradas se juntam ao item de cima, e o cabeçalho e o rodapé de cada página
+  (data, site, "1/3") e o aviso legal do fim ficam de fora. O app não mostra calorias.
+- O app passa a ter sete refeições: entra "ao acordar" (desligada no começo).
+- Parte 2 (pronta): "Avisar na hora de cada refeição, com o que o plano diz" (ligado por padrão ao salvar). O aviso
+  diz "Seu plano: …" com a observação de cada opção (ou os itens), separadas por "ou"; com avisos discretos, nada do
+  plano aparece. O cartão "Agora" da tela Hoje e a janelinha mostram a primeira opção do plano e quantas mais existem;
+  "Não sei o que comer" mostra primeiro o que o plano diz para a refeição escolhida.
 
 ## Dinheiro (etapa 13)
 

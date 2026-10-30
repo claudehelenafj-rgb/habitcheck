@@ -18,9 +18,13 @@ export type PdfNovo = Pick<Arquivo, 'nome' | 'tipo' | 'tamanho' | 'dados'>
 
 /**
  * Salva as refeições conferidas. `pdf`: um PDF novo, ou 'manter' o que já está guardado (editar sem trocar).
- * `usarNoApp`: as refeições e os horários do app passam a ser os do plano.
+ * `usarNoApp`: as refeições e os horários do app passam a ser os do plano; `avisar`: com lembrete na hora de cada uma.
  */
-export async function salvarPlano(refeicoes: RefeicaoPlano[], pdf: PdfNovo | 'manter' | undefined, usarNoApp: boolean): Promise<PlanoAlimentar> {
+export async function salvarPlano(
+  refeicoes: RefeicaoPlano[],
+  pdf: PdfNovo | 'manter' | undefined,
+  { usarNoApp, avisar = false }: { usarNoApp: boolean; avisar?: boolean },
+): Promise<PlanoAlimentar> {
   const limpas = limparPlano(refeicoes)
   const agora = new Date().toISOString()
   const plano = await banco.transaction('rw', banco.configuracoes, banco.arquivos, async () => {
@@ -35,7 +39,7 @@ export async function salvarPlano(refeicoes: RefeicaoPlano[], pdf: PdfNovo | 'ma
     await banco.configuracoes.put({ chave: CHAVE, valor: novo })
     return novo
   })
-  if (usarNoApp) await mudarConfigAlimentacao((c) => ({ refeicoes: aplicarNoConfig(c.refeicoes, plano.refeicoes) }))
+  if (usarNoApp) await mudarConfigAlimentacao((c) => ({ refeicoes: aplicarNoConfig(c.refeicoes, plano.refeicoes, avisar) }))
   return plano
 }
 

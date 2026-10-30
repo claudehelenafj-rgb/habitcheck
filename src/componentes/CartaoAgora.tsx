@@ -5,6 +5,8 @@ import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { marcarRefeicao } from '../dados/alimentacao'
+import { usePlanoAlimentar } from '../dados/planoAlimentar'
+import { doPlano } from '../logica/planoAlimentar'
 import { alternarPasso, concluirTarefa, reabrirTarefa } from '../dados/tarefas'
 import { iniciarTimer, pararTimer, segundosRestantes, useAgora, useTimer } from '../dados/timer'
 import { AREAS } from '../design/areas'
@@ -17,6 +19,7 @@ import { Botao } from './Botao'
 import { BotoesDose } from './BotoesDose'
 import { BotoesHabito, PlanoSeEntao } from './CartaoHabito'
 import { TimerVisual } from './Enfeites'
+import { OpcoesDoPlano } from './PlanoAlimentar'
 
 const TIMER_PADRAO_MIN = 25
 
@@ -83,6 +86,7 @@ type Props = {
 export function CartaoAgora({ candidato, compacto = false, semNada }: Props) {
   const { t } = useTranslation()
   const [colando, setColando] = useState(false)
+  const plano = usePlanoAlimentar()
 
   if (!candidato) {
     return (
@@ -136,6 +140,8 @@ export function CartaoAgora({ candidato, compacto = false, semNada }: Props) {
   }
 
   if (candidato.tipo === 'refeicao') {
+    // com plano alimentar: o nome que está no plano e o que ele manda comer agora
+    const doMeuPlano = doPlano(plano, candidato.refeicao)
     return (
       <section aria-labelledby="titulo-agora" className={`cartao flex flex-col gap-3 bg-menta ${compacto ? 'p-4' : 'p-6'}`}>
         <p className="rotulo flex items-center gap-2">
@@ -144,8 +150,22 @@ export function CartaoAgora({ candidato, compacto = false, semNada }: Props) {
           <Adesivo nome="prato" tamanho={20} />
           {t('nav.alimentacao')} · {candidato.horario.toTimeString().slice(0, 5)}
         </p>
-        <p className={`font-titulo leading-tight font-semibold break-words ${compacto ? 'text-2xl' : 'text-3xl sm:text-4xl'}`}>{candidato.titulo}</p>
-        <p className="text-lg">{t('alimentacao.mesmoSemFome')}</p>
+        <p className={`font-titulo leading-tight font-semibold break-words ${compacto ? 'text-2xl' : 'text-3xl sm:text-4xl'}`}>
+          {doMeuPlano?.nome || candidato.titulo}
+        </p>
+        {doMeuPlano?.opcoes.length ? (
+          <div className="flex flex-col gap-2">
+            <p className="rotulo">{t('planoAlimentar.seuPlano')}</p>
+            <OpcoesDoPlano opcoes={doMeuPlano.opcoes} compacto />
+            {!compacto && (
+              <Link to="/alimentacao" className="self-start text-sm font-bold underline decoration-2 underline-offset-4">
+                {t('planoAlimentar.titulo')} →
+              </Link>
+            )}
+          </div>
+        ) : (
+          <p className="text-lg">{t('alimentacao.mesmoSemFome')}</p>
+        )}
         <div className="flex flex-wrap items-center gap-3">
           <Botao grande={!compacto} onClick={() => marcarRefeicao(diaLocal(), candidato.refeicao)} icone={<span aria-hidden="true">✓</span>}>
             {t('alimentacao.comi')}

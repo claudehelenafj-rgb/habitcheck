@@ -5,9 +5,9 @@
 import type { Dia } from './datas'
 import { blocoDoHorario, type Bloco, type Candidato } from './hoje'
 
-/** As seis refeições de um plano alimentar comum; lanche da manhã e ceia começam desligados. */
-export type IdRefeicao = 'cafe' | 'lancheManha' | 'almoco' | 'lanche' | 'jantar' | 'ceia'
-export const IDS_REFEICAO: IdRefeicao[] = ['cafe', 'lancheManha', 'almoco', 'lanche', 'jantar', 'ceia']
+/** As refeições de um plano alimentar comum; "ao acordar", lanche da manhã e ceia começam desligados. */
+export type IdRefeicao = 'acordar' | 'cafe' | 'lancheManha' | 'almoco' | 'lanche' | 'jantar' | 'ceia'
+export const IDS_REFEICAO: IdRefeicao[] = ['acordar', 'cafe', 'lancheManha', 'almoco', 'lanche', 'jantar', 'ceia']
 
 export type Refeicao = {
   id: IdRefeicao
@@ -24,6 +24,7 @@ export type ConfigAlimentacao = { refeicoes: Refeicao[]; aguaMeta: number }
 
 export const CONFIG_ALIMENTACAO_PADRAO: ConfigAlimentacao = {
   refeicoes: [
+    { id: 'acordar', hora: '07:00', ativa: false, lembrar: false },
     { id: 'cafe', hora: '08:00', ativa: true, lembrar: false },
     { id: 'lancheManha', hora: '10:00', ativa: false, lembrar: false },
     { id: 'almoco', hora: '12:30', ativa: true, lembrar: false },
@@ -34,7 +35,7 @@ export const CONFIG_ALIMENTACAO_PADRAO: ConfigAlimentacao = {
   aguaMeta: 8,
 }
 
-/** Configuração guardada antes do lanche da manhã e da ceia existirem: completa com as que faltam, na ordem do dia. */
+/** Configuração guardada antes das refeições novas existirem: completa com as que faltam, na ordem do dia. */
 export function completarRefeicoes(guardadas: Refeicao[] | undefined): Refeicao[] {
   return CONFIG_ALIMENTACAO_PADRAO.refeicoes.map((padrao) => guardadas?.find((r) => r.id === padrao.id) ?? padrao)
 }
@@ -103,7 +104,7 @@ export function deveLembrarRefeicao(r: Refeicao, d: DiaAlimentacao | undefined, 
 /** Em que parte do dia a refeição aparece na linha do dia. */
 export function blocoDaRefeicao(r: Refeicao): Bloco {
   if (r.hora) return blocoDoHorario(horarioNoDia(r.hora, new Date(2026, 0, 1)))
-  return r.id === 'cafe' || r.id === 'lancheManha' ? 'manha' : r.id === 'jantar' || r.id === 'ceia' ? 'noite' : 'tarde'
+  return r.id === 'acordar' || r.id === 'cafe' || r.id === 'lancheManha' ? 'manha' : r.id === 'jantar' || r.id === 'ceia' ? 'noite' : 'tarde'
 }
 
 /** Candidata ao cartão "Agora" (vem antes das tarefas A, só na hora da refeição). */

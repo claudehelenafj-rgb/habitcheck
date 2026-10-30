@@ -2,12 +2,22 @@
 // e o plano aparece por horário, com "Agora é hora de…". O PDF fica guardado para abrir quando quiser.
 
 import { useEffect, useRef, useState } from 'react'
+import { permissaoAvisos, pedirPermissaoAvisos, type PermissaoAvisos } from '../lembretes'
 import { useTranslation } from 'react-i18next'
 import { apagarPlano, lerPdfDoPlano, restaurarPlano, salvarPlano, usePlanoAlimentar, type PdfNovo } from '../dados/planoAlimentar'
 import { useAgora } from '../dados/timer'
 import { comoDataUrl, linhasDoPdf } from '../lerPdf'
 import { IDS_REFEICAO, type ConfigAlimentacao, type IdRefeicao } from '../logica/alimentacao'
-import { lerPlano, opcoesParaTexto, refeicaoDoHorario, textoParaOpcoes, type PlanoAlimentar as Plano, type RefeicaoPlano } from '../logica/planoAlimentar'
+import {
+  lerPlano,
+  observacao,
+  opcoesParaTexto,
+  refeicaoDoHorario,
+  textoParaOpcoes,
+  type OpcaoPlano,
+  type PlanoAlimentar as Plano,
+  type RefeicaoPlano,
+} from '../logica/planoAlimentar'
 import { Adesivo } from './Adesivo'
 import { mostrarAviso } from './Avisos'
 import { Botao } from './Botao'
@@ -19,11 +29,11 @@ const botaoArquivo =
   'inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 self-start rounded-full border-2 px-5 font-bold focus-within:outline focus-within:outline-3 focus-within:outline-offset-2'
 
 /** Linha do rascunho: o texto das opções fica como a pessoa escreve, até salvar. */
-type Linha = { chave: string; id: IdRefeicao; nome?: string; hora?: string; texto: string }
+type Linha = { chave: string; id: IdRefeicao; nome?: string; hora?: string; nota?: string; texto: string }
 type Rascunho = { linhas: Linha[]; pdf?: PdfNovo | 'manter'; achou?: number }
 
 const paraLinhas = (refeicoes: RefeicaoPlano[]): Linha[] =>
-  refeicoes.map((r) => ({ chave: crypto.randomUUID(), id: r.id, nome: r.nome, hora: r.hora, texto: opcoesParaTexto(r.opcoes) }))
+  refeicoes.map((r) => ({ chave: crypto.randomUUID(), id: r.id, nome: r.nome, hora: r.hora, nota: r.nota, texto: opcoesParaTexto(r.opcoes) }))
 
 /** Juntando de volta: a mesma refeição escolhida duas vezes vira uma só, com as opções das duas. */
 function paraRefeicoes(linhas: Linha[]): RefeicaoPlano[] {
@@ -31,16 +41,57 @@ function paraRefeicoes(linhas: Linha[]): RefeicaoPlano[] {
   for (const l of linhas) {
     const opcoes = textoParaOpcoes(l.texto)
     const ja = porId.get(l.id)
+    const nota = l.nota?.trim()
     if (ja) {
       ja.opcoes.push(...opcoes)
       ja.hora ??= l.hora
-    } else porId.set(l.id, { id: l.id, ...(l.nome ? { nome: l.nome } : {}), ...(l.hora ? { hora: l.hora } : {}), opcoes })
+      ja.nota ??= nota || undefined
+    } else porId.set(l.id, { id: l.id, ...(l.nome ? { nome: l.nome } : {}), ...(l.hora ? { hora: l.hora } : {}), ...(nota ? { nota } : {}), opcoes })
   }
   return [...porId.values()]
 }
 
 function nomeNoPlano(t: ReturnType<typeof useTranslation>['t'], r: Pick<RefeicaoPlano, 'id' | 'nome'>) {
   return r.nome || nomeRefeicao(t, { id: r.id })
+}
+
+/**
+ * As opções de uma refeição do plano, lado a lado; a observação de cada opção ("Obs: sanduíche") vem em itálico.
+ * `compacto` (cartão "Agora", janelinha): só a primeira opção e quantas mais existem.
+ */
+export function OpcoesDoPlano({ opcoes, compacto = false }: { opcoes: OpcaoPlano[]; compacto?: boolean }) {
+  const { t } = useTranslation()
+  const mostradas = compacto ? opcoes.slice(0, 1) : opcoes
+  return (
+    <>
+      <ul className={`grid gap-2 ${mostradas.length > 1 ? 'sm:grid-cols-2' : ''}`}>
+        {mostradas.map((o, i) => {
+          const itens = o.filter((x) => !observacao(x))
+          const obs = o.map(observacao).filter(Boolean)
+          return (
+            <li key={i} className="flex flex-col gap-1 rounded-xl border-2 border-linha/30 bg-papel px-3 py-2">
+              {opcoes.length > 1 && <p className="rotulo">{t('planoAlimentar.opcao', { n: i + 1 })}</p>}
+              {itens.length > 0 && (
+                <ul className="list-disc pl-5">
+                  {itens.map((item, j) => (
+                    <li key={j} className="break-words">
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {obs.map((x, j) => (
+                <p key={j} className="font-destaque text-lg break-words italic">
+                  {x}
+                </p>
+              ))}
+            </li>
+          )
+        })}
+      </ul>
+      {compacto && opcoes.length > 1 && <p className="text-sm font-semibold">{t('planoAlimentar.maisOpcoes', { count: opcoes.length - 1 })}</p>}
+    </>
+  )
 }
 
 /** Botão que abre a escolha de arquivo (o campo fica escondido, mas recebe o foco do teclado). */
@@ -67,6 +118,7 @@ function Conferir({ rascunho, aoSalvar, aoCancelar }: { rascunho: Rascunho; aoSa
   const { t } = useTranslation()
   const [linhas, setLinhas] = useState(rascunho.linhas)
   const [usarNoApp, setUsarNoApp] = useState(true)
+  const [avisar, setAvisar] = useState(true)
   const [erro, setErro] = useState('')
   const titulo = useRef<HTMLHeadingElement>(null)
   useEffect(() => titulo.current?.focus(), [])
@@ -76,7 +128,7 @@ function Conferir({ rascunho, aoSalvar, aoCancelar }: { rascunho: Rascunho; aoSa
   async function salvar() {
     const refeicoes = paraRefeicoes(linhas).filter((r) => r.hora || r.opcoes.length)
     if (!refeicoes.length) return setErro(t('planoAlimentar.nadaParaSalvar'))
-    await salvarPlano(refeicoes, rascunho.pdf, usarNoApp)
+    await salvarPlano(refeicoes, rascunho.pdf, { usarNoApp, avisar: usarNoApp && avisar })
     mostrarAviso(t('planoAlimentar.salvo'))
     aoSalvar()
   }
@@ -134,6 +186,10 @@ function Conferir({ rascunho, aoSalvar, aoCancelar }: { rascunho: Rascunho; aoSa
                 </button>
               </div>
               <label className="flex flex-col gap-1">
+                <span className="text-sm font-bold">{t('planoAlimentar.nota', { refeicao: nome })}</span>
+                <input value={l.nota ?? ''} onChange={(e) => mudar(l.chave, { nota: e.target.value })} maxLength={140} className={campo} />
+              </label>
+              <label className="flex flex-col gap-1">
                 <span className="text-sm font-bold">{t('planoAlimentar.oQueComer', { refeicao: nome })}</span>
                 <textarea
                   value={l.texto}
@@ -163,6 +219,12 @@ function Conferir({ rascunho, aoSalvar, aoCancelar }: { rascunho: Rascunho; aoSa
           <span className="block text-sm">{t('planoAlimentar.usarNoAppDica')}</span>
         </span>
       </label>
+      {usarNoApp && (
+        <label className="flex items-start gap-2 pl-7">
+          <input type="checkbox" checked={avisar} onChange={(e) => setAvisar(e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-[var(--chocolate)]" />
+          <span className="font-bold">{t('planoAlimentar.avisar')}</span>
+        </label>
+      )}
       <p aria-live="polite" className="min-h-6 font-semibold">
         {erro && <>! {erro}</>}
       </p>
@@ -198,6 +260,25 @@ function useLinkDoPdf(temPdf: boolean, salvoEm?: string): string | undefined {
   return url
 }
 
+/** Com lembretes ligados nas refeições: pedir a permissão de avisos do sistema, se ainda não foi pedida. */
+function AvisosDoPlano({ config }: { config: ConfigAlimentacao }) {
+  const { t } = useTranslation()
+  const [permissao, setPermissao] = useState<PermissaoAvisos>(permissaoAvisos)
+  if (!config.refeicoes.some((r) => r.ativa && r.lembrar && r.hora)) return null
+  return (
+    <div className="flex flex-col gap-1 text-sm">
+      <p className="font-semibold">{t('planoAlimentar.avisosLigados')}</p>
+      {permissao === 'default' && (
+        <Botao variante="contorno" className="self-start" onClick={async () => setPermissao(await pedirPermissaoAvisos())}>
+          {t('remedios.ativarAvisos')}
+        </Botao>
+      )}
+      {permissao === 'denied' && <p>{t('remedios.avisosNegados')}</p>}
+      <p className="text-tinta-suave">{t('remedios.avisosAberto')}</p>
+    </div>
+  )
+}
+
 function PlanoPorHorario({ plano }: { plano: Plano }) {
   const { t } = useTranslation()
   const agora = useAgora(60_000)
@@ -222,22 +303,8 @@ function PlanoPorHorario({ plano }: { plano: Plano }) {
                 <span className="text-lg font-bold">{nomeNoPlano(t, r)}</span>
                 {eAgora && <span className="rounded-full border-2 border-linha bg-menta px-2 text-xs font-bold">{t('planoAlimentar.agora')}</span>}
               </p>
-              {r.opcoes.length > 0 && (
-                <ul className={`grid gap-2 ${r.opcoes.length > 1 ? 'sm:grid-cols-2' : ''}`}>
-                  {r.opcoes.map((o, i) => (
-                    <li key={i} className="rounded-xl border-2 border-linha/30 bg-papel px-3 py-2">
-                      {r.opcoes.length > 1 && <p className="rotulo">{t('planoAlimentar.opcao', { n: i + 1 })}</p>}
-                      <ul className="list-disc pl-5">
-                        {o.map((item, j) => (
-                          <li key={j} className="break-words">
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              {r.nota && <p className="text-sm italic">{r.nota}</p>}
+              {r.opcoes.length > 0 && <OpcoesDoPlano opcoes={r.opcoes} />}
             </li>
           )
         })}
@@ -300,6 +367,7 @@ export function MeuPlanoAlimentar({ config }: { config: ConfigAlimentacao }) {
       ) : plano ? (
         <>
           <PlanoPorHorario plano={plano} />
+          <AvisosDoPlano config={config} />
           <div className="flex flex-wrap items-center gap-2">
             {link && (
               <a href={link} target="_blank" rel="noopener" className={`${botaoArquivo} border-linha bg-papel`}>

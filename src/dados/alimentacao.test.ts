@@ -17,12 +17,13 @@ describe('alimentação no banco', () => {
     expect((await banco.diasAlimentacao.get('2026-10-29'))!.refeicoes.cafe).toBeUndefined()
   })
 
-  it('configuração: começa com as 6 refeições (lanche da manhã e ceia desligados) e muda sem perder o resto', async () => {
+  it('configuração: começa com as 7 refeições ("ao acordar", lanche da manhã e ceia desligados) e muda sem perder o resto', async () => {
     await mudarConfigAlimentacao(() => ({ aguaMeta: 6 }))
     await mudarConfigAlimentacao((c) => ({ refeicoes: c.refeicoes.map((r) => (r.id === 'lanche' ? { ...r, ativa: false } : r)) }))
     const c = (await banco.configuracoes.get('alimentacao'))!.valor as { aguaMeta: number; refeicoes: Array<{ id: string; ativa: boolean }> }
     expect(c.aguaMeta).toBe(6)
     expect(c.refeicoes.map((r) => [r.id, r.ativa])).toEqual([
+      ['acordar', false],
       ['cafe', true],
       ['lancheManha', false],
       ['almoco', true],
@@ -32,7 +33,7 @@ describe('alimentação no banco', () => {
     ])
   })
 
-  it('configuração guardada com 4 refeições ganha o lanche da manhã e a ceia, sem perder o que mudou', async () => {
+  it('configuração guardada com 4 refeições ganha as novas, sem perder o que mudou', async () => {
     const antigas = [
       { id: 'cafe', hora: '07:00', ativa: true, lembrar: true },
       { id: 'almoco', hora: '12:00', ativa: true, lembrar: false },
@@ -42,9 +43,9 @@ describe('alimentação no banco', () => {
     await banco.configuracoes.put({ chave: 'alimentacao', valor: { refeicoes: antigas, aguaMeta: 10 } })
     await mudarConfigAlimentacao(() => ({ aguaMeta: 9 }))
     const c = (await banco.configuracoes.get('alimentacao'))!.valor as { refeicoes: Array<{ id: string }> }
-    expect(c.refeicoes.map((r) => r.id)).toEqual(['cafe', 'lancheManha', 'almoco', 'lanche', 'jantar', 'ceia'])
-    expect(c.refeicoes[0]).toEqual(antigas[0])
-    expect(c.refeicoes[3]).toEqual(antigas[2])
+    expect(c.refeicoes.map((r) => r.id)).toEqual(['acordar', 'cafe', 'lancheManha', 'almoco', 'lanche', 'jantar', 'ceia'])
+    expect(c.refeicoes[1]).toEqual(antigas[0])
+    expect(c.refeicoes[4]).toEqual(antigas[2])
   })
 })
 
