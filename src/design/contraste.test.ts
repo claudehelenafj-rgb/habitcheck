@@ -26,6 +26,16 @@ const escuro = { ...claro, ...bloco(":root[data-modo='escuro']") }
 // Os blocos do Índigo definem todos os tokens; o claro serve só de reserva.
 const indigo = { ...claro, ...bloco("[data-tema='indigo']") }
 const indigoEscuro = { ...claro, ...bloco("[data-modo='escuro'][data-tema='indigo']") }
+// Temas pedidos depois: cada bloco define todos os tokens, como o Índigo.
+const NOVOS = [
+  ['Matcha Strawberry', 'matcha'],
+  ['Pink Dreams', 'pink'],
+  ['Caramel', 'caramelo'],
+  ['Green Thumb', 'verde'],
+] as const
+type Caso = [string, Record<string, string>]
+const novosClaro = NOVOS.map(([nome, id]): Caso => [`${nome} claro`, { ...claro, ...bloco(`[data-tema='${id}']`) }])
+const novosEscuro = NOVOS.map(([nome, id]): Caso => [`${nome} escuro`, { ...claro, ...bloco(`[data-modo='escuro'][data-tema='${id}']`) }])
 
 const TONS_CLAROS = [
   'claro-lavanda',
@@ -37,11 +47,13 @@ const TONS_CLAROS = [
 ]
 const TONS_FORTES = ['forte-rosa', 'forte-tomate', 'forte-laranja', 'forte-piscina', 'forte-agua', 'forte-chocolate']
 
-describe.each([
+describe.each<Caso>([
   ['modo claro', claro],
   ['modo escuro', escuro],
   ['Índigo claro', indigo],
   ['Índigo escuro', indigoEscuro],
+  ...novosClaro,
+  ...novosEscuro,
 ])('%s', (_modo, vars) => {
   const modoEscuro = _modo.endsWith('escuro')
   const cor = (nome: string) => resolver(vars, nome)
@@ -148,5 +160,23 @@ describe('Bem-estar', () => {
   it('texto chocolate e índigo-noite passam AA sobre o lilás-névoa', () => {
     expect(contraste(resolver(claro, 'chocolate'), bem['lilas-nevoa'])).toBeGreaterThanOrEqual(MINIMO_TEXTO)
     expect(contraste(resolver(indigo, 'chocolate'), bem['lilas-nevoa'])).toBeGreaterThanOrEqual(MINIMO_TEXTO)
+  })
+})
+
+describe('temas novos (Matcha Strawberry, Pink Dreams, Caramel e Green Thumb)', () => {
+  const bem = Object.fromEntries(
+    [...css.matchAll(/--(ameixa|lilas-nevoa|forte-ameixa):\s*(#[0-9a-f]{6})/g)].map(([, nome, hex]) => [nome, hex]),
+  )
+  it.each([...novosClaro, ...novosEscuro])('%s: destaque, cartões do destaque, Bem-estar e mapa de calor', (nome, vars) => {
+    const cor = (n: string) => resolver(vars, n)
+    expect(contraste(cor('destaque-texto'), cor('destaque')), 'texto do destaque').toBeGreaterThanOrEqual(MINIMO_TEXTO)
+    expect(contraste(cor('tinta'), cor('destaque-claro')), 'texto sobre o destaque claro').toBeGreaterThanOrEqual(MINIMO_TEXTO)
+    expect(contraste(cor('chocolate'), bem['lilas-nevoa']), 'texto no lilás do Bem-estar').toBeGreaterThanOrEqual(MINIMO_TEXTO)
+    const ameixa = nome.endsWith('escuro') ? bem['forte-ameixa'] : bem['ameixa']
+    expect(contraste(ameixa, cor('fundo')), 'ameixa como ícone').toBeGreaterThanOrEqual(MINIMO_ICONE)
+    // o mapa de calor vai do mais fraco ao mais forte em relação ao papel
+    const distancias = [1, 2, 3, 4].map((i) => contraste(cor(`mapa-${i}`), cor('papel')))
+    expect(distancias).toEqual([...distancias].sort((a, b) => a - b))
+    expect(distancias[3], 'a faixa mais forte aparece bem').toBeGreaterThanOrEqual(MINIMO_ICONE)
   })
 })

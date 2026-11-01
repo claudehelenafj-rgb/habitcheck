@@ -27,7 +27,7 @@ export type Estampa = (typeof ESTAMPAS)[number]
 
 export type Preferencias = {
   modo: 'auto' | 'claro' | 'escuro'
-  tema: 'creme' | 'cereja' | 'piscina' | 'pessego' | 'indigo'
+  tema: 'creme' | 'cereja' | 'piscina' | 'pessego' | 'indigo' | 'matcha' | 'pink' | 'caramelo' | 'verde'
   decoracao: 'doce' | 'neutra'
   estampa: Estampa
   calmo: boolean
@@ -47,6 +47,15 @@ export const PADRAO: Preferencias = {
   fonte: 'padrao',
   tamanho: 'normal',
   idioma: 'pt-BR',
+}
+
+/** Cor da barra do navegador em cada tema (claro, escuro); os outros usam a do Creme. */
+const COR_DA_BARRA: Partial<Record<Preferencias['tema'], [string, string]>> = {
+  indigo: ['#F3F2EE', '#1E2350'],
+  matcha: ['#F2F5E4', '#1E2716'],
+  pink: ['#FDEFF4', '#3B1430'],
+  caramelo: ['#F8EEDF', '#2D1C0F'],
+  verde: ['#EDF6EC', '#142A1D'],
 }
 
 const CHAVE_ESPELHO = 'caderninho:preferencias'
@@ -84,7 +93,8 @@ export function aplicar(p: Preferencias) {
   raiz.dataset.animacoes = p.animacoes ? 'sim' : 'nao'
   raiz.dataset.fonte = p.fonte
   raiz.dataset.tamanho = p.tamanho
-  const corBarra = p.tema === 'indigo' ? (escuro ? '#1E2350' : '#F3F2EE') : escuro ? '#521429' : '#FBF6EE'
+  const [claroBarra, escuroBarra] = COR_DA_BARRA[p.tema] ?? ['#FBF6EE', '#521429']
+  const corBarra = escuro ? escuroBarra : claroBarra
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', corBarra)
 }
 

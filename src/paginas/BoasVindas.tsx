@@ -85,9 +85,14 @@ export function BoasVindas() {
                   [
                     ['creme', t('boasVindas.temaClassico'), t('boasVindas.temaClassicoDesc'), ['#FBF6EE', '#422F0E', '#F9D4F8', '#FFD094']],
                     ['indigo', t('boasVindas.temaIndigo'), t('boasVindas.temaIndigoDesc'), ['#F3F2EE', '#1E2350', '#3949A3', '#E3A73B']],
+                    ['matcha', t('ajustes.temaMatcha'), t('boasVindas.temaMatchaDesc'), ['#F2F5E4', '#2E3B1F', '#4F6B28', '#F4A6B7']],
+                    ['pink', t('ajustes.temaPink'), t('boasVindas.temaPinkDesc'), ['#FDEFF4', '#4E1530', '#B23A6C', '#F9CFDD']],
+                    ['caramelo', t('ajustes.temaCaramelo'), t('boasVindas.temaCarameloDesc'), ['#F8EEDF', '#4A2A10', '#8B5426', '#D69A5C']],
+                    ['verde', t('ajustes.temaVerde'), t('boasVindas.temaVerdeDesc'), ['#EDF6EC', '#1D3A28', '#2E6A47', '#9ED2AE']],
                   ] as const
                 ).map(([tema, nomeTema, descricao, cores]) => {
-                  const ativo = tema === 'indigo' ? prefs.tema === 'indigo' : prefs.tema !== 'indigo'
+                  // Cereja, Piscina e Pêssego são variações do Creme (só o destaque muda)
+                  const ativo = tema === 'creme' ? ['creme', 'cereja', 'piscina', 'pessego'].includes(prefs.tema) : prefs.tema === tema
                   return (
                     <label
                       key={tema}

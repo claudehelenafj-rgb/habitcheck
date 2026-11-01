@@ -79,6 +79,10 @@ export function PainelAparencia({ prefs, mudar }: { prefs: Preferencias; mudar: 
           ['piscina', t('ajustes.temaPiscina')],
           ['pessego', t('ajustes.temaPessego')],
           ['indigo', t('ajustes.temaIndigo')],
+          ['matcha', t('ajustes.temaMatcha')],
+          ['pink', t('ajustes.temaPink')],
+          ['caramelo', t('ajustes.temaCaramelo')],
+          ['verde', t('ajustes.temaVerde')],
         ]}
         mudar={(tema) => mudar({ tema })}
       />

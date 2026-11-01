@@ -29,6 +29,10 @@ Base: guia "Estratégias de organização para pessoas com TDAH e Autismo" (PubM
 - Estampas trocáveis (11): bolinhas, xadrez, listras à mão, coraçõezinhos, cerejas, estrelinhas, flores retrô, ondinhas,
   pauta de caderno, confete e oncinha. Novas (14 no total): patinhas, rabiscos e xadrez à mão. Geradas por `scripts/gerar-estampas.py`.
 - Modo escuro **cereja**: fundo cereja escuro, texto creme; cartões das áreas continuam nos tons claros, com texto chocolate.
+- Temas pedidos depois (claro e escuro, no primeiro uso e em Ajustes → Aparência): **Matcha Strawberry** (verde matcha
+  com rosa-morango claro), **Pink Dreams** (rosa claro com rosa escuro), **Caramel** (caramelo com marrom claro) e
+  **Green Thumb** (tons de verde pastel). Como o Índigo, trocam fundo, texto, botões, destaques, mapa de calor e a cor
+  da barra do navegador; as cores das áreas continuam as mesmas. Todos os contrastes são conferidos nos testes.
 - Tudo desenhado do zero; nada copiado das referências.
 
 ## Novidades pedidas depois do plano
@@ -116,6 +120,7 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | 15 | **Meus objetivos**: folha de caderno, o que faz andar, o porquê no ritual da manhã e na revisão (parte 1) | Pronta |
 | 15 | Painel com números e gráficos do que foi feito (parte 2) | Pronta |
 | 16 | **Álbum de adesivos** e adesivos especiais (parte 1) | Pronta |
+| T | **Temas** Matcha Strawberry, Pink Dreams, Caramel e Green Thumb | Pronta |
 | 16 | Recompensas que a pessoa escolhe (parte 2) | |
 | 16 | Conferência final com os critérios de pronto (parte 3) | |
 
@@ -354,4 +359,4 @@ saldo dos potes e virada da semana, espera de 48 h da lista de desejos, progress
 avisos do semestre, fases do modo foco e "achei × levou", aviso do estudo acompanhado, hábitos (semana, pendente hoje, véspera), reset do quarto, refeições e água, ideias de comida e lista de compras, contas, potes e gasto rápido, pausa de 48 h, cofrinho, estoque de remédio, "X de 7 dias", limite de 3 tarefas A, escolha do cartão "Agora",
 importação de .ics sem duplicar, passos e dia dos rituais (a noite até as 5h), escolha das tarefas A e pendências da noite,
 agenda do dia, objetivo do dia e o que faz cada objetivo andar, dias com ação por semana, foco por dia e totais do mês, resumo da semana e avisos sem resposta da revisão, leitura do plano alimentar (títulos, horários, opções, "lanche" da manhã ou da tarde), adesivos do álbum e especiais (guardados uma vez só), e o contraste de todas
-as cores usadas.
+as cores usadas, em todos os temas.
