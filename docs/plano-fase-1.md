@@ -122,8 +122,8 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | 15 | Painel com números e gráficos do que foi feito (parte 2) | Pronta |
 | 16 | **Álbum de adesivos** e adesivos especiais (parte 1) | Pronta |
 | T | **Temas** Matcha Strawberry, Pink Dreams, Caramel e Green Thumb | Pronta |
-| 16 | Recompensas que a pessoa escolhe (parte 2) | |
-| 16 | Conferência final com os critérios de pronto (parte 3) | |
+| 16 | Recompensas que a pessoa escolhe (parte 2) | Retirada a pedido |
+| 16 | Publicar a Fase 1 no GitHub Pages | Pronta |
 
 ## Faculdade (etapa 9)
 
