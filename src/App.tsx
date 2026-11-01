@@ -20,6 +20,7 @@ import { Alimentacao } from './paginas/Alimentacao'
 import { Dinheiro } from './paginas/Dinheiro'
 import { Ritual, Rituais } from './paginas/Rituais'
 import { Objetivos } from './paginas/Objetivos'
+import { Album } from './paginas/Album'
 import { ResetQuarto } from './paginas/ResetQuarto'
 import { Foco } from './paginas/Foco'
 import { GuiaDeEstilo } from './paginas/GuiaDeEstilo'
@@ -51,6 +52,7 @@ const roteador = createHashRouter([
       { path: '/objetivos', element: <Objetivos /> },
       { path: '/rituais', element: <Rituais /> },
       { path: '/rituais/:ritual', element: <Ritual /> },
+      { path: '/album', element: <Album /> },
       ...TODAS_AS_TELAS.filter((tela) => tela.etapa).map((tela) => ({
         path: tela.caminho,
         element: <EmBreve tela={tela} />,

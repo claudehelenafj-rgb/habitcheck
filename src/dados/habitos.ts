@@ -64,8 +64,11 @@ export async function restaurarHabito({ habito, registros }: { habito?: Habito; 
 /** Marca o dia com um nível; `undefined` tira a marca. */
 export async function marcarHabito(habitoId: string, dia: Dia, nivel: NivelHabito | undefined, agora = new Date()) {
   const id = idRegistro(habitoId, dia)
-  if (!nivel) await banco.registrosHabito.delete(id)
-  else await banco.registrosHabito.put({ id, habitoId, dia, nivel, quando: agora.toISOString() })
+  if (!nivel) return banco.registrosHabito.delete(id)
+  await banco.transaction('rw', banco.habitos, banco.registrosHabito, async () => {
+    const adesivo = (await banco.habitos.get(habitoId))?.adesivo
+    await banco.registrosHabito.put({ id, habitoId, dia, nivel, quando: agora.toISOString(), ...(adesivo && { adesivo }) })
+  })
 }
 
 /** Marca ou desmarca um item da base de lançamento (ou o "combinei com…") para o dia. */

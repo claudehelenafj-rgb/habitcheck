@@ -10,6 +10,7 @@ export type IdTela =
   | 'tarefas'
   | 'objetivos'
   | 'rituais'
+  | 'album'
   | 'remedios'
   | 'consultas'
   | 'academia'
@@ -38,6 +39,7 @@ export const TELAS_PRINCIPAIS: Tela[] = [
   { id: 'caixa', caminho: '/caixa', adesivo: 'envelope', atalho: 'x' },
   { id: 'objetivos', caminho: '/objetivos', adesivo: 'estrela', atalho: 'o' },
   { id: 'rituais', caminho: '/rituais', adesivo: 'lua', atalho: 'r' },
+  { id: 'album', caminho: '/album', adesivo: 'coracao', atalho: 'u' },
 ]
 
 export const TELAS_AREAS: Tela[] = [

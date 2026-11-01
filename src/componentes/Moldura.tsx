@@ -9,7 +9,8 @@ import { diaLocal, type Dia } from '../logica/datas'
 import { TELA_AJUSTES, TELAS_AREAS, TELAS_BARRA_CELULAR, TELAS_PRINCIPAIS, type Tela } from '../rotas'
 import { Adesivo } from './Adesivo'
 import { AvisoAtualizacao } from './AvisoAtualizacao'
-import { Avisos } from './Avisos'
+import { Avisos, mostrarAviso } from './Avisos'
+import { guardarEspeciaisNovos, useTotalDeAdesivos } from '../dados/album'
 import { BannerLembrete } from './BannerLembrete'
 import { BannerFoco } from './BannerFoco'
 import { useLembretes } from '../lembretes'
@@ -252,6 +253,23 @@ export function Moldura() {
   return <MolduraComPerfil perfil={perfil} visitaAnterior={anterior.dia} />
 }
 
+/** Quando o total do álbum alcança um adesivo especial, guarda e avisa uma vez só. */
+function useEspeciaisDoAlbum() {
+  const { t } = useTranslation()
+  const total = useTotalDeAdesivos()
+  useEffect(() => {
+    if (total === undefined) return
+    let ativo = true
+    void guardarEspeciaisNovos().then((novos) => {
+      if (!ativo || !novos.length) return
+      mostrarAviso(novos.length === 1 ? t('album.especialNovo', { nome: t(`album.especiais.${novos[0]}`) }) : t('album.especiaisNovos', { count: novos.length }))
+    })
+    return () => {
+      ativo = false
+    }
+  }, [total, t])
+}
+
 function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
   const { t, i18n } = useTranslation()
   const [atalhosAbertos, setAtalhosAbertos] = useState(false)
@@ -300,6 +318,7 @@ function MolduraComPerfil({ perfil, visitaAnterior }: ContextoMoldura) {
     }),
     [t, i18n.language],
   )
+  useEspeciaisDoAlbum()
   useLembretes(textosLembretes, { bemEstar: perfil.areasAtivas.includes('bemestar'), faculdade: perfil.areasAtivas.includes('faculdade') })
 
   // Ao trocar de tela, o foco vai para o título da nova tela (bom para leitor de tela e teclado).

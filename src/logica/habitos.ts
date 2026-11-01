@@ -45,7 +45,15 @@ export type Habito = {
 export type Preparo = { dia: Dia; itens: string[]; combinado?: boolean }
 
 /** Um registro por hábito e por dia. Sem registro = nada a mostrar (neutro). */
-export type RegistroHabito = { id: string; habitoId: string; dia: Dia; nivel: NivelHabito; quando: string }
+export type RegistroHabito = {
+  id: string
+  habitoId: string
+  dia: Dia
+  nivel: NivelHabito
+  quando: string
+  /** o adesivo do hábito naquele dia (trocar o adesivo depois não muda o que já está no álbum) */
+  adesivo?: NomeAdesivo
+}
 
 /** Áreas que têm hábitos (cada uma mostra os seus na própria tela). */
 export const AREAS_COM_HABITOS: IdArea[] = ['academia', 'quarto']

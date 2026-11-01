@@ -57,6 +57,14 @@ const redondo = (cx: number, cy: number, r: number, lados = 11) =>
     0.2,
   )
 
+/** Arco facetado (meia-volta, de um lado ao outro por cima), para o arco-íris. */
+function arco(cx: number, cy: number, r: number, lados = 7): string {
+  return Array.from({ length: lados + 1 }, (_, i) => {
+    const a = Math.PI + (i / lados) * Math.PI
+    return `${i === 0 ? 'M' : 'L'}${(cx + r * Math.cos(a)).toFixed(1)} ${(cy + r * Math.sin(a)).toFixed(1)}`
+  }).join('')
+}
+
 /** Duas camadas de papel: a de fora é um traço grosso; a de dentro, levemente deslocada. */
 function Camadas({ d, fora, dentro, borda = 6 }: { d: string; fora: string; dentro: string; borda?: number }) {
   return (
@@ -418,6 +426,64 @@ const desenhos = {
       <circle cx="44" cy="28" r="3" fill={COR.rosa} />
       <circle cx="50" cy="33" r="3" fill={COR.mostarda} />
       <circle cx="44" cy="38" r="3" fill={COR.agua} />
+    </g>
+  ),
+  // ---- adesivos especiais do álbum (chegam com o total de adesivos) ----
+  arcoIris: (
+    <g transform="rotate(-8 32 36)">
+      <path d={arco(32, 44, 24)} fill="none" stroke={COR.rosa} strokeWidth={7} strokeLinejoin="miter" />
+      <path d={arco(32, 44, 17)} fill="none" stroke={COR.laranja} strokeWidth={7} strokeLinejoin="miter" />
+      <path d={arco(32, 44, 10, 5)} fill="none" stroke={COR.agua} strokeWidth={7} strokeLinejoin="miter" />
+      <Camadas d={redondo(12, 46, 8, 9)} fora={COR.azul} dentro={COR.creme} borda={4} />
+      <Camadas d={redondo(52, 46, 8, 9)} fora={COR.azul} dentro={COR.creme} borda={4} />
+    </g>
+  ),
+  pipa: (
+    <g transform="rotate(12 32 32)">
+      <path d="M32 41C25 46 38 50 31 59" fill="none" stroke={COR.chocolate} strokeWidth={2} strokeLinecap="round" />
+      <path d="M-5 -3.5L0 0L-5 3.5ZM5 -3.5L0 0L5 3.5Z" transform="translate(30.5 46) rotate(-20)" fill={COR.laranja} />
+      <path d="M-5 -3.5L0 0L-5 3.5ZM5 -3.5L0 0L5 3.5Z" transform="translate(33 53.5) rotate(15)" fill={COR.rosa} />
+      <Camadas d="M32 4L50 22L32 42L14 22Z" fora={COR.morango} dentro={COR.lavanda} />
+      <path d="M32 4.6L49.2 22L32 22ZM32 22L32 41.2L14.8 22Z" fill={COR.rosa} />
+      <path d="M32 4.6V41.2M14.8 22H49.2" stroke={COR.chocolate} strokeWidth={1.4} />
+    </g>
+  ),
+  foguete: (
+    <g transform="rotate(32 32 32)">
+      <path d="M25 45L32 61L39 45Z" fill={COR.laranja} />
+      <path d="M28 45L32 54L36 45Z" fill={COR.manteiga} />
+      <path d="M22 32L12 47L22 45ZM42 32L52 47L42 45Z" fill={COR.tomate} />
+      <Camadas d="M32 3L42 15L43 45L21 45L22 15Z" fora={COR.azul} dentro={COR.creme} />
+      <path d="M32 3.6L41.6 15L22.4 15Z" fill={COR.tomate} />
+      <path d={redondo(32, 26, 5.5, 8)} fill={COR.piscina} stroke={COR.azul} strokeWidth={2.5} />
+      <path d="M22 38h21v3H22z" fill={COR.azul} />
+    </g>
+  ),
+  cogumelo: (
+    <g transform="rotate(-5 32 32)">
+      <Camadas d="M24 35L40 35L43 56L21 56Z" fora={COR.pessego} dentro={COR.creme} borda={5} />
+      <Camadas d="M6 37L9 25L18 14L32 9L46 14L55 25L58 37Z" fora={COR.morango} dentro={COR.tomate} />
+      <path d={redondo(20, 26, 4.5, 7)} fill={COR.creme} />
+      <path d={redondo(34, 17, 3.5, 7)} fill={COR.creme} />
+      <path d={redondo(46, 28, 4.5, 7)} fill={COR.creme} />
+      <path d="M28 44h3v5h-3zM34 44h3v5h-3z" fill={COR.pessego} />
+    </g>
+  ),
+  coroa: (
+    <g transform="rotate(-6 32 32)">
+      <Camadas d="M8 21L20 31L32 11L44 31L56 21L52 50L12 50Z" fora={COR.laranja} dentro={COR.manteiga} />
+      <path d="M13.6 42L50.6 42L50 50L14 50Z" fill={COR.mostarda} />
+      <path d="M32 31l4.5 4.5L32 40l-4.5-4.5z" fill={COR.rosa} />
+      <path d="M20 36l3 3-3 3-3-3zM44 36l3 3-3 3-3-3z" fill={COR.agua} />
+    </g>
+  ),
+  joia: (
+    <g transform="rotate(5 32 32)">
+      <Camadas d="M12 23L23 10L41 10L52 23L32 55Z" fora={COR.agua} dentro={COR.azul} />
+      <path d="M12.8 23L51.2 23L32 54Z" fill={COR.agua} />
+      <path d="M24 23L32 54L40 23Z" fill={COR.azul} />
+      <path d="M23.6 10.6L28 23L32 10.6ZM40.4 10.6L36 23L32 10.6Z" fill={COR.creme} opacity={0.75} />
+      <path d="M40 23L32 54L51.2 23Z" fill={COR.piscina} />
     </g>
   ),
 } satisfies Record<string, ReactNode>

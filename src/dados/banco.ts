@@ -193,6 +193,19 @@ export class BancoCaderninho extends Dexie {
     this.version(18).stores({
       arquivos: 'id',
     })
+    // álbum de adesivos: cada registro de hábito guarda o adesivo que o hábito tinha (os antigos recebem o atual)
+    this.version(19)
+      .stores({})
+      .upgrade(async (tx) => {
+        const adesivos = new Map((await tx.table<Habito>('habitos').toArray()).map((h) => [h.id, h.adesivo]))
+        await tx
+          .table<RegistroHabito>('registrosHabito')
+          .toCollection()
+          .modify((r) => {
+            const adesivo = adesivos.get(r.habitoId)
+            if (!r.adesivo && adesivo) r.adesivo = adesivo
+          })
+      })
   }
 }
 

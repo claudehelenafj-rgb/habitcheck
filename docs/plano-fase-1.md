@@ -115,7 +115,9 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | 14 | **Revisão semanal** (com 5 min de dinheiro, os hobbies e os avisos sem resposta) (parte 2) | Pronta |
 | 15 | **Meus objetivos**: folha de caderno, o que faz andar, o porquê no ritual da manhã e na revisão (parte 1) | Pronta |
 | 15 | Painel com números e gráficos do que foi feito (parte 2) | Pronta |
-| 16 | Álbum de adesivos, recompensas e conferência final | |
+| 16 | **Álbum de adesivos** e adesivos especiais (parte 1) | Pronta |
+| 16 | Recompensas que a pessoa escolhe (parte 2) | |
+| 16 | Conferência final com os critérios de pronto (parte 3) | |
 
 ## Faculdade (etapa 9)
 
@@ -331,11 +333,25 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
   - Os textos do mapa de calor passam a ter inglês. Dentro da folha de caderno (clara em qualquer tema), textos de
     exemplo, o painel "ligar" e as caixinhas usam as cores da folha.
 
+## Álbum de adesivos (etapa 16, parte 1)
+
+- Tela Álbum (atalho U): uma página por mês. Cada coisa feita cola um adesivo, na ordem em que aconteceu: hábito feito
+  (a versão mínima conta igual), tarefa concluída (adesivo da área ou estrela) e ritual terminado (sol, lua, calendário;
+  a revisão vai para o dia em que foi feita). Cada adesivo fica um pouco torto, sempre igual, com o dia embaixo.
+- Selos com o total do álbum e o do mês; "Mês anterior" e "Próximo mês" do primeiro mês com adesivo até hoje; quantos
+  vieram de hábitos, tarefas e rituais; "Ver como lista" por dia. Dia sem adesivo não aparece e não tira nada; página
+  vazia mostra um convite gentil.
+- O adesivo do hábito fica guardado em cada registro: trocar o adesivo do hábito depois não muda o que já está colado.
+- Adesivos especiais, desenhados do zero: arco-íris (10 adesivos), pipa (25), foguete (50), cogumelo (100), coroa (200)
+  e joia (365). Os próximos aparecem como surpresa, com o número. Quando o total alcança um, ele é guardado com o dia
+  e um aviso aparece uma vez só; desfazer algo depois não tira o especial. Um especial pode virar o adesivo de um
+  hábito (escolha no editor do hábito).
+
 ## Lógica com testes automáticos
 
 Horários de lembretes (adiar, repetir, silêncio), recorrências, vencimento de contas (ex.: dia 31 em mês de 30 dias),
 saldo dos potes e virada da semana, espera de 48 h da lista de desejos, progresso do cofrinho, planejamento reverso (prova → sessões; consulta → alarmes),
 avisos do semestre, fases do modo foco e "achei × levou", aviso do estudo acompanhado, hábitos (semana, pendente hoje, véspera), reset do quarto, refeições e água, ideias de comida e lista de compras, contas, potes e gasto rápido, pausa de 48 h, cofrinho, estoque de remédio, "X de 7 dias", limite de 3 tarefas A, escolha do cartão "Agora",
 importação de .ics sem duplicar, passos e dia dos rituais (a noite até as 5h), escolha das tarefas A e pendências da noite,
-agenda do dia, objetivo do dia e o que faz cada objetivo andar, dias com ação por semana, foco por dia e totais do mês, resumo da semana e avisos sem resposta da revisão, leitura do plano alimentar (títulos, horários, opções, "lanche" da manhã ou da tarde), e o contraste de todas
+agenda do dia, objetivo do dia e o que faz cada objetivo andar, dias com ação por semana, foco por dia e totais do mês, resumo da semana e avisos sem resposta da revisão, leitura do plano alimentar (títulos, horários, opções, "lanche" da manhã ou da tarde), adesivos do álbum e especiais (guardados uma vez só), e o contraste de todas
 as cores usadas.

@@ -3,8 +3,10 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useEspeciaisGanhos } from '../dados/album'
 import { apagarHabito, restaurarHabito, salvarHabito } from '../dados/habitos'
 import { AREAS, type IdArea } from '../design/areas'
+import { adesivosParaEscolher, ESPECIAIS } from '../logica/album'
 import { temPreparo, type Habito } from '../logica/habitos'
 import { BLOCOS } from '../logica/hoje'
 import { Adesivo } from './Adesivo'
@@ -74,6 +76,10 @@ export function EditorHabito({
   const [erro, setErro] = useState('')
   const [item, setItem] = useState('')
   const mudar = (m: Partial<Habito>) => setH((x) => ({ ...x, ...m }))
+  const especiais = useEspeciaisGanhos()
+  // o adesivo "de sempre": o do hábito (se não for especial) ou o da área
+  const deSempre = ESPECIAIS.some((e) => e.nome === h.adesivo) ? (h.area ? AREAS[h.area].adesivo : 'estrela') : h.adesivo
+  const escolhas = adesivosParaEscolher(deSempre, especiais ?? {})
   const acrescentarItem = () => {
     const novo = item.trim()
     if (novo && !(h.base ?? []).includes(novo)) mudar({ base: [...(h.base ?? []), novo] })
@@ -146,6 +152,30 @@ export function EditorHabito({
                 <Escolha key={a} marcado={h.area === a} onClick={() => mudar({ area: a, adesivo: AREAS[a].adesivo })}>
                   {t(`nav.${a}`)}
                 </Escolha>
+              ))}
+            </div>
+          </Grupo>
+        )}
+
+        {escolhas.length > 1 && (
+          <Grupo titulo={t('editorHabito.adesivo')} dica={t('editorHabito.adesivoDica')}>
+            <div className="flex flex-wrap gap-2">
+              {escolhas.map((n, i) => (
+                <button
+                  key={n}
+                  type="button"
+                  aria-pressed={h.adesivo === n}
+                  aria-label={i === 0 ? t('editorHabito.adesivoDeSempre') : t(`album.especiais.${n}`)}
+                  onClick={() => mudar({ adesivo: n })}
+                  className={`relative grid h-16 w-16 place-items-center rounded-2xl border-2 ${h.adesivo === n ? 'border-linha bg-manteiga ring-2 ring-linha ring-offset-2 ring-offset-papel' : 'border-linha/40 bg-papel'}`}
+                >
+                  <Adesivo nome={n} tamanho={40} />
+                  {h.adesivo === n && (
+                    <span aria-hidden="true" className="absolute -top-2 -right-2 grid h-6 w-6 place-items-center rounded-full bg-botao text-xs font-bold text-botao-texto">
+                      ✓
+                    </span>
+                  )}
+                </button>
               ))}
             </div>
           </Grupo>

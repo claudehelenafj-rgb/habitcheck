@@ -67,6 +67,12 @@ const NOMES_ADESIVO: Record<NomeAdesivo, string> = {
   pincel: 'Pincel',
   novelo: 'Novelo',
   controle: 'Videogame',
+  arcoIris: 'Arco-íris (especial)',
+  pipa: 'Pipa (especial)',
+  foguete: 'Foguete (especial)',
+  cogumelo: 'Cogumelo (especial)',
+  coroa: 'Coroa (especial)',
+  joia: 'Joia (especial)',
 }
 
 const SEMANA: Dia[] = [
