@@ -1,0 +1,612 @@
+/*
+ * Tokens de cor do Caderninho.
+ * Este arquivo é a fonte única das cores: o teste src/design/contraste.test.ts
+ * lê os valores daqui e confere o contraste WCAG AA de cada combinação usada.
+ *
+ * Regras:
+ * - Tons claros = fundos de cartões e áreas, sempre com texto em "tinta".
+ * - Tons fortes = ícones, checks, barras e selos (nunca texto corrido).
+ * - "tinta" é chocolate no modo claro e creme no modo escuro.
+ */
+
+:root {
+  /* Paleta base (valores exatos pedidos) */
+  --creme: #fbf6ee;
+  --chocolate: #422f0e;
+
+  --lavanda: #f9d4f8;
+  --azul-nevoa: #aecfd0;
+  --pessego: #ffd094;
+  --manteiga: #f7e9b2;
+  --menta: #ddf2b8;
+  --morango-claro: #fcc4c0;
+
+  --rosa: #ea5e86;
+  --tomate: #ef6545;
+  --laranja: #f49625;
+  --verde-piscina: #037f71;
+  --verde-agua: #57b1a8;
+
+  /*
+   * Ajustes de contraste para selos com texto em chocolate.
+   * Rosa e tomate originais dão 3,9:1 e 4,0:1 (AA pede 4,5:1).
+   * Escurecer pioraria (o texto já é escuro), então clareamos levemente.
+   */
+  --rosa-selo: #ed7597;
+  --tomate-selo: #f1795d;
+
+  /* Papéis semânticos (modo claro) */
+  --fundo: var(--creme);
+  --papel: #fffdf8;
+  --tinta: var(--chocolate);
+  --tinta-suave: #67573b; /* só sobre fundo ou papel */
+  --linha: var(--chocolate);
+  /* texto suave e papel dentro de cartões em tom claro (iguais nos dois modos) */
+  --suave-claro: #67573b;
+  --papel-claro: #fffdf8;
+  --contorno-adesivo: #ffffff;
+
+  /* Tons claros usados como fundo de cartões */
+  --claro-lavanda: var(--lavanda);
+  --claro-azul-nevoa: var(--azul-nevoa);
+  --claro-pessego: var(--pessego);
+  --claro-manteiga: var(--manteiga);
+  --claro-menta: var(--menta);
+  --claro-morango: var(--morango-claro);
+
+  /* Tons fortes usados como ícone, check e barra */
+  --forte-rosa: var(--rosa);
+  --forte-tomate: var(--tomate);
+  --forte-laranja: var(--laranja);
+  --forte-piscina: var(--verde-piscina);
+  --forte-agua: var(--verde-agua);
+  --forte-chocolate: var(--chocolate);
+
+  /* Mapa de calor (sequencial, um só tom, validado contra o papel) */
+  --mapa-1: #ee9cbe;
+  --mapa-2: #e86a92;
+  --mapa-3: #c44770;
+  --mapa-4: #872c4e;
+
+  /* Botão principal */
+  --botao-fundo: var(--chocolate);
+  --botao-texto: var(--creme);
+
+  /* Tema (troca a "embalagem", não o sistema) */
+  --destaque: var(--chocolate);
+  --destaque-texto: var(--creme);
+  --destaque-claro: var(--manteiga);
+
+  color-scheme: light;
+}
+
+/* Temas trocáveis */
+:root[data-tema='cereja'] {
+  --destaque: var(--rosa-selo);
+  --destaque-texto: var(--chocolate);
+  --destaque-claro: var(--morango-claro);
+}
+:root[data-tema='piscina'] {
+  --destaque: var(--verde-piscina);
+  --destaque-texto: var(--creme);
+  --destaque-claro: var(--azul-nevoa);
+}
+:root[data-tema='pessego'] {
+  --destaque: var(--laranja);
+  --destaque-texto: var(--chocolate);
+  --destaque-claro: var(--pessego);
+}
+
+/*
+ * Modo escuro "cereja": fundo cereja escuro e texto creme.
+ * Os cartões das áreas continuam nos tons claros (um pouco apagados, 12% de cereja),
+ * como papéis coloridos sobre uma mesa escura; dentro deles o texto volta a ser chocolate
+ * (ver .cartao-claro em global.css). Assim cada área continua com sua cor.
+ */
+:root[data-modo='escuro'] {
+  --fundo: #521429;
+  --papel: #5e2437;
+  --tinta: var(--creme);
+  --tinta-suave: #d9c9c7;
+  --linha: #d9c9c7;
+
+  --claro-lavanda: #e5bddf;
+  --claro-azul-nevoa: #a3b9bc;
+  --claro-pessego: #eab987;
+  --claro-manteiga: #e3cfa2;
+  --claro-menta: #ccd7a7;
+  --claro-morango: #e8afae;
+
+  /* verde-piscina some sobre cereja (2,9:1); usamos uma versão mais clara */
+  --forte-piscina: #35978a;
+  --forte-chocolate: var(--creme);
+
+  --botao-fundo: var(--creme);
+  --botao-texto: #521429;
+
+  /* no escuro, "mais" fica mais claro */
+  --mapa-1: #c85e82;
+  --mapa-2: #de80a1;
+  --mapa-3: #f0a6c0;
+  --mapa-4: #fbd5e2;
+
+  --destaque-claro: #6e2e44;
+
+  color-scheme: dark;
+}
+:root[data-modo='escuro'][data-tema='creme'],
+:root[data-modo='escuro']:not([data-tema]) {
+  --destaque: var(--creme);
+  --destaque-texto: #521429;
+}
+
+/*
+ * Tema Índigo: troca fundo, texto, botões e destaques. As cores das áreas não mudam.
+ * Os seletores não usam :root para o guia de estilo poder mostrar uma prévia dentro de um quadro
+ * (<div data-tema="indigo">). Por isso cada bloco define todos os tokens, sem herdar dos outros.
+ * "chocolate" e "creme" viram índigo-noite e papel-gelo: tudo que era marrom fica azul-noite.
+ */
+[data-tema='indigo'] {
+  --papel-gelo: #f3f2ee;
+  --indigo-noite: #1e2350;
+  --indigo: #3949a3;
+  --azul-lavanda: #d9ddf5;
+  --mostarda: #e3a73b;
+
+  --chocolate: var(--indigo-noite);
+  --creme: var(--papel-gelo);
+
+  --fundo: var(--papel-gelo);
+  --papel: #fbfaf6;
+  --tinta: var(--indigo-noite);
+  --tinta-suave: #4a4f78;
+  --linha: var(--indigo-noite);
+  --suave-claro: #4a4f78;
+  --papel-claro: #fbfaf6;
+
+  --claro-lavanda: var(--lavanda);
+  --claro-azul-nevoa: var(--azul-nevoa);
+  --claro-pessego: var(--pessego);
+  --claro-manteiga: var(--manteiga);
+  --claro-menta: var(--menta);
+  --claro-morango: var(--morango-claro);
+
+  --forte-rosa: var(--rosa);
+  --forte-tomate: var(--tomate);
+  --forte-laranja: var(--laranja);
+  --forte-piscina: var(--verde-piscina);
+  --forte-agua: var(--verde-agua);
+  --forte-chocolate: var(--indigo-noite);
+
+  --mapa-1: #a9b1e6;
+  --mapa-2: #7683d0;
+  --mapa-3: #4a59b4;
+  --mapa-4: #2a347f;
+
+  --botao-fundo: var(--indigo);
+  --botao-texto: var(--papel-gelo);
+
+  --destaque: var(--indigo);
+  --destaque-texto: var(--papel-gelo);
+  --destaque-claro: var(--azul-lavanda);
+
+  --sombra-retro: 3px 3px 0 var(--linha);
+  color-scheme: light;
+}
+
+[data-modo='escuro'][data-tema='indigo'] {
+  --papel-gelo: #f3f2ee;
+  --indigo-noite: #1e2350;
+  --indigo: #3949a3;
+  --azul-lavanda: #d9ddf5;
+  --mostarda: #e3a73b;
+
+  --chocolate: var(--indigo-noite);
+  --creme: var(--papel-gelo);
+
+  --fundo: var(--indigo-noite);
+  --papel: #283066;
+  --tinta: var(--papel-gelo);
+  --tinta-suave: #c9cce0;
+  --linha: #c9cce0;
+  --suave-claro: #4a4f78;
+  --papel-claro: #fbfaf6;
+
+  /* tons claros 12% apagados com índigo-noite: papéis coloridos numa mesa azul-noite */
+  --claro-lavanda: #dfbfe4;
+  --claro-azul-nevoa: #9dbac1;
+  --claro-pessego: #e4bb8c;
+  --claro-manteiga: #ddd1a6;
+  --claro-menta: #c6d9ac;
+  --claro-morango: #e1b1b3;
+
+  --forte-rosa: var(--rosa);
+  --forte-tomate: var(--tomate);
+  --forte-laranja: var(--laranja);
+  /* verde-piscina some sobre índigo-noite (3,0:1); versão mais clara */
+  --forte-piscina: #3fa597;
+  --forte-agua: var(--verde-agua);
+  --forte-chocolate: var(--papel-gelo);
+
+  --mapa-1: #4553a8;
+  --mapa-2: #6d7cd0;
+  --mapa-3: #9ea9e6;
+  --mapa-4: #d3d8f7;
+
+  --botao-fundo: var(--papel-gelo);
+  --botao-texto: var(--indigo-noite);
+
+  --destaque: var(--azul-lavanda);
+  --destaque-texto: var(--indigo-noite);
+  --destaque-claro: #343b75;
+
+  --sombra-retro: 3px 3px 0 var(--linha);
+  color-scheme: dark;
+}
+
+/*
+ * Temas pedidos depois (Matcha Strawberry, Pink Dreams, Caramel e Green Thumb). Seguem o modelo do Índigo:
+ * trocam fundo, texto, botões, destaques e o mapa de calor; as cores das áreas continuam as mesmas.
+ * "chocolate" vira o tom escuro do tema e "creme", o claro. Contrastes conferidos em src/design/contraste.test.ts.
+ */
+
+/* Matcha Strawberry: fundo verde matcha, cartões rosa-claro, botões e destaques rosa-morango, escrita marrom. */
+[data-tema='matcha'] {
+  --chocolate: #422f0e;
+  --creme: #fff3f5;
+
+  --fundo: #e8f0d4;
+  --papel: #fff3f5;
+  --tinta: #422f0e;
+  --tinta-suave: #67573b;
+  --linha: #422f0e;
+  --suave-claro: #67573b;
+  --papel-claro: #fff3f5;
+
+  --claro-lavanda: var(--lavanda);
+  --claro-azul-nevoa: var(--azul-nevoa);
+  --claro-pessego: var(--pessego);
+  --claro-manteiga: var(--manteiga);
+  --claro-menta: var(--menta);
+  --claro-morango: var(--morango-claro);
+
+  --forte-rosa: var(--rosa);
+  --forte-tomate: var(--tomate);
+  --forte-laranja: var(--laranja);
+  --forte-piscina: var(--verde-piscina);
+  --forte-agua: var(--verde-agua);
+  --forte-chocolate: #422f0e;
+
+  --mapa-1: #ee9cbe;
+  --mapa-2: #e86a92;
+  --mapa-3: #c44770;
+  --mapa-4: #872c4e;
+
+  --botao-fundo: #ee8fa6;
+  --botao-texto: #422f0e;
+
+  --destaque: #f4a6b7;
+  --destaque-texto: var(--chocolate);
+  --destaque-claro: #fcdde4;
+
+  --sombra-retro: 3px 3px 0 var(--linha);
+  color-scheme: light;
+}
+
+[data-modo='escuro'][data-tema='matcha'] {
+  --chocolate: #422f0e;
+  --creme: #fff3f5;
+
+  --fundo: #1e2716;
+  --papel: #3a2630;
+  --tinta: #fbeff1;
+  --tinta-suave: #e0cfd3;
+  --linha: #e0cfd3;
+  --suave-claro: #67573b;
+  --papel-claro: #fff3f5;
+
+  /* tons claros 12% apagados com o fundo: papéis coloridos numa mesa escura */
+  --claro-lavanda: #dfbfdd;
+  --claro-azul-nevoa: #9dbbba;
+  --claro-pessego: #e4bc85;
+  --claro-manteiga: #ddd29f;
+  --claro-menta: #c6daa5;
+  --claro-morango: #e1b1ac;
+
+  --forte-rosa: var(--rosa);
+  --forte-tomate: var(--tomate);
+  --forte-laranja: var(--laranja);
+  --forte-piscina: #3fa597;
+  --forte-agua: var(--verde-agua);
+  --forte-chocolate: #fbeff1;
+
+  --mapa-1: #c85e82;
+  --mapa-2: #de80a1;
+  --mapa-3: #f0a6c0;
+  --mapa-4: #fbd5e2;
+
+  --botao-fundo: #f7b5c4;
+  --botao-texto: #1e2716;
+
+  --destaque: #f7b5c4;
+  --destaque-texto: #1e2716;
+  --destaque-claro: #4a3039;
+
+  --sombra-retro: 3px 3px 0 var(--linha);
+  color-scheme: dark;
+}
+
+/* Pink Dreams: rosa claro com rosa escuro (contornos e botões) e escrita marrom. */
+[data-tema='pink'] {
+  --chocolate: #422f0e;
+  --creme: #fdeff4;
+
+  --fundo: #fdeff4;
+  --papel: #fff8fa;
+  --tinta: #422f0e;
+  --tinta-suave: #67573b;
+  --linha: #8e2c57;
+  --suave-claro: #67573b;
+  --papel-claro: #fff8fa;
+
+  --claro-lavanda: var(--lavanda);
+  --claro-azul-nevoa: var(--azul-nevoa);
+  --claro-pessego: var(--pessego);
+  --claro-manteiga: var(--manteiga);
+  --claro-menta: var(--menta);
+  --claro-morango: var(--morango-claro);
+
+  --forte-rosa: var(--rosa);
+  --forte-tomate: var(--tomate);
+  --forte-laranja: var(--laranja);
+  --forte-piscina: var(--verde-piscina);
+  --forte-agua: var(--verde-agua);
+  --forte-chocolate: #422f0e;
+
+  --mapa-1: #ee9cbe;
+  --mapa-2: #e86a92;
+  --mapa-3: #c44770;
+  --mapa-4: #872c4e;
+
+  --botao-fundo: #b23a6c;
+  --botao-texto: #fff8fa;
+
+  --destaque: #c2416f;
+  --destaque-texto: #fff8fa;
+  --destaque-claro: #f9cfdd;
+
+  --sombra-retro: 3px 3px 0 var(--linha);
+  color-scheme: light;
+}
+
+[data-modo='escuro'][data-tema='pink'] {
+  --chocolate: #422f0e;
+  --creme: #fdeff4;
+
+  --fundo: #3b1430;
+  --papel: #4c1f3f;
+  --tinta: #fdeff4;
+  --tinta-suave: #e3c6d4;
+  --linha: #e3c6d4;
+  --suave-claro: #67573b;
+  --papel-claro: #fff8fa;
+
+  /* tons claros 12% apagados com o fundo: papéis coloridos numa mesa escura */
+  --claro-lavanda: #e2bde0;
+  --claro-azul-nevoa: #a0b9bd;
+  --claro-pessego: #e7b988;
+  --claro-manteiga: #e0cfa2;
+  --claro-menta: #cad7a8;
+  --claro-morango: #e5afaf;
+
+  --forte-rosa: var(--rosa);
+  --forte-tomate: var(--tomate);
+  --forte-laranja: var(--laranja);
+  --forte-piscina: #3fa597;
+  --forte-agua: var(--verde-agua);
+  --forte-chocolate: #fdeff4;
+
+  --mapa-1: #c85e82;
+  --mapa-2: #de80a1;
+  --mapa-3: #f0a6c0;
+  --mapa-4: #fbd5e2;
+
+  --botao-fundo: #fdeff4;
+  --botao-texto: #3b1430;
+
+  --destaque: #f6a9c6;
+  --destaque-texto: #3b1430;
+  --destaque-claro: #5a2a4b;
+
+  --sombra-retro: 3px 3px 0 var(--linha);
+  color-scheme: dark;
+}
+
+/* Caramel: caramelo com marrom claro. */
+[data-tema='caramelo'] {
+  --chocolate: #4a2a10;
+  --creme: #f8eedf;
+
+  --fundo: #f8eedf;
+  --papel: #fff9f0;
+  --tinta: #4a2a10;
+  --tinta-suave: #6f4d30;
+  --linha: #4a2a10;
+  --suave-claro: #6f4d30;
+  --papel-claro: #fff9f0;
+
+  --claro-lavanda: var(--lavanda);
+  --claro-azul-nevoa: var(--azul-nevoa);
+  --claro-pessego: var(--pessego);
+  --claro-manteiga: var(--manteiga);
+  --claro-menta: var(--menta);
+  --claro-morango: var(--morango-claro);
+
+  --forte-rosa: var(--rosa);
+  --forte-tomate: var(--tomate);
+  --forte-laranja: var(--laranja);
+  --forte-piscina: var(--verde-piscina);
+  --forte-agua: var(--verde-agua);
+  --forte-chocolate: #4a2a10;
+
+  --mapa-1: #e9c493;
+  --mapa-2: #d49a5a;
+  --mapa-3: #a86c35;
+  --mapa-4: #6e4318;
+
+  --botao-fundo: #8b5426;
+  --botao-texto: #fff9f0;
+
+  --destaque: #d69a5c;
+  --destaque-texto: var(--chocolate);
+  --destaque-claro: #efd5b3;
+
+  --sombra-retro: 3px 3px 0 var(--linha);
+  color-scheme: light;
+}
+
+[data-modo='escuro'][data-tema='caramelo'] {
+  --chocolate: #4a2a10;
+  --creme: #f8eedf;
+
+  --fundo: #2d1c0f;
+  --papel: #3c2717;
+  --tinta: #f8eedf;
+  --tinta-suave: #dcc8b0;
+  --linha: #dcc8b0;
+  --suave-claro: #6f4d30;
+  --papel-claro: #fff9f0;
+
+  /* tons claros 12% apagados com o fundo: papéis coloridos numa mesa escura */
+  --claro-lavanda: #e1bedc;
+  --claro-azul-nevoa: #9fbab9;
+  --claro-pessego: #e6ba84;
+  --claro-manteiga: #dfd09e;
+  --claro-menta: #c8d8a4;
+  --claro-morango: #e3b0ab;
+
+  --forte-rosa: var(--rosa);
+  --forte-tomate: var(--tomate);
+  --forte-laranja: var(--laranja);
+  --forte-piscina: #3fa597;
+  --forte-agua: var(--verde-agua);
+  --forte-chocolate: #f8eedf;
+
+  --mapa-1: #8a5a2e;
+  --mapa-2: #b07a44;
+  --mapa-3: #d6a46a;
+  --mapa-4: #f1d4ae;
+
+  --botao-fundo: #f8eedf;
+  --botao-texto: #2d1c0f;
+
+  --destaque: #e3b47e;
+  --destaque-texto: #2d1c0f;
+  --destaque-claro: #4b3320;
+
+  --sombra-retro: 3px 3px 0 var(--linha);
+  color-scheme: dark;
+}
+
+/* Green Thumb: tons de verde pastel. */
+[data-tema='verde'] {
+  --chocolate: #1d3a28;
+  --creme: #edf6ec;
+
+  --fundo: #edf6ec;
+  --papel: #f8fcf6;
+  --tinta: #1d3a28;
+  --tinta-suave: #46604f;
+  --linha: #1d3a28;
+  --suave-claro: #46604f;
+  --papel-claro: #f8fcf6;
+
+  --claro-lavanda: var(--lavanda);
+  --claro-azul-nevoa: var(--azul-nevoa);
+  --claro-pessego: var(--pessego);
+  --claro-manteiga: var(--manteiga);
+  --claro-menta: var(--menta);
+  --claro-morango: var(--morango-claro);
+
+  --forte-rosa: var(--rosa);
+  --forte-tomate: var(--tomate);
+  --forte-laranja: var(--laranja);
+  --forte-piscina: var(--verde-piscina);
+  --forte-agua: var(--verde-agua);
+  --forte-chocolate: #1d3a28;
+
+  --mapa-1: #b3dbbd;
+  --mapa-2: #7cbd90;
+  --mapa-3: #4a9866;
+  --mapa-4: #2a6343;
+
+  --botao-fundo: #2e6a47;
+  --botao-texto: #f8fcf6;
+
+  --destaque: #9ed2ae;
+  --destaque-texto: var(--chocolate);
+  --destaque-claro: #d2ebd6;
+
+  --sombra-retro: 3px 3px 0 var(--linha);
+  color-scheme: light;
+}
+
+[data-modo='escuro'][data-tema='verde'] {
+  --chocolate: #1d3a28;
+  --creme: #edf6ec;
+
+  --fundo: #142a1d;
+  --papel: #1e3728;
+  --tinta: #edf6ec;
+  --tinta-suave: #c5d8c9;
+  --linha: #c5d8c9;
+  --suave-claro: #46604f;
+  --papel-claro: #f8fcf6;
+
+  /* tons claros 12% apagados com o fundo: papéis coloridos numa mesa escura */
+  --claro-lavanda: #dec0de;
+  --claro-azul-nevoa: #9cbbbb;
+  --claro-pessego: #e3bc86;
+  --claro-manteiga: #dcd2a0;
+  --claro-menta: #c5daa5;
+  --claro-morango: #e0b2ac;
+
+  --forte-rosa: var(--rosa);
+  --forte-tomate: var(--tomate);
+  --forte-laranja: var(--laranja);
+  --forte-piscina: #45ad9c;
+  --forte-agua: var(--verde-agua);
+  --forte-chocolate: #edf6ec;
+
+  --mapa-1: #2f7a50;
+  --mapa-2: #4f9d6d;
+  --mapa-3: #7fc195;
+  --mapa-4: #b9e2c4;
+
+  --botao-fundo: #edf6ec;
+  --botao-texto: #142a1d;
+
+  --destaque: #a8dcb8;
+  --destaque-texto: #142a1d;
+  --destaque-claro: #2a4a37;
+
+  --sombra-retro: 3px 3px 0 var(--linha);
+  color-scheme: dark;
+}
+
+/* Bem-estar: ameixa e lilás-névoa. No escuro, a ameixa clareia para continuar visível. */
+:root {
+  --ameixa: #8a5a9e;
+  --lilas-nevoa: #e6e0f5;
+  --forte-ameixa: var(--ameixa);
+  --claro-lilas: var(--lilas-nevoa);
+}
+:root[data-modo='escuro'],
+[data-modo='escuro'][data-tema='indigo'],
+[data-modo='escuro'][data-tema='matcha'],
+[data-modo='escuro'][data-tema='pink'],
+[data-modo='escuro'][data-tema='caramelo'],
+[data-modo='escuro'][data-tema='verde'] {
+  --forte-ameixa: #c49bd6;
+  --claro-lilas: #cec9e1;
+}
