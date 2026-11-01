@@ -250,18 +250,18 @@
  * "chocolate" vira o tom escuro do tema e "creme", o claro. Contrastes conferidos em src/design/contraste.test.ts.
  */
 
-/* Matcha Strawberry: verde matcha com rosa-morango claro. */
+/* Matcha Strawberry: fundo verde matcha, cartões rosa-claro, botões e destaques rosa-morango, escrita marrom. */
 [data-tema='matcha'] {
-  --chocolate: #2e3b1f;
-  --creme: #f2f5e4;
+  --chocolate: #422f0e;
+  --creme: #fff3f5;
 
-  --fundo: #f2f5e4;
-  --papel: #fbfcf4;
-  --tinta: #2e3b1f;
-  --tinta-suave: #56643f;
-  --linha: #2e3b1f;
-  --suave-claro: #56643f;
-  --papel-claro: #fbfcf4;
+  --fundo: #e8f0d4;
+  --papel: #fff3f5;
+  --tinta: #422f0e;
+  --tinta-suave: #67573b;
+  --linha: #422f0e;
+  --suave-claro: #67573b;
+  --papel-claro: #fff3f5;
 
   --claro-lavanda: var(--lavanda);
   --claro-azul-nevoa: var(--azul-nevoa);
@@ -275,15 +275,15 @@
   --forte-laranja: var(--laranja);
   --forte-piscina: var(--verde-piscina);
   --forte-agua: var(--verde-agua);
-  --forte-chocolate: #2e3b1f;
+  --forte-chocolate: #422f0e;
 
   --mapa-1: #ee9cbe;
   --mapa-2: #e86a92;
   --mapa-3: #c44770;
   --mapa-4: #872c4e;
 
-  --botao-fundo: #4f6b28;
-  --botao-texto: #fbfcf4;
+  --botao-fundo: #ee8fa6;
+  --botao-texto: #422f0e;
 
   --destaque: #f4a6b7;
   --destaque-texto: var(--chocolate);
@@ -294,16 +294,16 @@
 }
 
 [data-modo='escuro'][data-tema='matcha'] {
-  --chocolate: #2e3b1f;
-  --creme: #f2f5e4;
+  --chocolate: #422f0e;
+  --creme: #fff3f5;
 
   --fundo: #1e2716;
-  --papel: #2a3520;
-  --tinta: #f2f5e4;
-  --tinta-suave: #cdd5bc;
-  --linha: #cdd5bc;
-  --suave-claro: #56643f;
-  --papel-claro: #fbfcf4;
+  --papel: #3a2630;
+  --tinta: #fbeff1;
+  --tinta-suave: #e0cfd3;
+  --linha: #e0cfd3;
+  --suave-claro: #67573b;
+  --papel-claro: #fff3f5;
 
   /* tons claros 12% apagados com o fundo: papéis coloridos numa mesa escura */
   --claro-lavanda: #dfbfdd;
@@ -318,35 +318,35 @@
   --forte-laranja: var(--laranja);
   --forte-piscina: #3fa597;
   --forte-agua: var(--verde-agua);
-  --forte-chocolate: #f2f5e4;
+  --forte-chocolate: #fbeff1;
 
   --mapa-1: #c85e82;
   --mapa-2: #de80a1;
   --mapa-3: #f0a6c0;
   --mapa-4: #fbd5e2;
 
-  --botao-fundo: #f2f5e4;
+  --botao-fundo: #f7b5c4;
   --botao-texto: #1e2716;
 
   --destaque: #f7b5c4;
   --destaque-texto: #1e2716;
-  --destaque-claro: #3a4630;
+  --destaque-claro: #4a3039;
 
   --sombra-retro: 3px 3px 0 var(--linha);
   color-scheme: dark;
 }
 
-/* Pink Dreams: rosa claro com rosa escuro. */
+/* Pink Dreams: rosa claro com rosa escuro (contornos e botões) e escrita marrom. */
 [data-tema='pink'] {
-  --chocolate: #4e1530;
+  --chocolate: #422f0e;
   --creme: #fdeff4;
 
   --fundo: #fdeff4;
   --papel: #fff8fa;
-  --tinta: #4e1530;
-  --tinta-suave: #7a4561;
-  --linha: #4e1530;
-  --suave-claro: #7a4561;
+  --tinta: #422f0e;
+  --tinta-suave: #67573b;
+  --linha: #8e2c57;
+  --suave-claro: #67573b;
   --papel-claro: #fff8fa;
 
   --claro-lavanda: var(--lavanda);
@@ -361,7 +361,7 @@
   --forte-laranja: var(--laranja);
   --forte-piscina: var(--verde-piscina);
   --forte-agua: var(--verde-agua);
-  --forte-chocolate: #4e1530;
+  --forte-chocolate: #422f0e;
 
   --mapa-1: #ee9cbe;
   --mapa-2: #e86a92;
@@ -380,7 +380,7 @@
 }
 
 [data-modo='escuro'][data-tema='pink'] {
-  --chocolate: #4e1530;
+  --chocolate: #422f0e;
   --creme: #fdeff4;
 
   --fundo: #3b1430;
@@ -388,7 +388,7 @@
   --tinta: #fdeff4;
   --tinta-suave: #e3c6d4;
   --linha: #e3c6d4;
-  --suave-claro: #7a4561;
+  --suave-claro: #67573b;
   --papel-claro: #fff8fa;
 
   /* tons claros 12% apagados com o fundo: papéis coloridos numa mesa escura */

@@ -52,7 +52,7 @@ export const PADRAO: Preferencias = {
 /** Cor da barra do navegador em cada tema (claro, escuro); os outros usam a do Creme. */
 const COR_DA_BARRA: Partial<Record<Preferencias['tema'], [string, string]>> = {
   indigo: ['#F3F2EE', '#1E2350'],
-  matcha: ['#F2F5E4', '#1E2716'],
+  matcha: ['#E8F0D4', '#1E2716'],
   pink: ['#FDEFF4', '#3B1430'],
   caramelo: ['#F8EEDF', '#2D1C0F'],
   verde: ['#EDF6EC', '#142A1D'],

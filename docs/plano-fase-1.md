@@ -29,8 +29,9 @@ Base: guia "Estratégias de organização para pessoas com TDAH e Autismo" (PubM
 - Estampas trocáveis (11): bolinhas, xadrez, listras à mão, coraçõezinhos, cerejas, estrelinhas, flores retrô, ondinhas,
   pauta de caderno, confete e oncinha. Novas (14 no total): patinhas, rabiscos e xadrez à mão. Geradas por `scripts/gerar-estampas.py`.
 - Modo escuro **cereja**: fundo cereja escuro, texto creme; cartões das áreas continuam nos tons claros, com texto chocolate.
-- Temas pedidos depois (claro e escuro, no primeiro uso e em Ajustes → Aparência): **Matcha Strawberry** (verde matcha
-  com rosa-morango claro), **Pink Dreams** (rosa claro com rosa escuro), **Caramel** (caramelo com marrom claro) e
+- Temas pedidos depois (claro e escuro, no primeiro uso e em Ajustes → Aparência): **Matcha Strawberry** (fundo verde
+  matcha, cartões rosa-claro, botões e destaques rosa-morango, escrita marrom), **Pink Dreams** (rosa claro com contornos e
+  botões rosa escuro, e escrita marrom), **Caramel** (caramelo com marrom claro) e
   **Green Thumb** (tons de verde pastel). Como o Índigo, trocam fundo, texto, botões, destaques, mapa de calor e a cor
   da barra do navegador; as cores das áreas continuam as mesmas. Todos os contrastes são conferidos nos testes.
 - Tudo desenhado do zero; nada copiado das referências.
