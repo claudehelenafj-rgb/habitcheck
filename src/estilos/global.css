@@ -305,6 +305,8 @@ h3 {
  */
 .folha-caderno {
   --pauta: 2rem;
+  /* a folha é clara em qualquer tema: caixinhas e campos do navegador também */
+  color-scheme: light;
   color: var(--chocolate);
   background-color: var(--papel-claro);
   background-image:

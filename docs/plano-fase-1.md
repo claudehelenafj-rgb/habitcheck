@@ -114,7 +114,7 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 | 14 | **Rituais** da manhã e da noite, guiados, com check-in e rotina de desacelerar (parte 1) | Pronta |
 | 14 | **Revisão semanal** (com 5 min de dinheiro, os hobbies e os avisos sem resposta) (parte 2) | Pronta |
 | 15 | **Meus objetivos**: folha de caderno, o que faz andar, o porquê no ritual da manhã e na revisão (parte 1) | Pronta |
-| 15 | Painel com números e gráficos do que foi feito (parte 2) | |
+| 15 | Painel com números e gráficos do que foi feito (parte 2) | Pronta |
 | 16 | Álbum de adesivos, recompensas e conferência final | |
 
 ## Faculdade (etapa 9)
@@ -319,6 +319,17 @@ Guia de estilo do Índigo em `#/estilo/indigo`.
 - Revisão semanal: no último passo, "Isso ainda é importante pra mim?" para cada objetivo (sim, quero mudar, deixar
   de lado), guardado na revisão; "quero mudar" abre o objetivo.
 - A moldura não tira o foco de nada que a tela já tenha focado dentro do conteúdo.
+- Painel ao lado de cada folha (parte 2), só com o que foi feito. "Dia com ação": hábito feito (mesmo o mínimo),
+  tarefa concluída, sessão de foco numa tarefa do objetivo ou dinheiro guardado no cofrinho dele.
+  - Números: dias com ação nesta semana ("de 3 dias até hoje") e no mês, minutos de foco no mês (em quantas
+    sessões), tarefas feitas, vezes dos hábitos e o que foi guardado no mês (os dois últimos, se houver hábito ou
+    cofrinho ligado).
+  - Colunas: dias com ação por semana nas últimas 8 semanas (um tom, valor só na última coluna, dica no hover e no
+    foco). Mapa de calor: minutos de foco por dia do mês, começando no dia da semana certo; dia sem registro fica
+    neutro, dia que não chegou fica tracejado, hoje circulado; legenda das faixas.
+  - Os dois gráficos têm "Ver como tabela". Objetivo sem nada ligado mostra um convite, não um gráfico vazio.
+  - Os textos do mapa de calor passam a ter inglês. Dentro da folha de caderno (clara em qualquer tema), textos de
+    exemplo, o painel "ligar" e as caixinhas usam as cores da folha.
 
 ## Lógica com testes automáticos
 
@@ -326,5 +337,5 @@ Horários de lembretes (adiar, repetir, silêncio), recorrências, vencimento de
 saldo dos potes e virada da semana, espera de 48 h da lista de desejos, progresso do cofrinho, planejamento reverso (prova → sessões; consulta → alarmes),
 avisos do semestre, fases do modo foco e "achei × levou", aviso do estudo acompanhado, hábitos (semana, pendente hoje, véspera), reset do quarto, refeições e água, ideias de comida e lista de compras, contas, potes e gasto rápido, pausa de 48 h, cofrinho, estoque de remédio, "X de 7 dias", limite de 3 tarefas A, escolha do cartão "Agora",
 importação de .ics sem duplicar, passos e dia dos rituais (a noite até as 5h), escolha das tarefas A e pendências da noite,
-agenda do dia, objetivo do dia e o que faz cada objetivo andar, resumo da semana e avisos sem resposta da revisão, leitura do plano alimentar (títulos, horários, opções, "lanche" da manhã ou da tarde), e o contraste de todas
+agenda do dia, objetivo do dia e o que faz cada objetivo andar, dias com ação por semana, foco por dia e totais do mês, resumo da semana e avisos sem resposta da revisão, leitura do plano alimentar (títulos, horários, opções, "lanche" da manhã ou da tarde), e o contraste de todas
 as cores usadas.

@@ -17,9 +17,10 @@ export function CartaoNumero({
   tom?: string
 }) {
   return (
-    <div className={`cartao ${tom} flex flex-col gap-1 p-4`}>
+    // min-w-0 e quebra: um valor longo ("R$ 1.500,00") não alarga a grade no celular
+    <div className={`cartao ${tom} flex min-w-0 flex-col gap-1 p-4`}>
       <span className="text-sm font-semibold">{rotulo}</span>
-      <span className="font-texto text-4xl font-semibold leading-none">{valor}</span>
+      <span className="font-texto text-4xl font-semibold leading-none break-words">{valor}</span>
       {detalhe && <span className="text-sm">{detalhe}</span>}
     </div>
   )
@@ -147,11 +148,11 @@ export function ColunasSemanais({
 export type DiaMapa = { dia: number; valor: number; hoje?: boolean; futuro?: boolean }
 
 const FAIXAS = [
-  { ate: 0, cor: 'transparent', nome: 'nada registrado' },
-  { ate: 15, cor: 'var(--mapa-1)', nome: 'até 15 min' },
-  { ate: 30, cor: 'var(--mapa-2)', nome: '16 a 30 min' },
-  { ate: 45, cor: 'var(--mapa-3)', nome: '31 a 45 min' },
-  { ate: Infinity, cor: 'var(--mapa-4)', nome: 'mais de 45 min' },
+  { ate: 0, cor: 'transparent', nome: 'graficos.faixas.nada' },
+  { ate: 15, cor: 'var(--mapa-1)', nome: 'graficos.faixas.ate15' },
+  { ate: 30, cor: 'var(--mapa-2)', nome: 'graficos.faixas.ate30' },
+  { ate: 45, cor: 'var(--mapa-3)', nome: 'graficos.faixas.ate45' },
+  { ate: Infinity, cor: 'var(--mapa-4)', nome: 'graficos.faixas.mais45' },
 ]
 const faixa = (v: number) => FAIXAS.find((f) => v <= f.ate)!
 
@@ -168,8 +169,10 @@ export function MapaDeCalor({
   /** 0 = domingo */
   primeiroDiaSemana: number
 }) {
+  const { t, i18n } = useTranslation()
   const [ativo, setAtivo] = useState<DiaMapa | null>(null)
-  const semana = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
+  // domingo a sábado, a letra do idioma (4 de outubro de 2026 foi um domingo)
+  const semana = [0, 1, 2, 3, 4, 5, 6].map((i) => new Date(2026, 9, 4 + i, 12).toLocaleDateString(i18n.language, { weekday: 'narrow' }))
   return (
     <figure className="cartao bg-papel p-4 sm:p-5">
       <figcaption>
@@ -192,7 +195,7 @@ export function MapaDeCalor({
               key={d.dia}
               tabIndex={d.futuro ? -1 : 0}
               role="listitem"
-              aria-label={`Dia ${d.dia}: ${d.futuro ? 'ainda não chegou' : `${d.valor} minutos`}${d.hoje ? ' (hoje)' : ''}`}
+              aria-label={`${d.futuro ? t('graficos.diaFuturo', { dia: d.dia }) : t('graficos.diaMinutos', { dia: d.dia, minutos: d.valor })}${d.hoje ? ` (${t('grade.hoje')})` : ''}`}
               onPointerEnter={() => setAtivo(d)}
               onPointerLeave={() => setAtivo(null)}
               onFocus={() => setAtivo(d)}
@@ -206,11 +209,7 @@ export function MapaDeCalor({
         })}
       </div>
       <p className="mt-2 h-5 text-sm" aria-live="polite">
-        {ativo && !ativo.futuro ? (
-          <>
-            <strong>{ativo.valor} min</strong> no dia {ativo.dia}
-          </>
-        ) : null}
+        {ativo && !ativo.futuro ? t('graficos.minutosNoDia', { minutos: ativo.valor, dia: ativo.dia }) : null}
       </p>
       <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
         {FAIXAS.map((f) => (
@@ -219,14 +218,14 @@ export function MapaDeCalor({
               className={`h-3 w-3 rounded-sm ${f.ate === 0 ? 'border-2 border-linha/35' : ''}`}
               style={{ background: f.cor }}
             />
-            {f.nome}
+            {t(f.nome)}
           </span>
         ))}
       </div>
       <TabelaDados
         titulo={titulo}
-        unidade="minutos"
-        linhas={dias.filter((d) => !d.futuro).map((d) => [`Dia ${d.dia}`, d.valor])}
+        unidade={t('graficos.minutos')}
+        linhas={dias.filter((d) => !d.futuro).map((d) => [t('graficos.dia', { dia: d.dia }), d.valor])}
       />
     </figure>
   )

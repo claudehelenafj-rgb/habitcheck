@@ -7,10 +7,13 @@ import { useLocation } from 'react-router'
 import { Adesivo } from '../componentes/Adesivo'
 import { mostrarAviso } from '../componentes/Avisos'
 import { Botao } from '../componentes/Botao'
+import { PainelObjetivo } from '../componentes/PainelObjetivo'
 import { EstrelaGiz, FolhaCaderno } from '../componentes/Papelaria'
 import type { Objetivo, Tarefa } from '../dados/banco'
 import { useCofrinhos, useDepositos } from '../dados/dinheiro'
+import { useSessoesFoco } from '../dados/foco'
 import { useHabitosAtivos } from '../dados/habitos'
+import { useAgora } from '../dados/timer'
 import {
   apagarObjetivo,
   arquivarObjetivo,
@@ -27,12 +30,22 @@ import { AREAS } from '../design/areas'
 import { diaLocal } from '../logica/datas'
 import { formatarValor, progressoCofrinho, type Cofrinho, type Deposito } from '../logica/dinheiro'
 import { vezesNaSemana, type Habito, type RegistroHabito } from '../logica/habitos'
+import type { SessaoFoco } from '../logica/foco'
 import { ligadosAo, objetivosAtivos, SUGESTAO_OBJETIVOS } from '../logica/objetivos'
 
 const CORES_GIZ = ['#F49625', '#EA5E86', '#F7C948', '#5BB8A8', '#8E6BBF']
-const textoFolha = 'block w-full resize-none bg-transparent outline-none placeholder:text-tinta/40'
+// dentro da folha (que continua clara no tema escuro), as cores são as da folha: chocolate sobre papel claro
+const textoFolha = 'block w-full resize-none bg-transparent outline-none placeholder:text-chocolate/45'
 
-type Dados = { habitos: Habito[]; registros: RegistroHabito[]; tarefas: Tarefa[]; cofrinhos: Cofrinho[]; depositos: Deposito[]; objetivos: Objetivo[] }
+type Dados = {
+  habitos: Habito[]
+  registros: RegistroHabito[]
+  tarefas: Tarefa[]
+  cofrinhos: Cofrinho[]
+  depositos: Deposito[]
+  objetivos: Objetivo[]
+  sessoes: SessaoFoco[]
+}
 
 /** Título e porquê editáveis na própria folha: grava ao sair do campo. */
 function CamposDaFolha({ objetivo }: { objetivo: Objetivo }) {
@@ -88,7 +101,11 @@ function Ligar({ objetivo, dados }: { objetivo: Objetivo; dados: Dados }) {
     { tipo: 'cofrinho', titulo: t('objetivos.cofrinhos'), itens: dados.cofrinhos.filter((c) => !c.arquivadoEm).map((c) => ({ id: c.id, nome: c.nome, objetivoId: c.objetivoId })) },
   ]
   return (
-    <div role="group" aria-label={t('objetivos.ligarA', { objetivo: objetivo.titulo })} className="flex flex-col gap-4 rounded-2xl border-2 border-dashed border-linha/50 bg-papel p-4">
+    <div
+      role="group"
+      aria-label={t('objetivos.ligarA', { objetivo: objetivo.titulo })}
+      className="flex flex-col gap-4 rounded-2xl border-2 border-dashed border-chocolate/40 bg-[var(--papel-claro)] p-4"
+    >
       {grupos.map((g) => (
         <fieldset key={g.tipo} className="flex flex-col gap-1.5">
           <legend className="mb-1 font-bold">{g.titulo}</legend>
@@ -106,7 +123,7 @@ function Ligar({ objetivo, dados }: { objetivo: Objetivo; dados: Dados }) {
                   />
                   <span className="break-words">
                     {item.nome}
-                    {outro && <span className="text-sm text-tinta-suave"> ({t('objetivos.emOutro', { objetivo: outro })})</span>}
+                    {outro && <span className="text-sm text-chocolate/70"> ({t('objetivos.emOutro', { objetivo: outro })})</span>}
                   </span>
                 </label>
               )
@@ -157,49 +174,52 @@ function OQueFaco({ objetivo, dados }: { objetivo: Objetivo; dados: Dados }) {
   )
 }
 
-function FolhaObjetivo({ objetivo, dados, indice }: { objetivo: Objetivo; dados: Dados; indice: number }) {
+function FolhaObjetivo({ objetivo, dados, indice, agora }: { objetivo: Objetivo; dados: Dados; indice: number; agora: Date }) {
   const { t } = useTranslation()
   const [ligando, setLigando] = useState(false)
   return (
-    <li id={`objetivo-${objetivo.id}`} className="relative scroll-mt-6 list-none">
-      <FolhaCaderno inclinacao={indice % 2 ? 0.8 : -0.8}>
-        <article aria-label={objetivo.titulo} className="flex flex-col">
-          {/* desfazer ou mudança em outra tela: os campos voltam com o texto guardado */}
-          <CamposDaFolha key={`${objetivo.titulo}|${objetivo.porque}`} objetivo={objetivo} />
-          <p className="rotulo leading-8">{t('objetivos.oQueFaco')}</p>
-          <OQueFaco objetivo={objetivo} dados={dados} />
-          <div className="mt-3 flex flex-col gap-3">
-            <Botao variante="secundario" tom="bg-manteiga" className="self-start" onClick={() => setLigando((l) => !l)} aria-expanded={ligando}>
-              {ligando ? t('objetivos.pronto') : t('objetivos.ligar')}
-            </Botao>
-            {ligando && <Ligar objetivo={objetivo} dados={dados} />}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <button
-                type="button"
-                onClick={async () => {
-                  await arquivarObjetivo(objetivo.id, true)
-                  mostrarAviso(t('objetivos.deixado', { titulo: objetivo.titulo }), () => arquivarObjetivo(objetivo.id, false))
-                }}
-                className="text-sm font-bold underline decoration-2 underline-offset-4"
-              >
-                {t('objetivos.deixarDeLado')}
-              </button>
-              <button
-                type="button"
-                aria-label={t('objetivos.apagarNome', { titulo: objetivo.titulo })}
-                onClick={async () => {
-                  const copia = await apagarObjetivo(objetivo.id)
-                  if (copia) mostrarAviso(t('objetivos.apagado'), () => restaurarObjetivo(copia))
-                }}
-                className="text-sm font-bold underline decoration-2 underline-offset-4"
-              >
-                {t('objetivos.apagar')}
-              </button>
+    <li id={`objetivo-${objetivo.id}`} className="grid scroll-mt-6 list-none items-start gap-8 lg:grid-cols-[1.1fr_1fr]">
+      <div className="relative">
+        <FolhaCaderno inclinacao={indice % 2 ? 0.8 : -0.8}>
+          <article aria-label={objetivo.titulo} className="flex flex-col">
+            {/* desfazer ou mudança em outra tela: os campos voltam com o texto guardado */}
+            <CamposDaFolha key={`${objetivo.titulo}|${objetivo.porque}`} objetivo={objetivo} />
+            <p className="rotulo leading-8">{t('objetivos.oQueFaco')}</p>
+            <OQueFaco objetivo={objetivo} dados={dados} />
+            <div className="mt-3 flex flex-col gap-3">
+              <Botao variante="secundario" tom="bg-manteiga" className="self-start" onClick={() => setLigando((l) => !l)} aria-expanded={ligando}>
+                {ligando ? t('objetivos.pronto') : t('objetivos.ligar')}
+              </Botao>
+              {ligando && <Ligar objetivo={objetivo} dados={dados} />}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await arquivarObjetivo(objetivo.id, true)
+                    mostrarAviso(t('objetivos.deixado', { titulo: objetivo.titulo }), () => arquivarObjetivo(objetivo.id, false))
+                  }}
+                  className="text-sm font-bold underline decoration-2 underline-offset-4"
+                >
+                  {t('objetivos.deixarDeLado')}
+                </button>
+                <button
+                  type="button"
+                  aria-label={t('objetivos.apagarNome', { titulo: objetivo.titulo })}
+                  onClick={async () => {
+                    const copia = await apagarObjetivo(objetivo.id)
+                    if (copia) mostrarAviso(t('objetivos.apagado'), () => restaurarObjetivo(copia))
+                  }}
+                  className="text-sm font-bold underline decoration-2 underline-offset-4"
+                >
+                  {t('objetivos.apagar')}
+                </button>
+              </div>
             </div>
-          </div>
-        </article>
-      </FolhaCaderno>
-      <EstrelaGiz cor={CORES_GIZ[indice % CORES_GIZ.length]} tamanho={44} className="-top-5 -right-3" />
+          </article>
+        </FolhaCaderno>
+        <EstrelaGiz cor={CORES_GIZ[indice % CORES_GIZ.length]} tamanho={44} className="-top-5 -right-3" />
+      </div>
+      <PainelObjetivo objetivo={objetivo} dados={dados} agora={agora} />
     </li>
   )
 }
@@ -273,9 +293,11 @@ export function Objetivos() {
   const tarefas = useTarefas()
   const cofrinhos = useCofrinhos()
   const depositos = useDepositos()
+  const sessoes = useSessoesFoco()
+  const agora = useAgora(60_000)
   const [criando, setCriando] = useState(false)
   const { hash } = useLocation()
-  const pronto = !!(objetivos && habitos && tarefas && cofrinhos && depositos)
+  const pronto = !!(objetivos && habitos && tarefas && cofrinhos && depositos && sessoes)
 
   // vindo da revisão semanal ("quero mudar"): vai direto para o objetivo
   useEffect(() => {
@@ -285,8 +307,8 @@ export function Objetivos() {
     folha?.querySelector<HTMLElement>('textarea')?.focus({ preventScroll: true })
   }, [pronto, hash])
 
-  if (!objetivos || !habitos || !tarefas || !cofrinhos || !depositos) return null
-  const dados: Dados = { habitos: habitos.habitos, registros: habitos.registros, tarefas, cofrinhos, depositos, objetivos }
+  if (!objetivos || !habitos || !tarefas || !cofrinhos || !depositos || !sessoes) return null
+  const dados: Dados = { habitos: habitos.habitos, registros: habitos.registros, tarefas, cofrinhos, depositos, objetivos, sessoes }
   const ativos = objetivosAtivos(objetivos)
   const deLado = objetivos.filter((o) => o.arquivadoEm)
 
@@ -319,9 +341,9 @@ export function Objetivos() {
       {ativos.length > SUGESTAO_OBJETIVOS && <p className="max-w-prose rounded-2xl border-2 border-linha/40 bg-manteiga px-4 py-3">{t('objetivos.muitos')}</p>}
 
       {ativos.length > 0 && (
-        <ul className="grid items-start gap-10 lg:grid-cols-2">
+        <ul className="flex flex-col gap-14">
           {ativos.map((o, i) => (
-            <FolhaObjetivo key={o.id} objetivo={o} dados={dados} indice={i} />
+            <FolhaObjetivo key={o.id} objetivo={o} dados={dados} indice={i} agora={agora} />
           ))}
         </ul>
       )}
